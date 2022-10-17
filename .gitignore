@@ -215,3 +215,4 @@ config/local_settings.py
 
 .env
 
+.idea
