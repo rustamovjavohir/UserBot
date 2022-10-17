@@ -250,7 +250,7 @@ class Request_price(models.Model):
 
 class Data(models.Model):
     telegram_id = models.BigIntegerField()
-    data = models.JSONField(default=dict())
+    data = models.JSONField(default=dict)
 
 
 @receiver(post_save, sender=Workers)
