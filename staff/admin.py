@@ -13,8 +13,7 @@ from .utils import getMonthList
 
 
 @admin.register(Workers)
-# class DataAdmin(ExportMixin, admin.ModelAdmin, ImportMixin):
-class WorkersAdmin(ImportExportModelAdmin):
+class WorkersAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ["full_name", "department", "job", "phone", "is_boss"]
     list_display_links = ["full_name", "department", "job", "phone"]
     list_filter = ("department",)
@@ -31,7 +30,7 @@ class WorkersAdmin(ImportExportModelAdmin):
 
 @admin.register(Salarys)
 class SalaryAdmin(ImportExportModelAdmin):
-    # change_list_template = 'salary/change_list.html'
+    change_list_template = 'salary/change_list.html'
     list_display = ["full_name", "department", "year", "month", "musk_salary"]
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
@@ -51,7 +50,7 @@ class SalaryAdmin(ImportExportModelAdmin):
                 'salary': "{:,}".format(salary)
             }
             return super(SalaryAdmin, self).changelist_view(request,
-                                                           extra_context=my_context)
+                                                            extra_context=my_context)
         except (AttributeError, KeyError):
             return response
 
@@ -70,7 +69,7 @@ class SalaryAdmin(ImportExportModelAdmin):
 
 @admin.register(Bonus)
 class BonusAdmin(ImportExportModelAdmin):
-    # change_list_template = 'paid/change_list.html'
+    change_list_template = 'paid/change_list.html'
     list_display = ["full_name", "department", "month", "year", "musk_bonus", "musk_paid"]
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
@@ -110,8 +109,7 @@ class BonusAdmin(ImportExportModelAdmin):
 
 
 @admin.register(Leave)
-# class DataAdmin2(admin.ModelAdmin):
-class LeaveAdmin(ImportExportModelAdmin):
+class LeaveAdmin(admin.ModelAdmin):
     change_list_template = 'leave/change_list.html'
     list_display = ["full_name", "datetime_create", "department", "year", "month", "musk_fine"]
     list_display_links = ["full_name"]
@@ -182,7 +180,7 @@ class TotalAdmin(admin.ModelAdmin):
 
 @admin.register(Department)
 class DepartmentAdmin(ImportExportModelAdmin):
-    list_display = ['id', "name"]
+    list_display = ["name"]
     list_display_links = ["name"]
     actions = ["make_published"]
     resource_class = DepartmentResource

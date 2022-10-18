@@ -15,10 +15,10 @@ class TzDateTimeWidget(DateTimeWidget):
 
 
 class SalarysResource(resources.ModelResource):
-    id = Field(attribute="id")
-    # full_name = Field(attribute="full_name", column_name="Имя", widget=ForeignKeyWidget(Workers, "full_name"))
-    full_name = Field(attribute="full_name", column_name="Имя", widget=ForeignKeyWidget(Workers, "id"))
-    # department = Field(attribute="department", column_name="Подразделение")
+    # id = Field(attribute="id", column_name="Номер")
+    full_name = Field(attribute="full_name", column_name="Имя", widget=ForeignKeyWidget(Workers, "full_name"))
+    # full_name = Field(attribute="full_name", column_name="Имя", widget=ForeignKeyWidget(Workers, "id")) # import
+    department = Field(attribute="department", column_name="Подразделение")
     year = Field(attribute="year", column_name="Год")
     month = Field(attribute="month", column_name="Месяц")
     salary = Field(attribute="salary", column_name="Оклад")
@@ -27,50 +27,48 @@ class SalarysResource(resources.ModelResource):
         model = Salarys
         skip_unchanged = True
         report_skipped = True
-        # exclude = ('id',)
-        import_id_fields = ('id', 'full_name', 'year', 'month', 'salary')
+        exclude = ('id',)
+        import_id_fields = ('full_name', 'year', 'month', 'salary')
 
 
 class PaidResource(resources.ModelResource):
-    id = Field(attribute='id')
-    full_name = Field(attribute="full_name", widget=ForeignKeyWidget(Workers, "id"))
+    id = Field(attribute='id', column_name="ID")
+    full_name = Field(attribute="full_name", widget=ForeignKeyWidget(Workers, "full_name"))
     department = Field(attribute="department", column_name="Подразделение")
-    month = Field(attribute="month", )
-    year = Field(attribute="year", )
-    bonus = Field(attribute="bonus", )
-    paid = Field(attribute="paid", )
+    year = Field(attribute="year", column_name="Год")
+    month = Field(attribute="month", column_name="Месяц")
+    bonus = Field(attribute="bonus", column_name="Бонус")
+    paid = Field(attribute="paid", column_name="Штраф")
 
     class Meta:
         model = Bonus
         skip_unchanged = True
         report_skipped = True
         exclude = ('id',)
-        import_id_fields = ('id', 'full_name', 'year', 'month', 'bonus', 'paid')
+        import_id_fields = ('full_name', 'year', 'month', 'bonus', 'paid')
 
 
 class WorkerResource(resources.ModelResource):
-    id = Field(attribute='id')
     full_name = Field(attribute="full_name", column_name="Имя")
-    department = Field(attribute="department", column_name="", widget=ForeignKeyWidget(Department, 'id'))
-    job = Field(attribute="job", column_name="")
-    is_boss = Field(attribute="is_boss", column_name="")
-    phone = Field(attribute="phone", column_name="")
-    active = Field(attribute="active", column_name="")
-    telegram_id = Field(attribute="telegram_id", column_name="")
+    year = Field(column_name="Год")
+    month = Field(column_name="Месяц")
+    salary = Field(column_name="Оклад")
+    bonus = Field(column_name="Бонус")
+    paid = Field(column_name="Штраф")
 
-    # -----------------Server----------------
-    # year = Field(column_name="Год")
-    # month = Field(column_name="Месяц")
-    # salary = Field(column_name="Оклад")
-    # bonus = Field(column_name="Бонус")
-    # paid = Field(column_name="Штраф")
-    # ----------------------------------------
+    # id = Field(attribute='id')
+    # full_name = Field(attribute="full_name", column_name="Имя")
+    # department = Field(attribute="department", column_name="", widget=ForeignKeyWidget(Department, 'name'))
+    # job = Field(attribute="job", column_name="")
+    # is_boss = Field(attribute="is_boss", column_name="")
+    # phone = Field(attribute="phone", column_name="")
+    # active = Field(attribute="active", column_name="")
+    # telegram_id = Field(attribute="telegram_id", column_name="")
 
     class Meta:
         model = Workers
-        import_id_fields = ('id', 'full_name', 'department', 'job', 'is_boss', 'phone', 'active', 'telegram_id')
-        fields = '__all__'
-        # exclude = ('id', 'department', 'job', 'phone', 'telegram_id', "is_boss", "active")
+        exclude = ('id', 'department', 'job', 'phone', 'telegram_id', "is_boss", "active")
+        # import_id_fields = ('id', 'full_name', 'department', 'job', 'is_boss', 'phone', 'active', 'telegram_id')
 
 
 class DepartmentResource(resources.ModelResource):

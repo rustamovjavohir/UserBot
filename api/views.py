@@ -1,3 +1,4 @@
+from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -7,6 +8,10 @@ from config.settings import S_TOKEN
 from staff.models import *
 
 bot = Bot(token=S_TOKEN)
+
+
+def error_404(request, exception):
+    return render(request, '404.html')
 
 
 class RequestSalary(APIView):
