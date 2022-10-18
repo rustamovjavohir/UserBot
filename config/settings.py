@@ -131,10 +131,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+DATABASES = {'default': env.dj_db_url('DATABASE_URL')}
 SECRET_KEY = env.str('SECRET_KEY')
 TELEGRAM_TOKEN = env.str('TELEGRAM_TOKEN')
-S_TOKEN = "sadasd"
-URL_1C = "564512asd"
+S_TOKEN = env.str('S_TOKEN')
+URL_1C = env.str('URL_1C')
 
 try:
     from .local_settings import *

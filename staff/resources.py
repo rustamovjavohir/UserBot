@@ -16,9 +16,9 @@ class TzDateTimeWidget(DateTimeWidget):
 
 class SalarysResource(resources.ModelResource):
     id = Field(attribute="id")
-    full_name = Field(attribute="full_name", column_name="Имя", widget=ForeignKeyWidget(Workers, "full_name"))
-    # full_name = Field(attribute="full_name", column_name="Имя", widget=ForeignKeyWidget(Workers, "id"))
-    department = Field(attribute="department", column_name="Подразделение")
+    # full_name = Field(attribute="full_name", column_name="Имя", widget=ForeignKeyWidget(Workers, "full_name"))
+    full_name = Field(attribute="full_name", column_name="Имя", widget=ForeignKeyWidget(Workers, "id"))
+    # department = Field(attribute="department", column_name="Подразделение")
     year = Field(attribute="year", column_name="Год")
     month = Field(attribute="month", column_name="Месяц")
     salary = Field(attribute="salary", column_name="Оклад")
@@ -34,7 +34,7 @@ class SalarysResource(resources.ModelResource):
 class PaidResource(resources.ModelResource):
     id = Field(attribute='id')
     full_name = Field(attribute="full_name", widget=ForeignKeyWidget(Workers, "id"))
-    # department = Field(attribute="department", column_name="Подразделение")
+    department = Field(attribute="department", column_name="Подразделение")
     month = Field(attribute="month", )
     year = Field(attribute="year", )
     bonus = Field(attribute="bonus", )
@@ -44,7 +44,7 @@ class PaidResource(resources.ModelResource):
         model = Bonus
         skip_unchanged = True
         report_skipped = True
-        # exclude = ('id',)
+        exclude = ('id',)
         import_id_fields = ('id', 'full_name', 'year', 'month', 'bonus', 'paid')
 
 

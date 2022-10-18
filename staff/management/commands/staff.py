@@ -12,6 +12,6 @@ class Command(BaseCommand):
             CommandHandler(command='start', filters=Filters.chat_type.private, callback=start))
         updater.dispatcher.add_handler(MessageHandler(filters=Filters.all & Filters.chat_type.private, callback=order))
         updater.dispatcher.add_handler(CallbackQueryHandler(inline))
-        start()
+        # start()
         updater.start_polling()
         updater.idle()
