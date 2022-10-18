@@ -13,7 +13,8 @@ from .utils import getMonthList
 
 
 @admin.register(Workers)
-class DataAdmin(ExportMixin, admin.ModelAdmin):
+# class DataAdmin(ExportMixin, admin.ModelAdmin, ImportMixin):
+class WorkersAdmin(ImportExportModelAdmin):
     list_display = ["full_name", "department", "job", "phone", "is_boss"]
     list_display_links = ["full_name", "department", "job", "phone"]
     list_filter = ("department",)
@@ -29,13 +30,13 @@ class DataAdmin(ExportMixin, admin.ModelAdmin):
 
 
 @admin.register(Salarys)
-class DataAdmin4(ImportExportModelAdmin):
-    change_list_template = 'salary/change_list.html'
+class SalaryAdmin(ImportExportModelAdmin):
+    # change_list_template = 'salary/change_list.html'
     list_display = ["full_name", "department", "year", "month", "musk_salary"]
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
-    resource_class = OrderResource
+    resource_class = SalarysResource
 
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(
@@ -49,7 +50,7 @@ class DataAdmin4(ImportExportModelAdmin):
             my_context = {
                 'salary': "{:,}".format(salary)
             }
-            return super(DataAdmin4, self).changelist_view(request,
+            return super(SalaryAdmin, self).changelist_view(request,
                                                            extra_context=my_context)
         except (AttributeError, KeyError):
             return response
@@ -68,8 +69,8 @@ class DataAdmin4(ImportExportModelAdmin):
 
 
 @admin.register(Bonus)
-class DataAdmin3(ImportExportModelAdmin):
-    change_list_template = 'paid/change_list.html'
+class BonusAdmin(ImportExportModelAdmin):
+    # change_list_template = 'paid/change_list.html'
     list_display = ["full_name", "department", "month", "year", "musk_bonus", "musk_paid"]
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
@@ -90,7 +91,7 @@ class DataAdmin3(ImportExportModelAdmin):
                 'bonus': "{:,}".format(bonus),
                 'paid': "{:,}".format(paid)
             }
-            return super(DataAdmin3, self).changelist_view(request,
+            return super(BonusAdmin, self).changelist_view(request,
                                                            extra_context=my_context)
         except (AttributeError, KeyError):
             return response
@@ -109,12 +110,14 @@ class DataAdmin3(ImportExportModelAdmin):
 
 
 @admin.register(Leave)
-class DataAdmin2(admin.ModelAdmin):
+# class DataAdmin2(admin.ModelAdmin):
+class LeaveAdmin(ImportExportModelAdmin):
     change_list_template = 'leave/change_list.html'
     list_display = ["full_name", "datetime_create", "department", "year", "month", "musk_fine"]
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
+    resource_class = LeaveResource
 
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(
@@ -129,7 +132,7 @@ class DataAdmin2(admin.ModelAdmin):
             my_context = {
                 'fine': "{:,}".format(fine)
             }
-            return super(DataAdmin2, self).changelist_view(request,
+            return super(LeaveAdmin, self).changelist_view(request,
                                                            extra_context=my_context)
         except (AttributeError, KeyError):
             return response
@@ -142,7 +145,7 @@ class DataAdmin(admin.ModelAdmin):
 
 
 @admin.register(Total)
-class DataAdmin1(admin.ModelAdmin):
+class TotalAdmin(admin.ModelAdmin):
     change_list_template = 'total/change_list.html'
     list_display = ["full_name", "department", "year", "month", "oklad", "bonuss", "paid", "itog", "vplacheno",
                     "ostatok"]
@@ -171,17 +174,18 @@ class DataAdmin1(admin.ModelAdmin):
                 'vplacheno': "{:,}".format(vplacheno),
                 'ostatok': "{:,}".format(ostatok),
             }
-            return super(DataAdmin1, self).changelist_view(request,
+            return super(TotalAdmin, self).changelist_view(request,
                                                            extra_context=my_context)
         except (AttributeError, KeyError):
             return response
 
 
 @admin.register(Department)
-class DataAdmin(admin.ModelAdmin):
-    list_display = ["name"]
+class DepartmentAdmin(ImportExportModelAdmin):
+    list_display = ['id', "name"]
     list_display_links = ["name"]
     actions = ["make_published"]
+    resource_class = DepartmentResource
 
     def make_published(self, request, queryset):
         success = ""
