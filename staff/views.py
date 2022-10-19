@@ -99,7 +99,7 @@ def order(update: Update, context: CallbackContext):
                 step.update({"step": 0})
                 Data.objects.filter(telegram_id=user_id).update(data=step)
                 if 'success' in list(res.json().keys()):
-                    update.message.reply_html("✅So`rov kassaga jo`natildi")
+                    update.message.reply_html(f"✅So`rov tasdiqlandi, kassaga chiqishingiz mumkin ID: {req.pk}")
                 else:
                     update.message.reply_html("🚫Xatolik yuz berdi")
 
