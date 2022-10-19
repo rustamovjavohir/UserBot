@@ -136,6 +136,8 @@ SECRET_KEY = env.str('SECRET_KEY')
 TELEGRAM_TOKEN = env.str('TELEGRAM_TOKEN')
 S_TOKEN = env.str('S_TOKEN')
 URL_1C = env.str('URL_1C')
+LOGIN_1C = env.str('LOGIN_1C')
+PASSWORD_1C = env.str('PASSWORD_C')
 
 try:
     from .local_settings import *

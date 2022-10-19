@@ -1,6 +1,6 @@
 from telegram import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, Update
 
-from config.settings import URL_1C
+from config.settings import URL_1C, PASSWORD_1C, LOGIN_1C
 from .models import *
 import requests
 from telegram.ext import CallbackContext
@@ -17,42 +17,39 @@ def inform(user_id):
     return text
 
 
-def list_workers():
-    workers = Workers.objects.filter(active=True)
-    ids = []
-    for i in workers:
-        ids.append(i.telegram_id)
-    return ids
+def ifWorker(telegram_id) -> bool:
+    have = Workers.objects.filter(telegram_id=telegram_id, active=True).exists()
+    return have
 
 
 def start(update: Update, context: CallbackContext):
     user_id = update.message.from_user.id
-    if user_id in list_workers():
+    if ifWorker(telegram_id=user_id):
         update.message.reply_html(inform(user_id), reply_markup=ReplyKeyboardMarkup([[KeyboardButton('Avans so`rovi')]],
                                                                                     resize_keyboard=True,
                                                                                     one_time_keyboard=True))
         worker = Workers.objects.get(telegram_id=user_id)
-        try:
-            a = Data.objects.get(telegram_id=user_id)
-            Data.objects.filter(telegram_id=user_id).update(data={"step": 0, "name": worker.full_name})
-        except:
-            Data.objects.create(telegram_id=user_id, data={"step": 0, "name": worker.full_name})
+        obj, created = Data.objects.get_or_create(telegram_id=user_id)
+        obj.telegram_id = user_id
+        obj.data = {"step": 0, "name": worker.full_name}
+        obj.save()
     else:
         update.message.reply_text(f"ID: {user_id}")
 
-    #################################################################################################################
+
+#################################################################################################################
 
 
 def order(update: Update, context: CallbackContext):
     user_id = update.message.from_user.id
     msg = update.message.text
     step = Data.objects.get(telegram_id=user_id).data
-    if user_id in list_workers():
+    if ifWorker(user_id):
         if step["step"] == 0 and msg == 'Avans so`rovi':
             step.update({"step": 1})
             Data.objects.filter(telegram_id=user_id).update(data=step)
             update.message.reply_text('Avans miqdorini yozing',
-                                      reply_markup=ReplyKeyboardMarkup([[KeyboardButton('🏠Bosh sahifa')]],
+                                      reply_markup=ReplyKeyboardMarkup([[KeyboardButton('🏠')]],
                                                                        resize_keyboard=True, one_time_keyboard=True))
         elif step["step"] == 1 and msg != '🏠Bosh sahifa':
             if msg.isnumeric():
@@ -80,14 +77,15 @@ def order(update: Update, context: CallbackContext):
                 req = Request_price.objects.create(price=step['price'], avans=True,
                                                    department_id=Workers.objects.get(
                                                        telegram_id=user_id).department.ids)
-                months = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь",
-                          "Ноябрь", "Декабрь"]
+                months = getMonthList()
                 obj = Total.objects.get(full_name=Workers.objects.get(telegram_id=user_id),
                                         year=datetime.datetime.now().year,
                                         month=months[int(datetime.datetime.now().month) - 1])
                 req.workers.add(obj)
                 url = f"{URL_1C}ut3/hs/create_applications"
-                auth = ("django_admin", "DJango_96547456")
+
+                # auth = ("django_admin", "DJango_96547456")
+                auth = (LOGIN_1C, PASSWORD_1C)
                 js = {
                     "id": str(req.pk),
                     "department": req.department_id,
@@ -107,8 +105,7 @@ def order(update: Update, context: CallbackContext):
                 req = Request_price.objects.create(price=step['price'], avans=True,
                                                    department_id=Workers.objects.get(
                                                        telegram_id=user_id).department.ids)
-                months = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь",
-                          "Ноябрь", "Декабрь"]
+                months = getMonthList()
 
                 obj = Total.objects.get(full_name=Workers.objects.get(telegram_id=user_id),
                                         year=datetime.datetime.now().year,
@@ -144,12 +141,13 @@ def order(update: Update, context: CallbackContext):
 def inline(update: Update, context):
     user_id = update.callback_query.from_user.id
     data = update.callback_query.data.split("_")
-    if user_id in list_workers():
+    if ifWorker(user_id):
         if len(data) == 2 and data[0] == 'done':
             update.callback_query.message.edit_reply_markup()
             req = Request_price.objects.get(pk=data[1])
             url = f"{URL_1C}ut3/hs/create_applications"
-            auth = ("django_admin", "DJango_96547456")
+            # auth = ("django_admin", "DJango_96547456")
+            auth = (LOGIN_1C, PASSWORD_1C)
             js = {
                 "id": str(req.pk),
                 "department": req.department_id,
