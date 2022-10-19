@@ -18,6 +18,7 @@ class RequestSalary(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        bot.send_message(chat_id=779890968, text=request.data)
         if request.data["status"] == "success":
             try:
                 req = Request_price.objects.get(pk=request.data["id"], answer=False)
