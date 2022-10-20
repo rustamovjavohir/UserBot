@@ -64,22 +64,22 @@
 
         {% block result_list %}
           {% if action_form and actions_on_top and cl.show_admin_actions %}{% admin_actions %}{% endif %}
-          <table style="width:100%">
-            <tr>
-              <th>Итого</th>
-              <th></th>
-              <th></th>
-              <th></th>
-              <th></th>
-              <th></th>
-              <th style="text-align: right">ОКЛАД: {{ oklad }}</th>
-              <th style="text-align: right">БОНУС: {{ bonus }}</th>
-              <th style="text-align: right">ШТРАФ: {{ paid }}</th>
-              <th style="text-align: right">ИТОГО: {{ itog }}</th>
-              <th style="text-align: right">ВЫПЛАЧЕНО: {{ vplacheno }}</th>
-              <th style="text-align: right">ОСТАТОК: {{ ostatok }}</th>
-            </tr>
-          </table>
+{#          <table style="width:100%">#}
+{#            <tr>#}
+{#              <th>Итого</th>#}
+{#              <th></th>#}
+{#              <th></th>#}
+{#              <th></th>#}
+{#              <th></th>#}
+{#              <th></th>#}
+{#              <th style="text-align: right">ОКЛАД: {{ oklad }}</th>#}
+{#              <th style="text-align: right">БОНУС: {{ bonus }}</th>#}
+{#              <th style="text-align: right">ШТРАФ: {{ paid }}</th>#}
+{#              <th style="text-align: right">ИТОГО: {{ itog }}</th>#}
+{#              <th style="text-align: right">ВЫПЛАЧЕНО: {{ vplacheno }}</th>#}
+{#              <th style="text-align: right">ОСТАТОК: {{ ostatok }}</th>#}
+{#            </tr>#}
+{#          </table>#}
           {% result_list cl %}
           {% if action_form and actions_on_bottom and cl.show_admin_actions %}{% admin_actions %}{% endif %}
         {% endblock %}

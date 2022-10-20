@@ -30,7 +30,8 @@ class WorkersAdmin(ExportMixin, admin.ModelAdmin):
 
 @admin.register(Salarys)
 class SalaryAdmin(ImportExportModelAdmin):
-    change_list_template = 'salary/change_list.html'
+    # change_list_template = 'salary/change_list.html'
+    change_list_template = 'import_export/change_list_import_export.html'
     list_display = ["full_name", "department", "year", "month", "musk_salary"]
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
@@ -69,7 +70,8 @@ class SalaryAdmin(ImportExportModelAdmin):
 
 @admin.register(Bonus)
 class BonusAdmin(ImportExportModelAdmin):
-    change_list_template = 'paid/change_list.html'
+    # change_list_template = 'paid/change_list.html'
+    change_list_template = 'import_export/change_list_import_export.html'
     list_display = ["full_name", "department", "month", "year", "musk_bonus", "musk_paid"]
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
@@ -109,8 +111,8 @@ class BonusAdmin(ImportExportModelAdmin):
 
 
 @admin.register(Leave)
-class LeaveAdmin(admin.ModelAdmin):
-    change_list_template = 'leave/change_list.html'
+class LeaveAdmin(ImportExportModelAdmin):
+    change_list_template = 'import_export/change_list_import_export.html'
     list_display = ["full_name", "datetime_create", "department", "year", "month", "musk_fine"]
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
@@ -135,6 +137,18 @@ class LeaveAdmin(admin.ModelAdmin):
         except (AttributeError, KeyError):
             return response
 
+    def get_import_formats(self):
+        formats = (
+            base_formats.XLSX,
+        )
+        return [f for f in formats if f().can_import()]
+
+    def get_export_formats(self):
+        formats = (
+            base_formats.XLSX,
+        )
+        return [f for f in formats if f().can_export()]
+
 
 @admin.register(Request_price)
 class DataAdmin(admin.ModelAdmin):
@@ -144,7 +158,7 @@ class DataAdmin(admin.ModelAdmin):
 
 @admin.register(Total)
 class TotalAdmin(admin.ModelAdmin):
-    change_list_template = 'total/change_list.html'
+    change_list_template = 'import_export/change_list_import_export.html'
     list_display = ["full_name", "department", "year", "month", "oklad", "bonuss", "paid", "itog", "vplacheno",
                     "ostatok"]
     list_display_links = ["full_name"]
