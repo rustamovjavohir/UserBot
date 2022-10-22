@@ -93,3 +93,15 @@ class LeaveResource(resources.ModelResource):
     class Meta:
         model = Leave
         import_id_fields = ("id", 'full_name', 'month', 'year', 'fine')
+
+
+class InfTech(resources.ModelResource):
+    full_name = Field(attribute="full_name", column_name="Ф.И.О")
+    department = Field(attribute="department", column_name="Подразделение")
+    job = Field(attribute="job", column_name="Должность")
+    phone = Field(attribute="phone", column_name="Телефон номер")
+    active = Field(attribute="active", column_name="Статус")
+
+    class Meta:
+        model = InfTech
+        import_id_fields = ('full_name', 'department', 'job', 'phone', 'active')

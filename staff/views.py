@@ -7,18 +7,22 @@ import requests
 from telegram.ext import CallbackContext
 import datetime
 from dateutil.relativedelta import relativedelta
-from .utils import checkMoney, checkNextMonth, splitMoney, checkNextMonthMoney
+from .utils import checkMoney, checkNextMonth, splitMoney, checkNextMonthMoney, getWorker, isITStaff
 
 
 def isWorker(telegram_id) -> bool:
-    have = Workers.objects.filter(telegram_id=telegram_id, active=True).exists()
+    have = Workers.objects.filter(telegram_id=telegram_id, active=True).exists() or \
+           InfTech.objects.filter(telegram_id=telegram_id, active=True).exists()
     return have
 
 
 def inform(user_id):
-    worker = Workers.objects.get(telegram_id=user_id)
+    worker = getWorker(user_id)
     text = f"<strong>F.I.O.:</strong> {worker.full_name}\n"
-    text += f"<strong>Bo'lim:</strong> {worker.department.name}\n"
+    if type(worker.department) is str:
+        text += f"<strong>Bo'lim:</strong> {worker.department}\n"
+    else:
+        text += f"<strong>Bo'lim:</strong> {worker.department.name}\n"
     text += f"<strong>Ish:</strong> {worker.job}\n"
     text += f"<strong>Telefon raqam:</strong> {worker.phone}\n"
     text += f"<strong>Telegram ID:</strong> {worker.telegram_id}\n"
@@ -29,7 +33,7 @@ def start(update: Update, context: CallbackContext):
     user_id = update.message.from_user.id
     if isWorker(telegram_id=user_id):
         update.message.reply_html(inform(user_id), reply_markup=avansButton())
-        worker = Workers.objects.get(telegram_id=user_id)
+        worker = getWorker(user_id, True)
         obj, created = Data.objects.get_or_create(telegram_id=user_id)
         obj.telegram_id = user_id
         obj.data = {"step": 0, "name": worker.full_name}
@@ -53,7 +57,7 @@ def order(update: Update, context: CallbackContext):
                                       reply_markup=homeButton())
         elif step["step"] == 1 and msg != '🏠Bosh sahifa':
             if msg.isnumeric():
-                if checkMoney(user_id=user_id, money=int(msg)):
+                if checkMoney(user_id=user_id, money=int(msg)) or isITStaff(user_id):
                     step.update({"step": 2, "price": int(msg)})
                     Data.objects.filter(telegram_id=user_id).update(data=step)
                     text = f"<strong>Sana:</strong> {datetime.datetime.now().strftime('%d.%m.%Y')}\n"
@@ -81,13 +85,34 @@ def order(update: Update, context: CallbackContext):
                 update.message.reply_text('❗️❗️❗️Probelsiz faqat raqam kiriting',
                                           reply_markup=homeButton())
         elif step["step"] == 2 and msg == "✅So`rovni tasdiqlayman":
-            if Workers.objects.get(telegram_id=user_id).is_boss:
+            months = getMonthList()
+            if isITStaff(user_id):
+                price = int(step['price'])
+                req1 = Request_price.objects.create(price=price, avans=True, month=months[datetime.date.today().month - 1],
+                                                   department_id='АЙТи отдел', is_deleted=True)
+                req = ITRequestPrice.objects.create(price=price, avans=True, secondId=req1.pk,
+                                                    month=months[datetime.date.today().month - 1],
+                                                    department_id='АЙТи отдел')
+                text = f"<strong>ID:</strong> {req.secondId}\n"
+                text += f"<strong>Sana:</strong> {datetime.datetime.now().strftime('%d.%m.%Y')}\n"
+                text += f"<strong>F.I.O.:</strong> {step['name']}\n"
+                text += f"<strong>Oy: {months[datetime.date.today().month - 1]}</strong>\n"
+                text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(price)} So`m\n"
+
+                worker = getWorker(user_id)
+                req.workers.add(worker)
+                context.bot.send_message(chat_id=InfTech.objects.filter(is_boss=True).first().telegram_id,
+                                         text=text, parse_mode="html",
+                                         reply_markup=acceptInlineButton(req.secondId))
+                update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.secondId}")
+                update.message.reply_text("Bosh sahifa", reply_markup=avansButton())
+            elif getattr(getWorker(user_id), 'is_boss'):
+                print("salom")
                 update.message.reply_html("Bosh sahifa",
                                           reply_markup=avansButton())
                 req = Request_price.objects.create(price=step['price'], avans=True,
                                                    department_id=Workers.objects.get(
                                                        telegram_id=user_id).department.ids)
-                months = getMonthList()
                 obj = Total.objects.get(full_name__telegram_id=user_id,
                                         year=datetime.datetime.now().year,
                                         month=months[int(datetime.datetime.now().month) - 1])
@@ -112,7 +137,6 @@ def order(update: Update, context: CallbackContext):
                     update.message.reply_html("🚫Xatolik yuz berdi")
 
             else:
-                months = getMonthList()
                 avans_month = months[int(datetime.datetime.now().month) - 1]
                 price = int(step['price'])
                 money_split = splitMoney(user_id=user_id, money=price)

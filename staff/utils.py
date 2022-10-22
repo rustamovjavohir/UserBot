@@ -1,8 +1,13 @@
 import datetime
+import threading
 
-from staff.models import Total, getMonthList
+from staff.models import Total, getMonthList, Workers, InfTech
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
+from telegram import Bot
+from config.settings import S_TOKEN
+
+bot = Bot(token=S_TOKEN)
 
 
 def checkMoney(user_id, money: int) -> bool:
@@ -47,3 +52,23 @@ def splitMoney(user_id, money: int) -> tuple:
     if total_all.ostatok_1.__eq__(0):
         return (next_month.month, abs(money - total_all.ostatok_1)), (0, 0)
     return (date.today().month, total_all.ostatok_1), (next_month.month, abs(money - total_all.ostatok_1))
+
+
+def getWorker(user_id, active=True):
+    worker = Workers.objects.filter(telegram_id=user_id, active=active).first()
+    if not worker:
+        worker = InfTech.objects.filter(telegram_id=user_id, active=active).first()
+    return worker
+
+
+def isITStaff(user_id):
+    return InfTech.objects.filter(telegram_id=user_id, active=True).first()
+
+
+def sendNotification(notifications, workers):
+    for item in notifications:
+        for worker in workers:
+            try:
+                bot.send_message(chat_id=worker.telegram_id, text=item.text)
+            except:
+                pass

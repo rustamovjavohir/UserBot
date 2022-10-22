@@ -31,6 +31,57 @@ def getMonthList() -> list:
     return months
 
 
+class InfTech(models.Model):
+    full_name = models.CharField(max_length=70, verbose_name="Ф.И.О", unique=True)
+    department = models.CharField(default='АЙТи отдел', max_length=250, verbose_name="Подразделение")
+    job = models.CharField(max_length=70, verbose_name="Должность")
+    is_boss = models.BooleanField(default=False, verbose_name="Начальник отдела")
+    phone = models.CharField(max_length=70, verbose_name="Телефон номер")
+    active = models.BooleanField(default=True, verbose_name="Статус")
+    telegram_id = models.BigIntegerField(null=True, blank=True, verbose_name="Telegram ID")
+
+    def __str__(self):
+        return self.full_name
+
+    class Meta:
+        verbose_name = "АЙТишник"
+        verbose_name_plural = "АЙТишники"
+
+
+class ITRequestPrice(models.Model):
+    secondId = models.IntegerField(null=True, blank=True, verbose_name="Запрос ИД")
+    workers = models.ManyToManyField(InfTech)
+    department_id = models.CharField(max_length=70)
+    month = models.CharField(choices=getMonths(), max_length=250, null=True, blank=True)
+    price = models.BigIntegerField()
+    avans = models.BooleanField()
+    comment = models.CharField(max_length=2560, default="")
+    answer = models.BooleanField(default=False)
+    status = models.CharField(max_length=256, default="")
+
+    @property
+    def department(self):
+        return self.department_id
+
+    department.fget.short_description = "Подразделение"
+
+    @property
+    def all_workers(self):
+        if self.workers.all().exists():
+            string = ""
+            for i in self.workers.all():
+                string += i.full_name + '<br>'
+            return mark_safe(string)
+        else:
+            return ""
+
+    all_workers.fget.short_description = "Сотрудники"
+
+    class Meta:
+        verbose_name = "АЙТи отдел Зарплаты/аванс запрос"
+        verbose_name_plural = "АЙТи отдел Зарплаты/aванс запрос"
+
+
 class Department(models.Model):
     name = models.CharField(max_length=70, verbose_name="Подразделение")
     ids = models.CharField(max_length=70, default="", verbose_name="ID")
@@ -242,6 +293,7 @@ class Request_price(models.Model):
     comment = models.CharField(max_length=2560, default="")
     answer = models.BooleanField(default=False)
     status = models.CharField(max_length=256, default="")
+    is_deleted = models.BooleanField(default=False)
 
     departments = Department.objects.all()
 
@@ -286,3 +338,16 @@ def post_save_order(sender, instance, created, *args, **kwargs):
             pass
         else:
             Total.objects.create(full_name=instance, year=str(year), month=month)
+
+
+class Notification(models.Model):
+    title = models.CharField(max_length=250, null=True, blank=True)
+    text = models.TextField()
+    is_deleted = models.BooleanField(default=False)
+    created_at = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        ordering = ['-id']

@@ -1,3 +1,4 @@
+import threading
 from datetime import date
 
 import requests
@@ -10,6 +11,11 @@ from import_export.admin import ImportExportModelAdmin, ImportMixin, ExportMixin
 from config.settings import URL_1C
 from .resources import *
 from staff.models import *
+from telegram import Bot
+from config.settings import S_TOKEN
+from .utils import sendNotification
+
+bot = Bot(token=S_TOKEN)
 
 
 @admin.register(Workers)
@@ -155,6 +161,10 @@ class DataAdmin(admin.ModelAdmin):
     list_display = ["id", "all_workers", "department", "month", "price", "avans", "answer"]
     list_display_links = ["all_workers"]
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.filter(is_deleted=False)
+
 
 @admin.register(Total)
 class TotalAdmin(admin.ModelAdmin):
@@ -256,3 +266,35 @@ class DepartmentAdmin(ImportExportModelAdmin):
 
     month = months[int(date.today().month) - 2]
     make_published.short_description = f'Отправить запрос зарплаты для сотрудников за {month} месяц'
+
+
+@admin.register(InfTech)
+class InfTechAdmin(ImportExportModelAdmin):
+    list_display = ["id", "full_name", "department", "job", "is_boss", "phone", "active", "telegram_id"]
+    list_display_links = ["id", "full_name"]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser or request.user.username in ["Dilshod"]:
+            return qs.filter()
+        return qs.filter(partner=request.user.partner)
+
+
+@admin.register(ITRequestPrice)
+class DataAdmin(admin.ModelAdmin):
+    list_display = ["secondId", "all_workers", "department", "month", "price", "avans", "answer"]
+    list_display_links = ["all_workers"]
+
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ["title", "text", "is_deleted", "created_at"]
+    list_display_links = ["title"]
+    actions = ["sendMessage"]
+
+    def sendMessage(self, request, queryset):
+        workers = Workers.objects.filter(active=True)
+        dep = queryset
+        send_email_thread = threading.Thread(target=sendNotification, args=(dep, workers))
+        send_email_thread.start()
+
