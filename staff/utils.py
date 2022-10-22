@@ -24,6 +24,16 @@ def checkNextMonth(user_id) -> bool:
     return False
 
 
+def checkNextMonthMoney(user_id) -> int:
+    next_month = date.today() + relativedelta(months=+1)
+    months = getMonthList()
+    if checkNextMonth(user_id):
+        next_month_money = Total.objects.filter(full_name__telegram_id=user_id, year=next_month.year,
+                                                month=months[next_month.month - 1]).first()
+        return next_month_money.ostatok_1
+    return 0
+
+
 def splitMoney(user_id, money: int) -> tuple:
     """
     ((this_month, first_money), (next_month, second_money))

@@ -6,8 +6,8 @@ from .models import *
 import requests
 from telegram.ext import CallbackContext
 import datetime
-
-from .utils import checkMoney, checkNextMonth, splitMoney
+from dateutil.relativedelta import relativedelta
+from .utils import checkMoney, checkNextMonth, splitMoney, checkNextMonthMoney
 
 
 def isWorker(telegram_id) -> bool:
@@ -61,12 +61,21 @@ def order(update: Update, context: CallbackContext):
                     text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(step['price'])} So`m\n"
                     update.message.reply_html(text, reply_markup=acceptButton())
                 else:
+                    months = getMonthList()
+                    next_month = datetime.date.today() + relativedelta(months=+1)
                     step.update({"step": 0})
                     Data.objects.filter(telegram_id=user_id).update(data=step)
                     if checkNextMonth(user_id):
-                        text = "Ortiqcha pul soradingiz"
+                        if checkNextMonthMoney(user_id) == 0:
+                            text = f"Bo'ldida endi, <strong>{months[next_month.month - 1]}</strong> ni " \
+                                   f"oyliginiyam olib bo'ldiz🤌.\n" \
+                                   f"Izoh: Eng ko'pi bilan 2 oy uchun avans olsa bo'ladi"
+                        else:
+                            text = f"Ishtaha karnakku, {months[next_month.month - 1]} nikiniyam qo'shsa ham yetmayapdi🙅🏻‍♂.\n" \
+                                   f"<strong>Izoh</strong>: Yozilgan summa 2 oylik avans pulidan ko'p"
                     else:
-                        text = "Keyingi oy kiritilmagan"
+                        text = f"Boshliq oylik yozmabdilaku🤲. \n" \
+                               f"Izoh:<strong> {months[next_month.month - 1]}</strong> uchun oylik kiritilmagan"
                     update.message.reply_html(text, reply_markup=avansButton())
             else:
                 update.message.reply_text('❗️❗️❗️Probelsiz faqat raqam kiriting',
@@ -79,9 +88,6 @@ def order(update: Update, context: CallbackContext):
                                                    department_id=Workers.objects.get(
                                                        telegram_id=user_id).department.ids)
                 months = getMonthList()
-                # obj = Total.objects.get(full_name=Workers.objects.get(telegram_id=user_id),
-                #                         year=datetime.datetime.now().year,
-                #                         month=months[int(datetime.datetime.now().month) - 1])
                 obj = Total.objects.get(full_name__telegram_id=user_id,
                                         year=datetime.datetime.now().year,
                                         month=months[int(datetime.datetime.now().month) - 1])
