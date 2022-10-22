@@ -7,6 +7,8 @@ import requests
 from telegram.ext import CallbackContext
 import datetime
 
+from .utils import checkMoney, checkNextMonth, splitMoney
+
 
 def isWorker(telegram_id) -> bool:
     have = Workers.objects.filter(telegram_id=telegram_id, active=True).exists()
@@ -51,13 +53,21 @@ def order(update: Update, context: CallbackContext):
                                       reply_markup=homeButton())
         elif step["step"] == 1 and msg != '🏠Bosh sahifa':
             if msg.isnumeric():
-                step.update({"step": 2, "price": int(msg)})
-                Data.objects.filter(telegram_id=user_id).update(data=step)
-                text = f"<strong>Sana:</strong> {datetime.datetime.now().strftime('%d.%m.%Y')}\n"
-                text += f"<strong>F.I.O.:</strong> {step['name']}\n"
-                text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(step['price'])} So`m\n"
-                update.message.reply_html(text,
-                                          reply_markup=acceptButton())
+                if checkMoney(user_id=user_id, money=int(msg)):
+                    step.update({"step": 2, "price": int(msg)})
+                    Data.objects.filter(telegram_id=user_id).update(data=step)
+                    text = f"<strong>Sana:</strong> {datetime.datetime.now().strftime('%d.%m.%Y')}\n"
+                    text += f"<strong>F.I.O.:</strong> {step['name']}\n"
+                    text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(step['price'])} So`m\n"
+                    update.message.reply_html(text, reply_markup=acceptButton())
+                else:
+                    step.update({"step": 0})
+                    Data.objects.filter(telegram_id=user_id).update(data=step)
+                    if checkNextMonth(user_id):
+                        text = "Ortiqcha pul soradingiz"
+                    else:
+                        text = "Keyingi oy kiritilmagan"
+                    update.message.reply_html(text, reply_markup=avansButton())
             else:
                 update.message.reply_text('❗️❗️❗️Probelsiz faqat raqam kiriting',
                                           reply_markup=homeButton())
@@ -69,7 +79,10 @@ def order(update: Update, context: CallbackContext):
                                                    department_id=Workers.objects.get(
                                                        telegram_id=user_id).department.ids)
                 months = getMonthList()
-                obj = Total.objects.get(full_name=Workers.objects.get(telegram_id=user_id),
+                # obj = Total.objects.get(full_name=Workers.objects.get(telegram_id=user_id),
+                #                         year=datetime.datetime.now().year,
+                #                         month=months[int(datetime.datetime.now().month) - 1])
+                obj = Total.objects.get(full_name__telegram_id=user_id,
                                         year=datetime.datetime.now().year,
                                         month=months[int(datetime.datetime.now().month) - 1])
                 req.workers.add(obj)
@@ -85,7 +98,6 @@ def order(update: Update, context: CallbackContext):
                     "comment": ""
                 }
                 res = requests.post(url=url, auth=auth, json=js)
-                print(res.json())
                 step.update({"step": 0})
                 Data.objects.filter(telegram_id=user_id).update(data=step)
                 if 'success' in list(res.json().keys()):
@@ -94,28 +106,35 @@ def order(update: Update, context: CallbackContext):
                     update.message.reply_html("🚫Xatolik yuz berdi")
 
             else:
-                req = Request_price.objects.create(price=step['price'], avans=True,
-                                                   department_id=Workers.objects.get(
-                                                       telegram_id=user_id).department.ids)
                 months = getMonthList()
+                avans_month = months[int(datetime.datetime.now().month) - 1]
+                price = int(step['price'])
+                money_split = splitMoney(user_id=user_id, money=price)
+                for month, money in money_split:
+                    if money == 0:
+                        continue
+                    req = Request_price.objects.create(price=money, avans=True, month=months[month - 1],
+                                                       department_id=Workers.objects.get(
+                                                           telegram_id=user_id).department.ids)
 
-                obj = Total.objects.get(full_name=Workers.objects.get(telegram_id=user_id),
-                                        year=datetime.datetime.now().year,
-                                        month=months[int(datetime.datetime.now().month) - 1])
-                req.workers.add(obj)
-                step.update({"step": 0})
-                Data.objects.filter(telegram_id=user_id).update(data=step)
-                update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.id}")
+                    obj = Total.objects.get(full_name__telegram_id=user_id,
+                                            year=datetime.datetime.now().year,
+                                            month=avans_month)
+                    req.workers.add(obj)
+                    step.update({"step": 0})
+                    Data.objects.filter(telegram_id=user_id).update(data=step)
+                    update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.id}")
+                    boss = Workers.objects.filter(is_boss=True,
+                                                  department=Workers.objects.get(telegram_id=user_id).department)
+                    text = f"<strong>ID:</strong> {req.pk}\n"
+                    text += f"<strong>Sana:</strong> {datetime.datetime.now().strftime('%d.%m.%Y')}\n"
+                    text += f"<strong>F.I.O.:</strong> {step['name']}\n"
+                    text += f"<strong>Oy: {months[month - 1]}</strong>\n"
+                    text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(money)} So`m\n"
+                    context.bot.send_message(chat_id=boss[0].telegram_id, text=text, parse_mode="html",
+                                             reply_markup=acceptInlineButton(req.id))
                 update.message.reply_text("Bosh sahifa",
                                           reply_markup=avansButton())
-                boss = Workers.objects.filter(is_boss=True,
-                                              department=Workers.objects.get(telegram_id=user_id).department)
-                text = f"<strong>ID:</strong> {req.pk}\n"
-                text += f"<strong>Sana:</strong> {datetime.datetime.now().strftime('%d.%m.%Y')}\n"
-                text += f"<strong>F.I.O.:</strong> {step['name']}\n"
-                text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(step['price'])} So`m\n"
-                context.bot.send_message(chat_id=boss[0].telegram_id, text=text, parse_mode="html",
-                                         reply_markup=acceptInlineButton(req.id))
         elif msg == '🏠Bosh sahifa':
             step.update({"step": 0})
             Data.objects.filter(telegram_id=user_id).update(data=step)

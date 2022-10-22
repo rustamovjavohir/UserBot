@@ -12,6 +12,7 @@ def inline(update: Update, context):
     if isWorker(user_id):
         if len(data) == 2 and data[0] == 'done':
             update.callback_query.message.edit_reply_markup()
+            print(data[1])
             req = Request_price.objects.get(pk=data[1])
             url = f"{URL_1C}ut3/hs/create_applications"
             # auth = ("django_admin", "DJango_96547456")
@@ -33,9 +34,10 @@ def inline(update: Update, context):
                 update.callback_query.message.reply_text("🚫Xatolik yuz berdi")
         elif len(data) == 2 and data[0] == 'not':
             update.callback_query.message.edit_reply_markup()
-            req = Request_price.objects.get(pk=data[1])
-            for i in req.workers.all():
-                context.bot.send_message(chat_id=i.full_name.telegram_id,
-                                         text=f"❌So`rov bo`lim boshlig`i tomonidan rad etildi, ID: {req.pk}")
-            Request_price.objects.get(pk=data[1]).delete()
-            update.callback_query.message.reply_text("❌So`rov rad etildi")
+            req = Request_price.objects.filter(pk=data[1]).first()
+            if req:
+                for i in req.workers.all():
+                    context.bot.send_message(chat_id=i.full_name.telegram_id,
+                                             text=f"❌So`rov bo`lim boshlig`i tomonidan rad etildi, ID: {req.pk}")
+                Request_price.objects.get(pk=data[1]).delete()
+                update.callback_query.message.reply_text("❌So`rov rad etildi")

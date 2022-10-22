@@ -1,7 +1,6 @@
 import requests
 from datetime import date
 from staff.models import *
-from staff.utils import getMonthList
 
 
 def salary():

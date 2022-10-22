@@ -9,7 +9,7 @@ from import_export.admin import ImportExportModelAdmin, ImportMixin, ExportMixin
 
 from config.settings import URL_1C
 from .resources import *
-from .utils import getMonthList
+from staff.models import *
 
 
 @admin.register(Workers)
@@ -152,7 +152,7 @@ class LeaveAdmin(ImportExportModelAdmin):
 
 @admin.register(Request_price)
 class DataAdmin(admin.ModelAdmin):
-    list_display = ["all_workers", "department", "price", "avans", "answer"]
+    list_display = ["id", "all_workers", "department", "month", "price", "avans", "answer"]
     list_display_links = ["all_workers"]
 
 

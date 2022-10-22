@@ -6,7 +6,29 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.safestring import mark_safe
 
-from staff.utils import getMonths, getMonthList
+
+def getMonths() -> list:
+    months = [
+        ("Январь", "Январь"),
+        ("Февраль", "Февраль"),
+        ("Март", "Март"),
+        ("Апрель", "Апрель"),
+        ("Май", "Май"),
+        ("Июнь", "Июнь"),
+        ("Июль", "Июль"),
+        ("Август", "Август"),
+        ("Сентябрь", "Сентябрь"),
+        ("Октябрь", "Октябрь"),
+        ("Ноябрь", "Ноябрь"),
+        ("Декабрь", "Декабрь"),
+    ]
+    return months
+
+
+def getMonthList() -> list:
+    months = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь",
+              "Ноябрь", "Декабрь"]
+    return months
 
 
 class Department(models.Model):
@@ -214,6 +236,7 @@ class Total(models.Model):
 class Request_price(models.Model):
     workers = models.ManyToManyField(Total)
     department_id = models.CharField(max_length=70)
+    month = models.CharField(choices=getMonths(), max_length=250, null=True, blank=True)
     price = models.BigIntegerField()
     avans = models.BooleanField()
     comment = models.CharField(max_length=2560, default="")

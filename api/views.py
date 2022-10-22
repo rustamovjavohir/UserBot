@@ -17,9 +17,17 @@ def error_404(request, exception):
 class RequestSalary(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get(self, request):
+        data = {
+            "status": True,
+            "method": 'GET',
+            "description": "Method not allowed"
+        }
+        return Response(data=data, status=200)
+
     def post(self, request):
         bot.send_message(chat_id=779890968, text=request.data)
-        if request.data["status"] == "success":
+        if request.data.get('status') == "success":
             try:
                 req = Request_price.objects.get(pk=request.data["id"], answer=False)
                 workers = req.workers.all()
@@ -34,11 +42,10 @@ class RequestSalary(APIView):
                     return Response(status=200, data={"status": "ok"})
                 else:
                     for i in workers:
-                        Leave.objects.create(full_name=i.full_name, month=i.month, year=i.year, fine=req.price)
+                        Leave.objects.create(full_name=i.full_name, month=req.month, year=i.year, fine=req.price)
                         try:
                             bot.send_message(chat_id=i.full_name.telegram_id, text="✅To`lov qabul qilindi")
                         except Exception as ex:
-                            print(ex)
                             pass
                     return Response(status=200, data={"status": "ok"})
             except Exception as ex:
