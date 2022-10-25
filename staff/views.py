@@ -104,10 +104,11 @@ def order(update: Update, context: CallbackContext):
                 context.bot.send_message(chat_id=InfTech.objects.filter(is_boss=True).first().telegram_id,
                                          text=text, parse_mode="html",
                                          reply_markup=acceptInlineButton(req.secondId))
+                step.update({"step": 0})
+                Data.objects.filter(telegram_id=user_id).update(data=step)
                 update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.secondId}")
                 update.message.reply_text("Bosh sahifa", reply_markup=avansButton())
             elif getattr(getWorker(user_id), 'is_boss'):
-                print("salom")
                 update.message.reply_html("Bosh sahifa",
                                           reply_markup=avansButton())
                 req = Request_price.objects.create(price=step['price'], avans=True,

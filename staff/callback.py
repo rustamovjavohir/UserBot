@@ -45,13 +45,17 @@ def inline(update: Update, context):
             update.callback_query.message.edit_reply_markup()
             req = Request_price.objects.filter(pk=data[1]).first()
             if req:
-                if req.is_deleted:
-                    req = ITRequestPrice.objects.get(secondId=data[1])
+                try:
+                    if req.is_deleted:
+                        req = ITRequestPrice.objects.get(secondId=data[1])
+                        for i in req.workers.all():
+                            context.bot.send_message(chat_id=i.telegram_id,
+                                                     text=f"❌So`rov bo`lim boshlig`i tomonidan rad etildi,"
+                                                          f" ID: {req.secondId}")
                     for i in req.workers.all():
-                        context.bot.send_message(chat_id=i.telegram_id,
+                        context.bot.send_message(chat_id=i.full_name.telegram_id,
                                                  text=f"❌So`rov bo`lim boshlig`i tomonidan rad etildi, ID: {req.pk}")
-                for i in req.workers.all():
-                    context.bot.send_message(chat_id=i.full_name.telegram_id,
-                                             text=f"❌So`rov bo`lim boshlig`i tomonidan rad etildi, ID: {req.pk}")
-                Request_price.objects.get(pk=data[1]).delete()
-                update.callback_query.message.reply_text("❌So`rov rad etildi")
+                    Request_price.objects.get(pk=data[1]).delete()
+                    update.callback_query.message.reply_text("❌So`rov rad etildi")
+                except Exception as ex:
+                    print(ex)
