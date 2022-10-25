@@ -3,9 +3,13 @@ from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView
 from telegram import Bot
 from config.settings import S_TOKEN
-
+from api.serializers import BonusSerializer
+import datetime
+from pytz import timezone
+from dateutil import parser
 from staff.models import *
 
 bot = Bot(token=S_TOKEN)
@@ -69,3 +73,51 @@ class RequestSalary(APIView):
                 print(ex)
                 return Response(status=400, data={"status": "error"})
         return Response(status=400, data={"status": "error"})
+
+
+class BonusView(APIView):
+    queryset = Bonus.objects.all()
+    months = getMonthList()
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = BonusSerializer
+
+    def get_serializer(self, *args, **kwargs):
+        return self.serializer_class(*args, **kwargs)
+
+    def post(self, request):
+        serializer = BonusSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            worker = Workers.objects.filter(telegram_id=serializer.data.get('idmaneger')).first()
+            try:
+                if worker:
+                    date = datetime.datetime.strptime(serializer.data.get("date"), '%Y-%m-%dT%H:%M:%S%z')
+                    bonus = serializer.data.get('bonus') // 10
+                    bonus = Bonus.objects.create(full_name=worker, month=self.months[date.month - 1],
+                                                 year=date.year, bonus=bonus, paid=0)
+                    data = {
+                        "success": True,
+                        "status_code": 200,
+                        "statusMessage": "Бонус успешно добавлен",
+                        "id": bonus.id,
+                    }
+                else:
+                    data = {
+                        "success": False,
+                        "status_code": 404,
+                        "statusMessage": "Сотрудник не найден",
+                    }
+            except Exception as ex:
+                data = {
+                    "success": False,
+                    "status_code": 404,
+                    "statusMessage": ex.__str__(),
+                }
+                print(ex)
+        else:
+            data = {
+                "success": False,
+                "status_code": 400,
+                "statusMessage": "Поля не заполнены",
+            }
+        return Response(status=200, data=data)
