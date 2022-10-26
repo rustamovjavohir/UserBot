@@ -1,3 +1,4 @@
+# from django.contrib.gis.utils import GeoIP
 from django.db import transaction
 from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
@@ -5,13 +6,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView
 from telegram import Bot
+
+from api.utils import get_client_ip
 from config.settings import S_TOKEN
 from api.serializers import BonusSerializer
 import datetime
 from pytz import timezone
 from dateutil import parser
 from staff.models import *
-
 bot = Bot(token=S_TOKEN)
 
 
@@ -79,70 +81,84 @@ class BonusView(APIView):
     queryset = Bonus.objects.filter(is_deleted=False)
     months = getMonthList()
     permission_classes = [IsAuthenticated]
-
+    ip_address = '45.142.36.22'
     serializer_class = BonusSerializer
 
     def get_serializer(self, *args, **kwargs):
         return self.serializer_class(*args, **kwargs)
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            worker = Workers.objects.filter(telegram_id=serializer.data.get('idmaneger')).first()
-            try:
-                if worker:
-                    date = datetime.datetime.strptime(serializer.data.get("date"), '%Y-%m-%dT%H:%M:%S%z')
-                    bonus = serializer.data.get('bonus')
-                    bonus = Bonus.objects.create(full_name=worker, month=self.months[date.month - 1], year=date.year,
-                                                 bonus_id=serializer.data.get('id'), bonus=bonus, paid=0)
+        if self.ip_address == get_client_ip(request):
+            serializer = self.serializer_class(data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                worker = Workers.objects.filter(telegram_id=serializer.data.get('idmaneger')).first()
+                try:
+                    if worker:
+                        date = datetime.datetime.strptime(serializer.data.get("date"), '%Y-%m-%dT%H:%M:%S%z')
+                        bonus = serializer.data.get('bonus')
+                        bonus = Bonus.objects.create(full_name=worker, month=self.months[date.month - 1], year=date.year,
+                                                     bonus_id=serializer.data.get('id'), bonus=bonus, paid=0)
+                        data = {
+                            "success": True,
+                            "status_code": 200,
+                            "statusMessage": "Бонус успешно добавлен",
+                            "id": bonus.id,
+                        }
+                    else:
+                        data = {
+                            "success": False,
+                            "status_code": 404,
+                            "statusMessage": "Сотрудник не найден",
+                        }
+                except Exception as ex:
+                    data = {
+                        "success": False,
+                        "status_code": 404,
+                        "statusMessage": ex.__str__(),
+                    }
+                    print(ex)
+            else:
+                data = {
+                    "success": False,
+                    "status_code": 400,
+                    "statusMessage": "Поля не заполнены",
+                }
+        else:
+            data = {
+                "success": False,
+                "status_code": 403,
+                "statusMessage": f"Неверный IP-адреса ({get_client_ip(request)})",
+            }
+        return Response(status=200, data=data)
+
+    def delete(self, request):
+        if self.ip_address == get_client_ip(request):
+            bonus_id = request.data.get('id')
+            if bonus_id:
+                if self.queryset.filter(bonus_id=bonus_id).exists():
+                    self.queryset.filter(bonus_id=bonus_id).update(is_deleted=True)
                     data = {
                         "success": True,
                         "status_code": 200,
-                        "statusMessage": "Бонус успешно добавлен",
-                        "id": bonus.id,
+                        "statusMessage": "Бонус успешно удален",
                     }
                 else:
                     data = {
                         "success": False,
                         "status_code": 404,
-                        "statusMessage": "Сотрудник не найден",
+                        "statusMessage": "Бонус не найден",
                     }
-            except Exception as ex:
-                data = {
-                    "success": False,
-                    "status_code": 404,
-                    "statusMessage": ex.__str__(),
-                }
-                print(ex)
-        else:
-            data = {
-                "success": False,
-                "status_code": 400,
-                "statusMessage": "Поля не заполнены",
-            }
-        return Response(status=200, data=data)
-
-    def delete(self, request):
-
-        bonus_id = request.data.get('id')
-        if bonus_id:
-            if self.queryset.filter(bonus_id=bonus_id).exists():
-                self.queryset.filter(bonus_id=bonus_id).update(is_deleted=True)
-                data = {
-                    "success": True,
-                    "status_code": 200,
-                    "statusMessage": "Бонус успешно удален",
-                }
             else:
                 data = {
                     "success": False,
-                    "status_code": 404,
-                    "statusMessage": "Бонус не найден",
+                    "status_code": 400,
+                    "statusMessage": "Id Обязательное поле",
                 }
         else:
             data = {
                 "success": False,
-                "status_code": 400,
-                "statusMessage": "Id Обязательное поле",
+                "status_code": 403,
+                "statusMessage": f"Неверный IP-адреса ({get_client_ip(request)})",
             }
+
         return Response(status=200, data=data)
