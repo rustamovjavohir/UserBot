@@ -135,11 +135,13 @@ class Salarys(models.Model):
 
 
 class Bonus(models.Model):
+    bonus_id = models.CharField(max_length=250, null=True, blank=True, verbose_name="Удален")
     full_name = models.ForeignKey(Workers, verbose_name="Ф.И.О", on_delete=models.CASCADE)
     month = models.CharField(choices=getMonths(), verbose_name="Месяц", max_length=100)
     year = models.CharField(default=datetime.datetime.now().year, verbose_name="Год", max_length=10)
     bonus = models.IntegerField(default=0, verbose_name="Бонус")
     paid = models.IntegerField(default=0, verbose_name="Штраф")
+    is_deleted = models.BooleanField(default=False)
 
     @property
     def department(self):
@@ -195,7 +197,7 @@ class Total(models.Model):
 
     # queyset
     salary = Salarys.objects.all()
-    bonus = Bonus.objects.all()
+    bonus = Bonus.objects.filter(is_deleted=False)
     leave = Leave.objects.all()
 
     @property

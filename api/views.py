@@ -76,7 +76,7 @@ class RequestSalary(APIView):
 
 
 class BonusView(APIView):
-    queryset = Bonus.objects.all()
+    queryset = Bonus.objects.filter(is_deleted=False)
     months = getMonthList()
     permission_classes = [IsAuthenticated]
 
@@ -86,15 +86,15 @@ class BonusView(APIView):
         return self.serializer_class(*args, **kwargs)
 
     def post(self, request):
-        serializer = BonusSerializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
             worker = Workers.objects.filter(telegram_id=serializer.data.get('idmaneger')).first()
             try:
                 if worker:
                     date = datetime.datetime.strptime(serializer.data.get("date"), '%Y-%m-%dT%H:%M:%S%z')
-                    bonus = serializer.data.get('bonus') // 10
-                    bonus = Bonus.objects.create(full_name=worker, month=self.months[date.month - 1],
-                                                 year=date.year, bonus=bonus, paid=0)
+                    bonus = serializer.data.get('bonus')
+                    bonus = Bonus.objects.create(full_name=worker, month=self.months[date.month - 1], year=date.year,
+                                                 bonus_id=serializer.data.get('id'), bonus=bonus, paid=0)
                     data = {
                         "success": True,
                         "status_code": 200,
@@ -119,5 +119,30 @@ class BonusView(APIView):
                 "success": False,
                 "status_code": 400,
                 "statusMessage": "Поля не заполнены",
+            }
+        return Response(status=200, data=data)
+
+    def delete(self, request):
+
+        bonus_id = request.data.get('id')
+        if bonus_id:
+            if self.queryset.filter(bonus_id=bonus_id).exists():
+                self.queryset.filter(bonus_id=bonus_id).update(is_deleted=True)
+                data = {
+                    "success": True,
+                    "status_code": 200,
+                    "statusMessage": "Бонус успешно удален",
+                }
+            else:
+                data = {
+                    "success": False,
+                    "status_code": 404,
+                    "statusMessage": "Бонус не найден",
+                }
+        else:
+            data = {
+                "success": False,
+                "status_code": 400,
+                "statusMessage": "Id Обязательное поле",
             }
         return Response(status=200, data=data)

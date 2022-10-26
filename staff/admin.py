@@ -77,12 +77,17 @@ class SalaryAdmin(ImportExportModelAdmin):
 @admin.register(Bonus)
 class BonusAdmin(ImportExportModelAdmin):
     # change_list_template = 'paid/change_list.html'
+
     change_list_template = 'import_export/change_list_import_export.html'
     list_display = ["full_name", "department", "month", "year", "musk_bonus", "musk_paid"]
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
     resource_class = PaidResource
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.filter(is_deleted=False)
 
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(
@@ -297,4 +302,3 @@ class NotificationAdmin(admin.ModelAdmin):
         dep = queryset
         send_email_thread = threading.Thread(target=sendNotification, args=(dep, workers))
         send_email_thread.start()
-
