@@ -292,9 +292,9 @@ class Request_price(models.Model):
     month = models.CharField(choices=getMonths(), max_length=250, null=True, blank=True)
     price = models.BigIntegerField()
     avans = models.BooleanField()
-    comment = models.CharField(max_length=2560, default="")
+    comment = models.CharField(max_length=2560, default="", null=True, blank=True)
     answer = models.BooleanField(default=False)
-    status = models.CharField(max_length=256, default="")
+    status = models.CharField(max_length=256, default="", null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
 
     departments = Department.objects.all()
