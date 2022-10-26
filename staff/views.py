@@ -88,8 +88,9 @@ def order(update: Update, context: CallbackContext):
             months = getMonthList()
             if isITStaff(user_id):
                 price = int(step['price'])
-                req1 = Request_price.objects.create(price=price, avans=True, month=months[datetime.date.today().month - 1],
-                                                   department_id='АЙТи отдел', is_deleted=True)
+                req1 = Request_price.objects.create(price=price, avans=True,
+                                                    month=months[datetime.date.today().month - 1],
+                                                    department_id='АЙТи отдел', is_deleted=True)
                 req = ITRequestPrice.objects.create(price=price, avans=True, secondId=req1.pk,
                                                     month=months[datetime.date.today().month - 1],
                                                     department_id='АЙТи отдел')
@@ -111,31 +112,37 @@ def order(update: Update, context: CallbackContext):
             elif getattr(getWorker(user_id), 'is_boss'):
                 update.message.reply_html("Bosh sahifa",
                                           reply_markup=avansButton())
-                req = Request_price.objects.create(price=step['price'], avans=True,
-                                                   department_id=Workers.objects.get(
-                                                       telegram_id=user_id).department.ids)
-                obj = Total.objects.get(full_name__telegram_id=user_id,
-                                        year=datetime.datetime.now().year,
-                                        month=months[int(datetime.datetime.now().month) - 1])
-                req.workers.add(obj)
-                url = f"{URL_1C}ut3/hs/create_applications"
+                avans_month = months[int(datetime.datetime.now().month) - 1]
+                price = int(step['price'])
+                money_split = splitMoney(user_id=user_id, money=price)
+                for month, money in money_split:
+                    if money == 0:
+                        continue
+                    req = Request_price.objects.create(price=money, avans=True, month=months[month - 1],
+                                                       department_id=Workers.objects.get(
+                                                           telegram_id=user_id).department.ids)
+                    obj = Total.objects.get(full_name__telegram_id=user_id,
+                                            year=datetime.datetime.now().year,
+                                            month=avans_month)
+                    req.workers.add(obj)
+                    url = f"{URL_1C}ut3/hs/create_applications"
 
-                # auth = ("django_admin", "DJango_96547456")
-                auth = (LOGIN_1C, PASSWORD_1C)
-                js = {
-                    "id": str(req.pk),
-                    "department": req.department_id,
-                    "price": req.price,
-                    "avans": True,
-                    "comment": ""
-                }
-                res = requests.post(url=url, auth=auth, json=js)
-                step.update({"step": 0})
-                Data.objects.filter(telegram_id=user_id).update(data=step)
-                if 'success' in list(res.json().keys()):
-                    update.message.reply_html(f"✅So`rov tasdiqlandi, kassaga chiqishingiz mumkin ID: {req.pk}")
-                else:
-                    update.message.reply_html("🚫Xatolik yuz berdi")
+                    # auth = ("django_admin", "DJango_96547456")
+                    auth = (LOGIN_1C, PASSWORD_1C)
+                    js = {
+                        "id": str(req.pk),
+                        "department": req.department_id,
+                        "price": req.price,
+                        "avans": True,
+                        "comment": ""
+                    }
+                    res = requests.post(url=url, auth=auth, json=js)
+                    step.update({"step": 0})
+                    Data.objects.filter(telegram_id=user_id).update(data=step)
+                    if 'success' in list(res.json().keys()):
+                        update.message.reply_html(f"✅So`rov tasdiqlandi, kassaga chiqishingiz mumkin ID: {req.pk}")
+                    else:
+                        update.message.reply_html("🚫Xatolik yuz berdi")
 
             else:
                 avans_month = months[int(datetime.datetime.now().month) - 1]
