@@ -163,7 +163,7 @@ class LeaveAdmin(ImportExportModelAdmin):
 
 @admin.register(Request_price)
 class DataAdmin(admin.ModelAdmin):
-    list_display = ["id", "all_workers", "department", "month", "price", "avans", "answer"]
+    list_display = ["id", "all_workers", "department", "month", "price", "avans", "answer", "created_at"]
     list_display_links = ["all_workers"]
 
     def get_queryset(self, request):
@@ -302,3 +302,5 @@ class NotificationAdmin(admin.ModelAdmin):
         dep = queryset
         send_email_thread = threading.Thread(target=sendNotification, args=(dep, workers))
         send_email_thread.start()
+
+    sendMessage.short_description = "Отправить выбранные сообщение сотрудникам"

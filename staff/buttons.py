@@ -3,7 +3,7 @@ from telegram import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, 
 
 def avansButton():
     buttons = [
-        [KeyboardButton('Avans so`rovi')],
+        [KeyboardButton('Avans so`rovi'), KeyboardButton('Hisobot')],
     ]
     return ReplyKeyboardMarkup(buttons, resize_keyboard=True, one_time_keyboard=True)
 

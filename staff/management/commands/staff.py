@@ -6,6 +6,7 @@ from jobs.updater import start
 from staff.views import *
 from staff.callback import inline
 
+
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         updater = Updater(S_TOKEN)

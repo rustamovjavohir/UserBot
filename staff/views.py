@@ -1,3 +1,4 @@
+from django.db.models import Q
 from telegram import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, Update
 
 from config.settings import URL_1C, PASSWORD_1C, LOGIN_1C
@@ -7,7 +8,8 @@ import requests
 from telegram.ext import CallbackContext
 import datetime
 from dateutil.relativedelta import relativedelta
-from .utils import checkMoney, checkNextMonth, splitMoney, checkNextMonthMoney, getWorker, isITStaff
+from .utils import checkMoney, checkNextMonth, splitMoney, checkNextMonthMoney, getWorker, isITStaff, nextMonth, \
+    getFirstTotal, getTotalList, getReportTotalText
 
 
 def isWorker(telegram_id) -> bool:
@@ -66,7 +68,9 @@ def order(update: Update, context: CallbackContext):
                     update.message.reply_html(text, reply_markup=acceptButton())
                 else:
                     months = getMonthList()
-                    next_month = datetime.date.today() + relativedelta(months=+1)
+                    total_all = getFirstTotal(user_id=user_id)
+                    next_month = nextMonth(total_all)
+                    # next_month = datetime.date.today() + relativedelta(months=+1)
                     step.update({"step": 0})
                     Data.objects.filter(telegram_id=user_id).update(data=step)
                     if checkNextMonth(user_id):
@@ -112,7 +116,6 @@ def order(update: Update, context: CallbackContext):
             elif getattr(getWorker(user_id), 'is_boss'):
                 update.message.reply_html("Bosh sahifa",
                                           reply_markup=avansButton())
-                avans_month = months[int(datetime.datetime.now().month) - 1]
                 price = int(step['price'])
                 money_split = splitMoney(user_id=user_id, money=price)
                 for month, money in money_split:
@@ -121,13 +124,15 @@ def order(update: Update, context: CallbackContext):
                     req = Request_price.objects.create(price=money, avans=True, month=months[month - 1],
                                                        department_id=Workers.objects.get(
                                                            telegram_id=user_id).department.ids)
-                    obj = Total.objects.get(full_name__telegram_id=user_id,
-                                            year=datetime.datetime.now().year,
-                                            month=avans_month)
-                    req.workers.add(obj)
+                    try:
+                        obj = Total.objects.get(full_name__telegram_id=user_id,
+                                                year=datetime.datetime.now().year,
+                                                month=months[month - 1])
+                        req.workers.add(obj)
+                    except Exception as ex:
+                        print(ex)
                     url = f"{URL_1C}ut3/hs/create_applications"
 
-                    # auth = ("django_admin", "DJango_96547456")
                     auth = (LOGIN_1C, PASSWORD_1C)
                     js = {
                         "id": str(req.pk),
@@ -145,7 +150,6 @@ def order(update: Update, context: CallbackContext):
                         update.message.reply_html("🚫Xatolik yuz berdi")
 
             else:
-                avans_month = months[int(datetime.datetime.now().month) - 1]
                 price = int(step['price'])
                 money_split = splitMoney(user_id=user_id, money=price)
                 for month, money in money_split:
@@ -154,11 +158,13 @@ def order(update: Update, context: CallbackContext):
                     req = Request_price.objects.create(price=money, avans=True, month=months[month - 1],
                                                        department_id=Workers.objects.get(
                                                            telegram_id=user_id).department.ids)
-
-                    obj = Total.objects.get(full_name__telegram_id=user_id,
-                                            year=datetime.datetime.now().year,
-                                            month=avans_month)
-                    req.workers.add(obj)
+                    try:
+                        obj = Total.objects.get(full_name__telegram_id=user_id,
+                                                year=datetime.datetime.now().year,
+                                                month=months[month - 1])
+                        req.workers.add(obj)
+                    except Exception as ex:
+                        print(ex)
                     step.update({"step": 0})
                     Data.objects.filter(telegram_id=user_id).update(data=step)
                     update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.id}")
@@ -173,6 +179,22 @@ def order(update: Update, context: CallbackContext):
                                              reply_markup=acceptInlineButton(req.id))
                 update.message.reply_text("Bosh sahifa",
                                           reply_markup=avansButton())
+
+        elif step["step"] == 0 and msg == "Hisobot":
+            if not isITStaff(user_id):
+                for total in getTotalList(user_id):
+                    text = getReportTotalText(total)
+                    context.bot.send_message(chat_id=user_id, text=text, parse_mode="HTML",
+                                             reply_markup=homeButton())
+
+                step["step"] = 3
+                Data.objects.filter(telegram_id=user_id).update(data=step)
+            else:
+                text = "Biz Boshqa Respublika 😂"
+                context.bot.send_message(chat_id=user_id, text=text, parse_mode="HTML",
+                                         reply_markup=homeButton())
+
+
         elif msg == '🏠Bosh sahifa':
             step.update({"step": 0})
             Data.objects.filter(telegram_id=user_id).update(data=step)

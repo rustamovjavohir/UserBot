@@ -201,6 +201,11 @@ class Total(models.Model):
     leave = Leave.objects.all()
 
     @property
+    def month_index(self):
+        months = getMonthList()
+        return months.index(self.month) + 1
+
+    @property
     def oklad_1(self):
         try:
             salary = self.salary.filter(month=self.month, year=self.year, full_name=self.full_name).first().salary
@@ -289,13 +294,14 @@ class Total(models.Model):
 class Request_price(models.Model):
     workers = models.ManyToManyField(Total)
     department_id = models.CharField(max_length=70)
-    month = models.CharField(choices=getMonths(), max_length=250, null=True, blank=True)
-    price = models.BigIntegerField()
-    avans = models.BooleanField()
+    month = models.CharField(choices=getMonths(), max_length=250, null=True, blank=True, verbose_name="Месяц")
+    price = models.BigIntegerField(verbose_name="Цена")
+    avans = models.BooleanField(verbose_name="Аванс")
     comment = models.CharField(max_length=2560, default="", null=True, blank=True)
-    answer = models.BooleanField(default=False)
+    answer = models.BooleanField(default=False, verbose_name="Ответил")
     status = models.CharField(max_length=256, default="", null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
+    created_at = models.DateField(auto_now_add=True, verbose_name="Дата создания")
 
     departments = Department.objects.all()
 
@@ -328,18 +334,6 @@ class Request_price(models.Model):
 class Data(models.Model):
     telegram_id = models.BigIntegerField()
     data = models.JSONField(default=dict)
-
-
-@receiver(post_save, sender=Workers)
-def post_save_order(sender, instance, created, *args, **kwargs):
-    if created:
-        months = getMonthList()
-        month = months[int(datetime.date.today().month) - 1]
-        year = int(datetime.date.today().year)
-        if Total.objects.filter(full_name=instance, year=str(year), month=month).exists():
-            pass
-        else:
-            Total.objects.create(full_name=instance, year=str(year), month=month)
 
 
 class Notification(models.Model):

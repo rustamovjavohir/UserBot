@@ -1,4 +1,3 @@
-import datetime
 import threading
 
 from staff.models import Total, getMonthList, Workers, InfTech
@@ -43,15 +42,14 @@ def splitMoney(user_id, money: int) -> tuple:
     """
     ((this_month, first_money), (next_month, second_money))
     """
-    next_month = date.today() + relativedelta(months=+1)
-    months = getMonthList()
-    total_all = Total.objects.filter(full_name__telegram_id=user_id, year=date.today().year,
-                                     month=months[date.today().month - 1]).first()
+    total_all = Total.objects.filter(full_name__telegram_id=user_id).first()
+    current_day = datetime(int(total_all.year), int(total_all.month_index), 1)
+    next_month = nextMonth(total_all)
     if total_all.ostatok_1.__ge__(money):
-        return (date.today().month, money), (0, 0)
+        return (total_all.month_index, money), (0, 0)
     if total_all.ostatok_1.__eq__(0):
         return (next_month.month, abs(money - total_all.ostatok_1)), (0, 0)
-    return (date.today().month, total_all.ostatok_1), (next_month.month, abs(money - total_all.ostatok_1))
+    return (current_day.month, total_all.ostatok_1), (next_month.month, abs(money - total_all.ostatok_1))
 
 
 def getWorker(user_id, active=True):
@@ -72,3 +70,30 @@ def sendNotification(notifications, workers):
                 bot.send_message(chat_id=worker.telegram_id, text=item.text)
             except:
                 pass
+
+
+def getTotalList(user_id):
+    totals = [total for total in Total.objects.filter(full_name__telegram_id=user_id) if total.ostatok_1.__ge__(0)]
+    return totals
+
+
+def getFirstTotal(user_id):
+    totals = getTotalList(user_id)
+    return totals[0]
+
+
+def nextMonth(obj):
+    current_day = datetime(int(getattr(obj, "year")), int(getattr(obj, "month_index")), 1)
+    next_month = current_day + relativedelta(months=+1)
+    return next_month
+
+
+def getReportTotalText(total: Total):
+    text = f"<strong>F.I.O: </strong>{total.full_name.full_name}\n" \
+           f"<strong>Oy: </strong>{total.month}\n" \
+           f"<strong>Bonus: </strong>{total.bonuss}\n" \
+           f"<strong>Jarima: </strong>{total.paid}\n" \
+           f"<strong>Jami: </strong>{total.itog}\n" \
+           f"<strong>To'landi: </strong>{total.vplacheno}\n" \
+           f"<strong>Qoldiq: </strong>{total.ostatok}\n"
+    return text
