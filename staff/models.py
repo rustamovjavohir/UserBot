@@ -1,6 +1,8 @@
 import datetime
 
+from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.db import models
+from django.contrib.auth.models import User
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -103,6 +105,7 @@ class Workers(models.Model):
     active = models.BooleanField(default=True, verbose_name="Статус")
     telegram_id = models.BigIntegerField(null=True, blank=True, verbose_name="Telegram ID")
     boss = models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING, verbose_name="Главный")
+    user = models.ForeignKey(User, null=True, blank=True, on_delete=models.DO_NOTHING)
 
     def __str__(self):
         return self.full_name
@@ -348,3 +351,11 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['-id']
+
+
+# class CustomUser(AbstractUser, PermissionsMixin):
+#     partner = models.ForeignKey(Department, on_delete=models.CASCADE, verbose_name="Подразделение", null=True, blank=True)
+#     telegram_id = models.BigIntegerField(verbose_name="Телеграм ID", null=True, blank=True)
+#
+#     class Meta(AbstractUser.Meta):
+#         swappable = 'AUTH_USER_MODEL'

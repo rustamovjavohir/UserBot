@@ -3,6 +3,7 @@ from datetime import date
 
 import requests
 from django.contrib import admin, messages
+from django.contrib.auth.admin import UserAdmin
 from django.db.models import Sum
 from django.utils.translation import ngettext
 from import_export.formats import base_formats
@@ -13,9 +14,14 @@ from .resources import *
 from staff.models import *
 from telegram import Bot
 from config.settings import S_TOKEN
-from .utils import sendNotification
+from .utils import sendNotification, getWorker
 
 bot = Bot(token=S_TOKEN)
+
+
+# @admin.register(CustomUser)
+# class CustomUserAmin(admin.ModelAdmin, UserAdmin):
+# list_display = CustomUser._meta.get_all_field_name()
 
 
 @admin.register(Workers)
@@ -26,6 +32,15 @@ class WorkersAdmin(ExportMixin, admin.ModelAdmin):
     search_fields = ["full_name", "department__name", "job"]
     list_editable = ["is_boss"]
     resource_class = WorkerResource
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        if request.user.workers_set.first():
+            staff = getWorker(user_id=request.user.workers_set.first().telegram_id)
+            return qs.filter(department=staff.department)
+        return qs
 
     def get_export_formats(self):
         formats = (
@@ -43,6 +58,15 @@ class SalaryAdmin(ImportExportModelAdmin):
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
     resource_class = SalarysResource
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        if request.user.workers_set.first():
+            staff = getWorker(user_id=request.user.workers_set.first().telegram_id)
+            return qs.filter(full_name__department=staff.department)
+        return qs
 
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(
@@ -87,7 +111,13 @@ class BonusAdmin(ImportExportModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.filter(is_deleted=False)
+        qs = qs.filter(is_deleted=False)
+        if request.user.is_superuser:
+            return qs
+        if request.user.workers_set.first():
+            staff = getWorker(user_id=request.user.workers_set.first().telegram_id)
+            return qs.filter(full_name__department=staff.department)
+        return qs
 
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(
@@ -130,6 +160,15 @@ class LeaveAdmin(ImportExportModelAdmin):
     search_fields = ["full_name__full_name", "month"]
     resource_class = LeaveResource
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        if request.user.workers_set.first():
+            staff = getWorker(user_id=request.user.workers_set.first().telegram_id)
+            return qs.filter(full_name__department=staff.department)
+        return qs
+
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(
             request,
@@ -168,7 +207,13 @@ class DataAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.filter(is_deleted=False)
+        qs = qs.filter(is_deleted=False)
+        if request.user.is_superuser:
+            return qs
+        if request.user.workers_set.first():
+            staff = getWorker(user_id=request.user.workers_set.first().telegram_id)
+            return qs.filter(workers__full_name__department=staff.department)
+        return qs
 
 
 @admin.register(Total)
@@ -179,6 +224,15 @@ class TotalAdmin(admin.ModelAdmin):
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if request.user.is_superuser:
+            return qs
+        if request.user.workers_set.first():
+            staff = getWorker(user_id=request.user.workers_set.first().telegram_id)
+            return qs.filter(full_name__department=staff.department)
+        return qs
 
     def changelist_view(self, request, extra_context=None):
         response = super().changelist_view(
