@@ -20,7 +20,7 @@ bot = Bot(token=S_TOKEN)
 
 @admin.register(Workers)
 class WorkersAdmin(ExportMixin, admin.ModelAdmin):
-    list_display = ["full_name", "department", "job", "phone", "is_boss"]
+    list_display = ["full_name", "department", "job", "phone", "boss", "is_boss"]
     list_display_links = ["full_name", "department", "job", "phone"]
     list_filter = ("department",)
     search_fields = ["full_name", "department__name", "job"]

@@ -9,7 +9,7 @@ from telegram.ext import CallbackContext
 import datetime
 from dateutil.relativedelta import relativedelta
 from .utils import checkMoney, checkNextMonth, splitMoney, checkNextMonthMoney, getWorker, isITStaff, nextMonth, \
-    getFirstTotal, getTotalList, getReportTotalText
+    getFirstTotal, getTotalList, getReportTotalText, getAvansText
 
 
 def isWorker(telegram_id) -> bool:
@@ -70,7 +70,6 @@ def order(update: Update, context: CallbackContext):
                     months = getMonthList()
                     total_all = getFirstTotal(user_id=user_id)
                     next_month = nextMonth(total_all)
-                    # next_month = datetime.date.today() + relativedelta(months=+1)
                     step.update({"step": 0})
                     Data.objects.filter(telegram_id=user_id).update(data=step)
                     if checkNextMonth(user_id):
@@ -131,23 +130,29 @@ def order(update: Update, context: CallbackContext):
                         req.workers.add(obj)
                     except Exception as ex:
                         print(ex)
-                    url = f"{URL_1C}ut3/hs/create_applications"
-
-                    auth = (LOGIN_1C, PASSWORD_1C)
-                    js = {
-                        "id": str(req.pk),
-                        "department": req.department_id,
-                        "price": req.price,
-                        "avans": True,
-                        "comment": ""
-                    }
-                    res = requests.post(url=url, auth=auth, json=js)
-                    step.update({"step": 0})
-                    Data.objects.filter(telegram_id=user_id).update(data=step)
-                    if 'success' in list(res.json().keys()):
-                        update.message.reply_html(f"✅So`rov tasdiqlandi, kassaga chiqishingiz mumkin ID: {req.pk}")
+                    staff = getWorker(user_id)
+                    if staff.boss:
+                        text = getAvansText(name=staff.full_name, req=req, month=month, money=money)
+                        context.bot.send_message(chat_id=staff.boss.telegram_id, text=text, parse_mode="html",
+                                                 reply_markup=acceptInlineButton(req.id))
+                        update.message.reply_text(text=f"✅So`rov {staff.boss.full_name}ga yuborildi, ID:  {req.pk}")
                     else:
-                        update.message.reply_html("🚫Xatolik yuz berdi")
+                        url = f"{URL_1C}ut3/hs/create_applications"
+                        auth = (LOGIN_1C, PASSWORD_1C)
+                        js = {
+                            "id": str(req.pk),
+                            "department": req.department_id,
+                            "price": req.price,
+                            "avans": True,
+                            "comment": ""
+                        }
+                        res = requests.post(url=url, auth=auth, json=js)
+                        step.update({"step": 0})
+                        Data.objects.filter(telegram_id=user_id).update(data=step)
+                        if 'success' in list(res.json().keys()):
+                            update.message.reply_html(f"✅So`rov tasdiqlandi, kassaga chiqishingiz mumkin ID: {req.pk}")
+                        else:
+                            update.message.reply_html("🚫Xatolik yuz berdi")
 
             else:
                 price = int(step['price'])
@@ -170,11 +175,7 @@ def order(update: Update, context: CallbackContext):
                     update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.id}")
                     boss = Workers.objects.filter(is_boss=True,
                                                   department=Workers.objects.get(telegram_id=user_id).department)
-                    text = f"<strong>ID:</strong> {req.pk}\n"
-                    text += f"<strong>Sana:</strong> {datetime.datetime.now().strftime('%d.%m.%Y')}\n"
-                    text += f"<strong>F.I.O.:</strong> {step['name']}\n"
-                    text += f"<strong>Oy: {months[month - 1]}</strong>\n"
-                    text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(money)} So`m\n"
+                    text = getAvansText(name=step['name'], req=req, month=month, money=money)
                     context.bot.send_message(chat_id=boss[0].telegram_id, text=text, parse_mode="html",
                                              reply_markup=acceptInlineButton(req.id))
                 update.message.reply_text("Bosh sahifa",

@@ -97,3 +97,14 @@ def getReportTotalText(total: Total):
            f"<strong>To'landi: </strong>{total.vplacheno}\n" \
            f"<strong>Qoldiq: </strong>{total.ostatok}\n"
     return text
+
+
+def getAvansText(name, req, month, money):
+    months = getMonthList()
+    text = f"<strong>ID:</strong> {req.pk}\n"
+    text += f"<strong>Sana:</strong> {datetime.now().strftime('%d.%m.%Y')}\n"
+    text += f"<strong>F.I.O.:</strong> {name}\n"
+    text += f"<strong>Oy: {months[month - 1]}</strong>\n"
+    text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(money)} So`m\n"
+
+    return text

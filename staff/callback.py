@@ -3,6 +3,7 @@ from telegram import Update
 
 from config.settings import URL_1C, LOGIN_1C, PASSWORD_1C
 from staff.models import Request_price, ITRequestPrice
+from staff.utils import getWorker
 from staff.views import isWorker
 
 
@@ -54,7 +55,8 @@ def inline(update: Update, context):
                                                           f" ID: {req.secondId}")
                     for i in req.workers.all():
                         context.bot.send_message(chat_id=i.full_name.telegram_id,
-                                                 text=f"❌So`rov bo`lim boshlig`i tomonidan rad etildi, ID: {req.pk}")
+                                                 text=f"❌So`rov {getWorker(user_id).full_name} "
+                                                      f"tomonidan rad etildi, ID: {req.pk}")
                     Request_price.objects.get(pk=data[1]).delete()
                     update.callback_query.message.reply_text("❌So`rov rad etildi")
                 except Exception as ex:

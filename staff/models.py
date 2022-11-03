@@ -102,6 +102,7 @@ class Workers(models.Model):
     phone = models.CharField(max_length=70, verbose_name="Телефон номер")
     active = models.BooleanField(default=True, verbose_name="Статус")
     telegram_id = models.BigIntegerField(null=True, blank=True, verbose_name="Telegram ID")
+    boss = models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING, verbose_name="Главный")
 
     def __str__(self):
         return self.full_name
