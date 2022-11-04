@@ -9,7 +9,7 @@ from django.utils.translation import ngettext
 from import_export.formats import base_formats
 from import_export.admin import ImportExportModelAdmin, ImportMixin, ExportMixin
 
-from config.settings import URL_1C
+from config.settings import URL_1C, PASSWORD_1C, LOGIN_1C
 from .resources import *
 from staff.models import *
 from telegram import Bot
@@ -204,6 +204,19 @@ class LeaveAdmin(ImportExportModelAdmin):
 class DataAdmin(admin.ModelAdmin):
     list_display = ["id", "all_workers", "department", "month", "price", "avans", "answer", "created_at"]
     list_display_links = ["all_workers"]
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        url = f"{URL_1C}ut3/hs/create_applications"
+        auth = (LOGIN_1C, PASSWORD_1C)
+        js = {
+            "id": str(obj.pk),
+            "department": obj.department_id,
+            "price": obj.price,
+            "avans": obj.avans,
+            "comment": obj.comment
+        }
+        requests.post(url=url, auth=auth, json=js)
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

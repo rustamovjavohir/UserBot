@@ -290,6 +290,9 @@ class Total(models.Model):
 
     department.fget.short_description = "Подразделение"
 
+    def __str__(self):
+        return self.full_name.full_name
+
     class Meta:
         verbose_name = "Итого"
         verbose_name_plural = "Итого"
@@ -351,11 +354,3 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['-id']
-
-
-# class CustomUser(AbstractUser, PermissionsMixin):
-#     partner = models.ForeignKey(Department, on_delete=models.CASCADE, verbose_name="Подразделение", null=True, blank=True)
-#     telegram_id = models.BigIntegerField(verbose_name="Телеграм ID", null=True, blank=True)
-#
-#     class Meta(AbstractUser.Meta):
-#         swappable = 'AUTH_USER_MODEL'
