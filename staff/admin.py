@@ -296,7 +296,7 @@ class DepartmentAdmin(ImportExportModelAdmin):
         workers = Total.objects.filter(year=str(year), month=month)
         for i in dep:
             price = 0
-            req = Request_price.objects.create(department_id=i.ids, price=0, avans=False)
+            req = Request_price.objects.create(department_id=i.ids, month=workers.first().month, price=0, avans=False)
             for w in workers:
                 if i.name == w.department and int(w.ostatok.replace(",", "")) > 0:
                     req.workers.add(w)
