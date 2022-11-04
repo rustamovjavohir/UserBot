@@ -79,12 +79,12 @@ class DepartmentResource(resources.ModelResource):
     class Meta:
         model = Department
         # fields = exclude = ('id',)
-        import_id_fields = ("id", 'name', 'ids')
+        import_id_fields = ('name', 'ids')
 
 
 class LeaveResource(resources.ModelResource):
     id = Field(attribute='id')
-    full_name = Field(attribute="full_name", widget=ForeignKeyWidget(Workers))
+    full_name = Field(attribute="full_name", widget=ForeignKeyWidget(Workers, "full_name"))
     datetime_create = Field(attribute='datetime_create', widget=DateTimeWidget('%d.%m.%Y %H:%M:%S'))
     month = Field(attribute='month', )
     year = Field(attribute='year')
@@ -92,7 +92,7 @@ class LeaveResource(resources.ModelResource):
 
     class Meta:
         model = Leave
-        import_id_fields = ("id", 'full_name', 'month', 'year', 'fine')
+        import_id_fields = ('full_name', 'month', 'year', 'fine')
 
 
 class InfTech(resources.ModelResource):

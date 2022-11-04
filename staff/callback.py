@@ -35,7 +35,6 @@ def inline(update: Update, context):
                 if req.is_deleted:
                     req = ITRequestPrice.objects.get(secondId=data[1])
                     for i in req.workers.all():
-                        print(i.telegram_id)
                         context.bot.send_message(chat_id=i.telegram_id, text=text)
                 else:
                     for i in req.workers.all():
