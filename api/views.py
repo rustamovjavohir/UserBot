@@ -54,10 +54,10 @@ class RequestSalary(APIView):
                 else:
                     if not req.avans:
                         for i in workers:
-                            if int(i.ostatok.replace(",", "")) == 0:
+                            if int(i.ostatok_1) == 0:
                                 continue
                             Leave.objects.create(full_name=i.full_name, month=i.month, year=i.year,
-                                                 fine=int(i.ostatok.replace(",", "")))
+                                                 fine=int(i.ostatok_1))
                         req.answer = True
                         req.save()
                         return Response(status=200, data={"status": "ok"})

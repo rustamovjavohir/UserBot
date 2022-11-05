@@ -1,12 +1,21 @@
 import threading
 
-from staff.models import Total, getMonthList, Workers, InfTech
+from staff.models import Total, getMonthList, Workers, InfTech, Request_price
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 from telegram import Bot
 from config.settings import S_TOKEN
 
 bot = Bot(token=S_TOKEN)
+
+
+def checkReceivedSalary(user_id, month=""):
+    if not month:
+        months = getMonthList()
+        month = months[(date.today() + relativedelta(months=-2)).month]
+    is_received = Request_price.objects.filter(avans=False, answer=False, month=month,
+                                               workers__full_name__telegram_id=user_id).exists()
+    return is_received
 
 
 def checkMoney(user_id, money: int) -> bool:

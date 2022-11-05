@@ -152,7 +152,7 @@ class BonusAdmin(ImportExportModelAdmin):
 
 
 @admin.register(Leave)
-class LeaveAdmin(ImportExportModelAdmin):
+class LeaveAdmin(ExportMixin, admin.ModelAdmin):
     change_list_template = 'import_export/change_list_import_export.html'
     list_display = ["full_name", "datetime_create", "department", "year", "month", "musk_fine"]
     list_display_links = ["full_name"]
@@ -201,7 +201,7 @@ class LeaveAdmin(ImportExportModelAdmin):
 
 
 @admin.register(Request_price)
-class DataAdmin(admin.ModelAdmin):
+class Request_priceAdmin(admin.ModelAdmin):
     list_display = ["id", "all_workers", "department", "month", "price", "avans", "answer", "created_at"]
     list_display_links = ["all_workers"]
 
@@ -233,7 +233,7 @@ class DataAdmin(admin.ModelAdmin):
 class TotalAdmin(admin.ModelAdmin):
     change_list_template = 'import_export/change_list_import_export.html'
     list_display = ["full_name", "department", "year", "month", "oklad", "bonuss", "paid", "itog", "vplacheno",
-                    "ostatok"]
+                    "waiting", "ostatok"]
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
@@ -298,13 +298,13 @@ class DepartmentAdmin(ImportExportModelAdmin):
             price = 0
             req = Request_price.objects.create(department_id=i.ids, month=workers.first().month, price=0, avans=False)
             for w in workers:
-                if i.name == w.department and int(w.ostatok.replace(",", "")) > 0:
+                if i.name == w.department and int(w.ostatok_1) > 0:
                     req.workers.add(w)
-                    price += int(w.ostatok.replace(",", ""))
+                    price += int(w.ostatok_1)
             Request_price.objects.filter(pk=req.pk).update(price=price)
             if Request_price.objects.get(pk=req.pk).workers.all().exists():
                 url = f"{URL_1C}ut3/hs/create_applications"
-                auth = ("django_admin", "DJango_96547456")
+                auth = (LOGIN_1C, PASSWORD_1C)
                 js = {
                     "id": str(req.pk),
                     "department": i.ids,
@@ -353,7 +353,7 @@ class InfTechAdmin(ImportExportModelAdmin):
 
 
 @admin.register(ITRequestPrice)
-class DataAdmin(admin.ModelAdmin):
+class ITRequestPriceAdmin(admin.ModelAdmin):
     list_display = ["secondId", "all_workers", "department", "month", "price", "avans", "answer"]
     list_display_links = ["all_workers"]
 

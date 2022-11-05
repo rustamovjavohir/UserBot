@@ -3,6 +3,7 @@ import datetime
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import Sum
 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -275,8 +276,25 @@ class Total(models.Model):
     vplacheno.fget.short_description = "Выплачено"
 
     @property
+    def waiting_1(self):
+        total = 0
+        request_price = self.request_price_set.filter(answer=False, month=self.month,
+                                                      workers__full_name__full_name=self.full_name)
+        request_price.annotate(price_waiting=Sum('price'))
+        for i in request_price:
+            if i.avans:
+                total += int(i.price)
+        return total
+
+    @property
+    def waiting(self):
+        return "{:,}".format(self.waiting_1)
+
+    waiting.fget.short_description = "Ожидание"
+
+    @property
     def ostatok_1(self):
-        return int(self.itog_1) - int(self.vplacheno_1)
+        return int(self.itog_1) - int(self.vplacheno_1) - int(self.waiting_1)
 
     @property
     def ostatok(self):

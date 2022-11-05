@@ -9,7 +9,7 @@ from telegram.ext import CallbackContext
 import datetime
 from dateutil.relativedelta import relativedelta
 from .utils import checkMoney, checkNextMonth, splitMoney, checkNextMonthMoney, getWorker, isITStaff, nextMonth, \
-    getFirstTotal, getTotalList, getReportTotalText, getAvansText
+    getFirstTotal, getTotalList, getReportTotalText, getAvansText, checkReceivedSalary
 
 
 def isWorker(telegram_id) -> bool:
@@ -59,7 +59,8 @@ def order(update: Update, context: CallbackContext):
                                       reply_markup=homeButton())
         elif step["step"] == 1 and msg != '🏠Bosh sahifa':
             if msg.isnumeric():
-                if checkMoney(user_id=user_id, money=int(msg)) or isITStaff(user_id):
+                if (checkMoney(user_id=user_id, money=int(msg)) or isITStaff(user_id)) \
+                        and not checkReceivedSalary(user_id):
                     step.update({"step": 2, "price": int(msg)})
                     Data.objects.filter(telegram_id=user_id).update(data=step)
                     text = f"<strong>Sana:</strong> {datetime.datetime.now().strftime('%d.%m.%Y')}\n"
