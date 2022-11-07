@@ -281,7 +281,7 @@ class DepartmentAdmin(ImportExportModelAdmin):
     actions = ["make_published"]
     resource_class = DepartmentResource
 
-    def make_published(self, request, queryset):
+    def innerFunc(self, request, queryset, message_user):
         success = ""
         error = ""
 
@@ -334,6 +334,9 @@ class DepartmentAdmin(ImportExportModelAdmin):
                               message=f"Заявки на зарплату в отделы {error}были отправлены безуспешно.",
                               level=messages.ERROR)
 
+    def make_published(self, request, queryset):
+        make_published_thread = threading.Thread(target=self.innerFunc, args=(request, queryset, self.message_user))
+        make_published_thread.start()
     months = getMonthList()
 
     month = months[int(date.today().month) - 2]
