@@ -107,6 +107,7 @@ class Workers(models.Model):
     telegram_id = models.BigIntegerField(null=True, blank=True, verbose_name="Telegram ID")
     boss = models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING, verbose_name="Главный")
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.DO_NOTHING)
+    is_access = models.BooleanField(default=False, null=True, blank=True, verbose_name="Право доступа")
 
     def __str__(self):
         return self.full_name

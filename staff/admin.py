@@ -39,7 +39,8 @@ class WorkersAdmin(ExportMixin, admin.ModelAdmin):
             return qs
         if request.user.workers_set.first():
             staff = getWorker(user_id=request.user.workers_set.first().telegram_id)
-            return qs.filter(department=staff.department)
+            if not staff.is_access:
+                return qs.filter(department=staff.department)
         return qs
 
     def get_export_formats(self):
@@ -65,7 +66,8 @@ class SalaryAdmin(ImportExportModelAdmin):
             return qs
         if request.user.workers_set.first():
             staff = getWorker(user_id=request.user.workers_set.first().telegram_id)
-            return qs.filter(full_name__department=staff.department)
+            if not staff.is_access:
+                return qs.filter(full_name__department=staff.department)
         return qs
 
     def changelist_view(self, request, extra_context=None):
@@ -116,7 +118,8 @@ class BonusAdmin(ImportExportModelAdmin):
             return qs
         if request.user.workers_set.first():
             staff = getWorker(user_id=request.user.workers_set.first().telegram_id)
-            return qs.filter(full_name__department=staff.department)
+            if not staff.is_access:
+                return qs.filter(full_name__department=staff.department)
         return qs
 
     def changelist_view(self, request, extra_context=None):
@@ -166,7 +169,8 @@ class LeaveAdmin(ExportMixin, admin.ModelAdmin):
             return qs
         if request.user.workers_set.first():
             staff = getWorker(user_id=request.user.workers_set.first().telegram_id)
-            return qs.filter(full_name__department=staff.department)
+            if not staff.is_access:
+                return qs.filter(full_name__department=staff.department)
         return qs
 
     def changelist_view(self, request, extra_context=None):
@@ -225,7 +229,8 @@ class Request_priceAdmin(admin.ModelAdmin):
             return qs
         if request.user.workers_set.first():
             staff = getWorker(user_id=request.user.workers_set.first().telegram_id)
-            return qs.filter(workers__full_name__department=staff.department)
+            if not staff.is_access:
+                return qs.filter(workers__full_name__department=staff.department)
         return qs
 
 
@@ -244,7 +249,8 @@ class TotalAdmin(admin.ModelAdmin):
             return qs
         if request.user.workers_set.first():
             staff = getWorker(user_id=request.user.workers_set.first().telegram_id)
-            return qs.filter(full_name__department=staff.department)
+            if not staff.is_access:
+                return qs.filter(full_name__department=staff.department)
         return qs
 
     def changelist_view(self, request, extra_context=None):
