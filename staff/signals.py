@@ -1,9 +1,9 @@
 import datetime
 
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save, post_save, post_delete
 from django.dispatch import receiver
 
-from staff.models import Request_price, ITRequestPrice, Workers, getMonthList, Total
+from staff.models import Request_price, ITRequestPrice, Workers, getMonthList, Total, Salarys
 
 
 @receiver(post_save, sender=Request_price)
@@ -22,3 +22,17 @@ def post_save_order(sender, instance, created, *args, **kwargs):
             pass
         else:
             Total.objects.create(full_name=instance, year=str(year), month=month)
+
+
+@receiver(post_save, sender=Salarys)
+def post_save_salary(sender, instance, created, *args, **kwargs):
+    if created:
+        if Total.objects.filter(full_name=instance.full_name, year=instance.year, month=instance.month).exists():
+            pass
+        else:
+            Total.objects.create(full_name=instance.full_name, year=instance.year, month=instance.month)
+
+
+@receiver(post_delete, sender=Salarys)
+def delete_save_salary(sender, instance, *args, **kwargs):
+    Total.objects.filter(full_name=instance.full_name, year=instance.year, month=instance.month).first().delete()

@@ -59,6 +59,7 @@ class SalaryAdmin(ImportExportModelAdmin):
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
     resource_class = SalarysResource
+    list_per_page = 70
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -110,6 +111,7 @@ class BonusAdmin(ImportExportModelAdmin):
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
     resource_class = PaidResource
+    list_per_page = 70
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -162,6 +164,7 @@ class LeaveAdmin(ExportMixin, admin.ModelAdmin):
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
     resource_class = LeaveResource
+    list_per_page = 70
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -208,10 +211,11 @@ class LeaveAdmin(ExportMixin, admin.ModelAdmin):
 class Request_priceAdmin(admin.ModelAdmin):
     list_display = ["id", "all_workers", "department", "month", "price", "avans", "answer", "created_at"]
     list_display_links = ["all_workers"]
+    list_per_page = 70
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        url = f"{URL_1C}ut3/hs/create_applications"
+        url = f"{URL_1C}ut3/hs/radius_bot/create_applications"
         auth = (LOGIN_1C, PASSWORD_1C)
         js = {
             "id": str(obj.pk),
@@ -242,6 +246,7 @@ class TotalAdmin(admin.ModelAdmin):
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
+    list_per_page = 70
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -259,13 +264,21 @@ class TotalAdmin(admin.ModelAdmin):
             extra_context=extra_context,
         )
         try:
+            oklad = 0
+            bonus = 0
+            paid = 0
+            itog = 0
+            vplacheno = 0
+            ostatok = 0
             qs = response.context_data['cl'].queryset
-            oklad = sum([data.oklad_1 for data in qs])
-            bonus = sum([data.bonuss_1 for data in qs])
-            paid = sum([data.paid_1 for data in qs])
-            itog = sum([data.itog_1 for data in qs])
-            vplacheno = sum([data.vplacheno_1 for data in qs])
-            ostatok = sum([data.ostatok_1 for data in qs])
+            for data in qs:
+                oklad += data.oklad_1
+                bonus += data.bonuss_1
+                paid += data.paid_1
+                itog += data.itog_1
+                vplacheno += data.vplacheno_1
+                ostatok += data.ostatok_1
+
             my_context = {
                 'oklad': "{:,}".format(oklad),
                 'bonus': "{:,}".format(bonus),
@@ -309,7 +322,7 @@ class DepartmentAdmin(ImportExportModelAdmin):
                     price += int(w.ostatok_1)
             Request_price.objects.filter(pk=req.pk).update(price=price)
             if Request_price.objects.get(pk=req.pk).workers.all().exists():
-                url = f"{URL_1C}ut3/hs/create_applications"
+                url = f"{URL_1C}ut3/hs/radius_bot/create_applications"
                 auth = (LOGIN_1C, PASSWORD_1C)
                 js = {
                     "id": str(req.pk),
@@ -343,6 +356,7 @@ class DepartmentAdmin(ImportExportModelAdmin):
     def make_published(self, request, queryset):
         make_published_thread = threading.Thread(target=self.innerFunc, args=(request, queryset, self.message_user))
         make_published_thread.start()
+
     months = getMonthList()
 
     month = months[int(date.today().month) - 2]
