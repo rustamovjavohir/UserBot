@@ -34,9 +34,22 @@ def getMonthList() -> list:
     return months
 
 
+class Department(models.Model):
+    name = models.CharField(max_length=70, verbose_name="Подразделение")
+    ids = models.CharField(max_length=70, default="", verbose_name="ID")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Подразделение"
+        verbose_name_plural = "Подразделение"
+
+
 class InfTech(models.Model):
     full_name = models.CharField(max_length=70, verbose_name="Ф.И.О", unique=True)
-    department = models.CharField(default='АЙТи отдел', max_length=250, verbose_name="Подразделение")
+    # department = models.CharField(default='АЙТи отдел', max_length=250, verbose_name="Подразделение")
+    department = models.ForeignKey(to=Department, on_delete=models.DO_NOTHING, verbose_name="Подразделение")
     job = models.CharField(max_length=70, verbose_name="Должность")
     is_boss = models.BooleanField(default=False, verbose_name="Начальник отдела")
     phone = models.CharField(max_length=70, verbose_name="Телефон номер")
@@ -83,18 +96,6 @@ class ITRequestPrice(models.Model):
     class Meta:
         verbose_name = "АЙТи отдел Зарплаты/аванс запрос"
         verbose_name_plural = "АЙТи отдел Зарплаты/aванс запрос"
-
-
-class Department(models.Model):
-    name = models.CharField(max_length=70, verbose_name="Подразделение")
-    ids = models.CharField(max_length=70, default="", verbose_name="ID")
-
-    def __str__(self):
-        return self.name
-
-    class Meta:
-        verbose_name = "Подразделение"
-        verbose_name_plural = "Подразделение"
 
 
 class Workers(models.Model):

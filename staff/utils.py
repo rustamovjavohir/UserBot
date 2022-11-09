@@ -117,3 +117,20 @@ def getAvansText(name, req, month, money):
     text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(money)} So`m\n"
 
     return text
+
+
+def notificationBot(message, workers: Workers = 0, info_staff: InfTech = 0, is_all=True, **kwargs):
+    if is_all:
+        workers = Workers.objects.filter(active=True)
+        info_staff = InfTech.objects.filter(active=True)
+    for staff in info_staff:
+        try:
+            bot.send_message(chat_id=staff.telegram_id, text=message, parse_mode="HTML")
+        except:
+            pass
+    for worker in workers:
+        try:
+            bot.send_message(chat_id=worker.telegram_id, text=message, parse_mode="HTML")
+        except:
+            pass
+    return 1

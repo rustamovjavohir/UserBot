@@ -1,14 +1,18 @@
+import threading
+
 import requests
 from telegram import Update
 
 from config.settings import URL_1C, LOGIN_1C, PASSWORD_1C
-from staff.models import Request_price, ITRequestPrice
-from staff.utils import getWorker
+from staff.buttons import foodMenuButton
+from staff.models import Request_price, ITRequestPrice, Data
+from staff.utils import getWorker, notificationBot
 from staff.views import isWorker
 
 
 def inline(update: Update, context):
     user_id = update.callback_query.from_user.id
+    step = Data.objects.get(telegram_id=user_id).data
     data = update.callback_query.data.split("_")
     if isWorker(user_id):
         if len(data) == 2 and data[0] == 'done':
@@ -60,3 +64,11 @@ def inline(update: Update, context):
                     update.callback_query.message.reply_text("❌So`rov rad etildi")
                 except Exception as ex:
                     print(ex)
+        elif len(data) == 2 and data[1] == "seat":
+            step.update({"step": 0})
+            Data.objects.filter(telegram_id=user_id).update(data=step)
+            update.callback_query.delete_message()
+            context.bot.send_message(chat_id=user_id, text="Habar jonatildi", reply_markup=foodMenuButton())
+            message = f"Oshonada <strong>{data[0]}</strong> ta joy bor"
+            notification_bot_thread = threading.Thread(target=notificationBot, args=(message,))
+            notification_bot_thread.start()

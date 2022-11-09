@@ -1,15 +1,17 @@
+import threading
+
 from django.db.models import Q
 from telegram import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardMarkup, InlineKeyboardButton, Update
 
 from config.settings import URL_1C, PASSWORD_1C, LOGIN_1C
-from .buttons import avansButton, homeButton, acceptButton, acceptInlineButton
+from .buttons import *
 from .models import *
 import requests
 from telegram.ext import CallbackContext
 import datetime
 from dateutil.relativedelta import relativedelta
 from .utils import checkMoney, checkNextMonth, splitMoney, checkNextMonthMoney, getWorker, isITStaff, nextMonth, \
-    getFirstTotal, getTotalList, getReportTotalText, getAvansText, checkReceivedSalary
+    getFirstTotal, getTotalList, getReportTotalText, getAvansText, checkReceivedSalary, notificationBot
 
 
 def isWorker(telegram_id) -> bool:
@@ -18,8 +20,8 @@ def isWorker(telegram_id) -> bool:
     return have
 
 
-def inform(user_id):
-    worker = getWorker(user_id)
+def inform(user_id, active=True):
+    worker = getWorker(user_id, active)
     text = f"<strong>F.I.O.:</strong> {worker.full_name}\n"
     if type(worker.department) is str:
         text += f"<strong>Bo'lim:</strong> {worker.department}\n"
@@ -34,8 +36,14 @@ def inform(user_id):
 def start(update: Update, context: CallbackContext):
     user_id = update.message.from_user.id
     if isWorker(telegram_id=user_id):
-        update.message.reply_html(inform(user_id), reply_markup=avansButton())
-        worker = getWorker(user_id, True)
+        worker = getWorker(user_id)
+        if isITStaff(user_id):
+            update.message.reply_html(inform(user_id), reply_markup=avansButton())
+        elif worker.department.name == "Кухня":
+            update.message.reply_html(inform(user_id), reply_markup=foodMenuButton())
+
+        else:
+            update.message.reply_html(inform(user_id), reply_markup=avansButton())
         obj, created = Data.objects.get_or_create(telegram_id=user_id)
         obj.telegram_id = user_id
         obj.data = {"step": 0, "name": worker.full_name}
@@ -51,7 +59,7 @@ def order(update: Update, context: CallbackContext):
     user_id = update.message.from_user.id
     msg = update.message.text
     step = Data.objects.get(telegram_id=user_id).data
-    if isWorker(user_id):
+    if isWorker(user_id) and not getWorker(user_id).department.name.__eq__("Кухня"):
         if step["step"] == 0 and msg == 'Avans so`rovi':
             step.update({"step": 1})
             Data.objects.filter(telegram_id=user_id).update(data=step)
@@ -192,7 +200,7 @@ def order(update: Update, context: CallbackContext):
                 step["step"] = 3
                 Data.objects.filter(telegram_id=user_id).update(data=step)
             else:
-                text = "Biz Boshqa Respublika 😂"
+                text = "Biz boshqa respublika 😂"
                 context.bot.send_message(chat_id=user_id, text=text, parse_mode="HTML",
                                          reply_markup=homeButton())
 
@@ -202,3 +210,21 @@ def order(update: Update, context: CallbackContext):
             Data.objects.filter(telegram_id=user_id).update(data=step)
             update.message.reply_html("Bosh sahifa",
                                       reply_markup=avansButton())
+
+    elif getWorker(user_id).department.name.__eq__("Кухня"):
+        if step["step"] == 0:
+            if msg == 'Taomnoma':
+                step.update({"step": 1})
+                Data.objects.filter(telegram_id=user_id).update(data=step)
+                update.message.reply_text("Bugungi taomnomani tanlang")
+            elif msg == "Obetga 🗣":
+                step.update({"step": 2})
+                Data.objects.filter(telegram_id=user_id).update(data=step)
+                update.message.reply_text("Nechta kishiga joy bor", reply_markup=getFreeSeatsInlineButton())
+        elif step["step"] == 1 and not msg in ['Taomnoma', 'Obetga 🗣']:
+            step.update({"step": 0})
+            Data.objects.filter(telegram_id=user_id).update(data=step)
+            message = f"Bugun menuda: <strong>{msg}</strong>"
+            notification_bot_thread = threading.Thread(target=notificationBot, args=(message,))
+            notification_bot_thread.start()
+            context.bot.send_message(chat_id=user_id, text="Habar jonatildi", reply_markup=foodMenuButton())
