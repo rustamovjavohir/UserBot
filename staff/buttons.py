@@ -37,8 +37,34 @@ def foodMenuButton():
         [
             KeyboardButton("Taomnoma"),
             KeyboardButton("Obetga 🗣")
-        ]
+        ],
+        [
+            KeyboardButton('Avans so`rovi'),
+            KeyboardButton('Hisobot')
+        ],
     ]
+
+    return ReplyKeyboardMarkup(button, resize_keyboard=True, one_time_keyboard=True)
+
+
+def cashierButton():
+    button = [
+        [
+            KeyboardButton("Avans yozish"),
+        ],
+        [
+            KeyboardButton('Avans so`rovi'),
+            KeyboardButton('Hisobot')
+        ],
+    ]
+
+    return ReplyKeyboardMarkup(button, resize_keyboard=True, one_time_keyboard=True)
+
+
+def workersListButton(workers):
+    button = []
+    for worker in workers:
+        button.append([KeyboardButton(f"{worker.full_name}")])
 
     return ReplyKeyboardMarkup(button, resize_keyboard=True, one_time_keyboard=True)
 
