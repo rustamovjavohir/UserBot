@@ -4,9 +4,6 @@ from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
-
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.utils.safestring import mark_safe
 
 
@@ -142,7 +139,7 @@ class Salarys(models.Model):
 
 
 class Bonus(models.Model):
-    bonus_id = models.CharField(max_length=250, null=True, blank=True, verbose_name="Удален")
+    bonus_id = models.CharField(max_length=250, null=True, blank=True, verbose_name="Удален ид")
     full_name = models.ForeignKey(Workers, verbose_name="Ф.И.О", on_delete=models.CASCADE)
     month = models.CharField(choices=getMonths(), verbose_name="Месяц", max_length=100)
     year = models.CharField(default=datetime.datetime.now().year, verbose_name="Год", max_length=10)
@@ -201,6 +198,13 @@ class Total(models.Model):
     full_name = models.ForeignKey(Workers, verbose_name="Ф.И.О", on_delete=models.CASCADE)
     year = models.CharField(verbose_name="Год", max_length=10)
     month = models.CharField(choices=getMonths(), verbose_name="Месяц", max_length=100)
+    created_at = models.DateField(auto_now_add=True, verbose_name="Дата создания")
+    oklad_2 = models.IntegerField(default=0, verbose_name="Оклад2")
+    bonuss_2 = models.IntegerField(default=0, verbose_name="Бонус2")
+    paid_2 = models.IntegerField(default=0, verbose_name="Штраф2")
+    vplacheno_2 = models.IntegerField(default=0, verbose_name="Выплачено2")
+    waiting_2 = models.IntegerField(default=0, verbose_name="Ожидание2")
+    ostatok_2 = models.IntegerField(default=0, verbose_name="Остаток2")
 
     # queyset
     salary = Salarys.objects.all()
@@ -229,10 +233,14 @@ class Total(models.Model):
     @property
     def bonuss_1(self):
         try:
-            bonus = [obj.bonus for obj in self.bonus.filter(month=self.month, year=self.year, full_name=self.full_name)]
+            # bonus = [obj.bonus for obj in self.bonus.filter(month=self.month, year=self.year, full_name=self.full_name)]
+            bonus = self.bonus.filter(full_name__full_name=self.full_name.full_name, month=self.month,
+                                      is_deleted=False, year=self.year).aggregate(Sum('bonus')).get("bonus__sum")
+            if bonus is None:
+                bonus = 0
         except:
             bonus = 0
-        return sum(bonus)
+        return bonus
 
     @property
     def bonuss(self):
@@ -279,14 +287,12 @@ class Total(models.Model):
 
     @property
     def waiting_1(self):
-        total = 0
-        request_price = self.request_price_set.filter(answer=False, month=self.month,
-                                                      workers__full_name__full_name=self.full_name)
-        request_price.annotate(price_waiting=Sum('price'))
-        for i in request_price:
-            if i.avans:
-                total += int(i.price)
-        return total
+        request_price = self.request_price_set.filter(answer=False, month=self.month, avans=True,
+                                                      workers__full_name__full_name=self.full_name). \
+            aggregate(Sum("price")).get('price__sum', 0)
+        if request_price is None:
+            request_price = 0
+        return request_price
 
     @property
     def waiting(self):
@@ -374,3 +380,100 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['-id']
+
+
+class TotalDepartment(models.Model):
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    month = models.CharField(max_length=20, choices=getMonths(), verbose_name="Месяц")
+    year = models.CharField(max_length=4, default=datetime.datetime.now().year, verbose_name="Год")
+
+    salary = Salarys.objects.all()
+    bonus = Bonus.objects.filter(is_deleted=False)
+    leave = Leave.objects.all()
+
+    @property
+    def oklad_1(self):
+        try:
+            salary = self.salary.filter(full_name__department=self.department, month=self.month,
+                                        year=self.year).aggregate(Sum('salary')).get("salary__sum")
+            if salary is None:
+                salary = 0
+        except:
+            salary = 0
+        return salary
+
+    @property
+    def oklad(self):
+        return "{:,}".format(self.oklad_1)
+
+    oklad.fget.short_description = "Оклад"
+
+    @property
+    def bonuss_1(self):
+        try:
+            bonus = self.bonus.filter(full_name__department=self.department, month=self.month,
+                                      year=self.year).aggregate(Sum('bonus')).get("bonus__sum")
+            if bonus is None:
+                bonus = 0
+        except:
+            bonus = 0
+        return bonus
+
+    @property
+    def bonuss(self):
+        return "{:,}".format(self.bonuss_1)
+
+    bonuss.fget.short_description = "Бонус"
+
+    @property
+    def paid_1(self):
+        try:
+            paid = self.bonus.filter(full_name__department=self.department, month=self.month,
+                                     year=self.year).aggregate(Sum('paid')).get("paid__sum")
+            if paid is None:
+                paid = 0
+        except:
+            paid = 0
+        return paid
+
+    @property
+    def paid(self):
+        return "{:,}".format(self.paid_1)
+
+    paid.fget.short_description = "Штраф"
+
+    @property
+    def itog_1(self):
+        return int(self.oklad_1) - int(self.paid_1) + int(self.bonuss_1)
+
+    @property
+    def itog(self):
+        return "{:,}".format(self.itog_1)
+
+    itog.fget.short_description = "Итого"
+
+    @property
+    def vplacheno_1(self):
+        leave = self.leave.filter(full_name__department=self.department, month=self.month,
+                                  year=self.year).aggregate(Sum('fine')).get("fine__sum")
+        if leave is None:
+            leave = 0
+        return leave
+
+    @property
+    def vplacheno(self):
+        return "{:,}".format(self.vplacheno_1)
+
+    vplacheno.fget.short_description = "Выплачено"
+
+    @property
+    def ostatok_1(self):
+        return int(self.itog_1) - int(self.vplacheno_1)
+
+    @property
+    def ostatok(self):
+        return "{:,}".format(self.ostatok_1)
+
+    class Meta:
+        verbose_name = "Итого Подразделение"
+        verbose_name_plural = "Итого Подразделение"

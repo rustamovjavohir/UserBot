@@ -1,6 +1,33 @@
 import requests
 from datetime import date
 from staff.models import *
+from django.db.models import Sum
+
+
+def updateTotal():
+    # months = getMonthList()
+    # salary = Salarys.objects.all()
+    bonus = Bonus.objects.filter(is_deleted=False)
+    leave = Leave.objects.all()
+
+    totals = Total.objects.all().order_by('-id')[:100]
+    for total in totals:
+        total_bonus = bonus.filter(full_name=total.full_name, year=total.year, month=total.month). \
+            aggregate(Sum("bonus")).get('bonus__sum', 0)
+        total_paid = bonus.filter(full_name=total.full_name, year=total.year, month=total.month). \
+            aggregate(Sum("paid")).get('paid__sum', 0)
+        total_fine = leave.filter(full_name=total.full_name, year=total.year, month=total.month). \
+            aggregate(Sum("fine")).get('fine__sum', 0)
+        if total_bonus is None:
+            total_bonus = 0
+        if total_paid is None:
+            total_paid = 0
+        if total_fine is None:
+            total_fine = 0
+        total.bonuss_2 = total_bonus
+        total.paid_2 = total_paid
+        total.vplacheno_2 = total_fine
+        total.save()
 
 
 def salary():

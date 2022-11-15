@@ -32,7 +32,6 @@ def inline(update: Update, context):
                 "comment": ""
             }
             res = requests.post(url=url, auth=auth, json=js)
-            print(res.json())
             if 'success' in list(res.json().keys()):
                 update.callback_query.message.reply_text("✅So`rov kassaga yuborildi")
                 text = f"✅So`rov tasdiqlandi, kassaga chiqishingiz mumkin ID: {req.pk}"
@@ -66,9 +65,9 @@ def inline(update: Update, context):
                     print(ex)
         elif len(data) == 2 and data[1] == "seat":
             step.update({"step": 0})
-            Data.objects.filter(telegram_id=user_id).update(data=step)
             update.callback_query.delete_message()
             context.bot.send_message(chat_id=user_id, text="Habar jonatildi", reply_markup=foodMenuButton())
             message = f"Oshonada <strong>{data[0]}</strong> ta joy bor"
             notification_bot_thread = threading.Thread(target=notificationBot, args=(message,))
             notification_bot_thread.start()
+            Data.objects.filter(telegram_id=user_id).update(data=step)

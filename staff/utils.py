@@ -24,10 +24,10 @@ def checkReceivedSalary(user_id, month=""):
 
 def checkMoney(user_id, money: int) -> bool:
     sum_money = 0
-    total = Total.objects.filter(full_name__telegram_id=user_id)
+    total = Total.objects.filter(full_name__telegram_id=user_id).order_by('-id')[0:2]
     for item in total:
         sum_money += item.ostatok_1
-    if sum_money.__ge__(money):
+    if sum_money >= money:
         return True
     return False
 
@@ -55,14 +55,19 @@ def splitMoney(user_id, money: int) -> tuple:
     """
     ((this_month, first_money), (next_month, second_money))
     """
-    total_all = Total.objects.filter(full_name__telegram_id=user_id).first()
+    total_all = Total.objects.filter(full_name__telegram_id=user_id).order_by('-id')[1:2].first()
     current_day = datetime(int(total_all.year), int(total_all.month_index), 1)
     next_month = nextMonth(total_all)
-    if total_all.ostatok_1.__ge__(money):
+    print(total_all.ostatok_1)
+    if total_all.ostatok_1 >= money:
         return (total_all.month_index, money), (0, 0)
-    if total_all.ostatok_1.__eq__(0):
-        return (next_month.month, abs(money - total_all.ostatok_1)), (0, 0)
-    return (current_day.month, total_all.ostatok_1), (next_month.month, abs(money - total_all.ostatok_1))
+    elif total_all.ostatok_1 == 0:
+        return (next_month.month, money), (0, 0)
+    elif 0 < total_all.ostatok_1 < money:
+        return (current_day.month, total_all.ostatok_1), (next_month.month, abs(money - total_all.ostatok_1))
+    # total_1 manfiy bulishi mumkin
+    print(f"xato{datetime.datetime.now()}")
+    return 0, 0
 
 
 def getWorker(user_id, active=True):
@@ -281,12 +286,13 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                     "comment": ""
                 }
                 res = requests.post(url=url, auth=auth, json=js)
-                step.update({"step": 0})
-                Data.objects.filter(telegram_id=worker_id).update(data=step)
                 if 'success' in list(res.json().keys()):
                     update.message.reply_html(f"✅So`rov tasdiqlandi, kassaga chiqishingiz mumkin ID: {req.pk}")
                 else:
                     update.message.reply_html("🚫Xatolik yuz berdi")
+        step.update({"step": 0})
+        Data.objects.filter(telegram_id=worker_id).update(data=step)
+        update.message.reply_text("Bosh sahifa", reply_markup=avansButton())
 
     else:
         price = int(step['price'])
@@ -308,9 +314,9 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
             Data.objects.filter(telegram_id=user_id).update(data=step)
             update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.id}")
             boss = Workers.objects.filter(is_boss=True,
-                                          department=Workers.objects.get(telegram_id=worker_id).department)
+                                          department=Workers.objects.get(telegram_id=worker_id).department).first()
             text = getAvansText(name=staff_name, req=req, month=month, money=money)
-            context.bot.send_message(chat_id=boss[0].telegram_id, text=text, parse_mode="html",
+            context.bot.send_message(chat_id=boss.telegram_id, text=text, parse_mode="html",
                                      reply_markup=acceptInlineButton(req.id))
         reply_markup = avansButton()
         if isCashier(user_id):

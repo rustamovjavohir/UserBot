@@ -91,16 +91,17 @@ def getMenuListInlineButton():
 def getFreeSeatsInlineButton():
     free_seats_button = [
         [
+            InlineKeyboardButton("0👤", callback_data="0_seat"),
             InlineKeyboardButton("1👤", callback_data="1_seat"),
             InlineKeyboardButton("2👤", callback_data="2_seat"),
             InlineKeyboardButton("3👤", callback_data="3_seat"),
-            InlineKeyboardButton("4👤", callback_data="4_seat")
+
         ],
         [
+            InlineKeyboardButton("4👤", callback_data="4_seat"),
             InlineKeyboardButton("5👤", callback_data="5_seat"),
             InlineKeyboardButton("6👤", callback_data="6_seat"),
             InlineKeyboardButton("7👤", callback_data="7_seat"),
-            InlineKeyboardButton("8👤", callback_data="8_seat")
         ],
     ]
 

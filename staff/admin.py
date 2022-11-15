@@ -3,6 +3,7 @@ from datetime import date
 
 import requests
 from django.contrib import admin, messages
+from django.contrib.admin.models import DELETION, LogEntry
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Sum
 from django.utils.translation import ngettext
@@ -15,6 +16,9 @@ from staff.models import *
 from telegram import Bot
 from config.settings import S_TOKEN
 from .utils import sendNotification, getWorker
+from django.utils.html import escape
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 bot = Bot(token=S_TOKEN)
 
@@ -210,7 +214,7 @@ class LeaveAdmin(ExportMixin, admin.ModelAdmin):
 @admin.register(Request_price)
 class Request_priceAdmin(admin.ModelAdmin):
     list_display = ["id", "all_workers", "department", "month", "price", "avans", "answer", "created_at"]
-    list_display_links = ["all_workers"]
+    list_display_links = ["all_workers", "department"]
     list_per_page = 70
 
     def save_model(self, request, obj, form, change):
@@ -394,3 +398,58 @@ class NotificationAdmin(admin.ModelAdmin):
         send_email_thread.start()
 
     sendMessage.short_description = "Отправить выбранные сообщение сотрудникам"
+
+
+@admin.register(TotalDepartment)
+class TotalDepartmentAdmin(admin.ModelAdmin):
+    list_display = ["department", "year", "month", "oklad", "bonuss", "paid", "itog", "vplacheno", "ostatok"]
+
+
+@admin.register(LogEntry)
+class LogEntryAdmin(admin.ModelAdmin):
+    date_hierarchy = 'action_time'
+
+    list_filter = [
+        'user',
+        'content_type',
+        'action_flag'
+    ]
+
+    search_fields = [
+        'object_repr',
+        'change_message'
+    ]
+
+    list_display = [
+        'action_time',
+        'user',
+        'content_type',
+        'object_link',
+        'action_flag',
+    ]
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_superuser
+
+    def object_link(self, obj):
+        if obj.action_flag == DELETION:
+            link = escape(obj.object_repr)
+        else:
+            ct = obj.content_type
+            link = '<a href="%s">%s</a>' % (
+                reverse('admin:%s_%s_change' % (ct.app_label, ct.model), args=[obj.object_id]),
+                escape(obj.object_repr),
+            )
+        return mark_safe(link)
+
+    object_link.admin_order_field = "object_repr"
+    object_link.short_description = "object"
