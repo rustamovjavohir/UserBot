@@ -199,12 +199,10 @@ class Total(models.Model):
     year = models.CharField(verbose_name="Год", max_length=10)
     month = models.CharField(choices=getMonths(), verbose_name="Месяц", max_length=100)
     created_at = models.DateField(auto_now_add=True, verbose_name="Дата создания")
-    oklad_2 = models.IntegerField(default=0, verbose_name="Оклад2")
-    bonuss_2 = models.IntegerField(default=0, verbose_name="Бонус2")
-    paid_2 = models.IntegerField(default=0, verbose_name="Штраф2")
-    vplacheno_2 = models.IntegerField(default=0, verbose_name="Выплачено2")
-    waiting_2 = models.IntegerField(default=0, verbose_name="Ожидание2")
-    ostatok_2 = models.IntegerField(default=0, verbose_name="Остаток2")
+    oklad_1 = models.IntegerField(default=0, verbose_name="Оклад2")
+    bonuss_1 = models.IntegerField(default=0, verbose_name="Бонус2")
+    paid_1 = models.IntegerField(default=0, verbose_name="Штраф2")
+    vplacheno_1 = models.IntegerField(default=0, verbose_name="Выплачено2")
 
     # queyset
     salary = Salarys.objects.all()
@@ -216,13 +214,17 @@ class Total(models.Model):
         months = getMonthList()
         return months.index(self.month) + 1
 
-    @property
-    def oklad_1(self):
-        try:
-            salary = self.salary.filter(month=self.month, year=self.year, full_name=self.full_name).first().salary
-        except:
-            salary = 0
-        return salary
+    # @property
+    # def oklad_1(self):
+    #     try:
+    #         salary = self.full_name.salarys_set.filter(month=self.month, year=self.year,
+    #                                                    full_name=self.full_name).first().salary
+    #         # salary = self.salary.filter(month=self.month, year=self.year, full_name=self.full_name).first().salary
+    #         if salary is None:
+    #             salary = 0
+    #     except:
+    #         salary = 0
+    #     return salary
 
     @property
     def oklad(self):
@@ -230,17 +232,17 @@ class Total(models.Model):
 
     oklad.fget.short_description = "Оклад"
 
-    @property
-    def bonuss_1(self):
-        try:
-            # bonus = [obj.bonus for obj in self.bonus.filter(month=self.month, year=self.year, full_name=self.full_name)]
-            bonus = self.bonus.filter(full_name__full_name=self.full_name.full_name, month=self.month,
-                                      is_deleted=False, year=self.year).aggregate(Sum('bonus')).get("bonus__sum")
-            if bonus is None:
-                bonus = 0
-        except:
-            bonus = 0
-        return bonus
+    # @property
+    # def bonuss_1(self):
+    #     try:
+    #         # bonus = [obj.bonus for obj in self.bonus.filter(month=self.month, year=self.year, full_name=self.full_name)]
+    #         bonus = self.bonus.filter(full_name__full_name=self.full_name.full_name, month=self.month,
+    #                                   is_deleted=False, year=self.year).aggregate(Sum('bonus')).get("bonus__sum")
+    #         if bonus is None:
+    #             bonus = 0
+    #     except:
+    #         bonus = 0
+    #     return bonus
 
     @property
     def bonuss(self):
@@ -248,13 +250,13 @@ class Total(models.Model):
 
     bonuss.fget.short_description = "Бонус"
 
-    @property
-    def paid_1(self):
-        try:
-            paid = [obj.paid for obj in self.bonus.filter(month=self.month, year=self.year, full_name=self.full_name)]
-        except:
-            paid = 0
-        return sum(paid)
+    # @property
+    # def paid_1(self):
+    #     try:
+    #         paid = [obj.paid for obj in self.bonus.filter(month=self.month, year=self.year, full_name=self.full_name)]
+    #     except:
+    #         paid = 0
+    #     return sum(paid)
 
     @property
     def paid(self):
@@ -272,12 +274,12 @@ class Total(models.Model):
 
     itog.fget.short_description = "Итого"
 
-    @property
-    def vplacheno_1(self):
-        total = 0
-        for i in self.leave.filter(month=self.month, year=self.year, full_name=self.full_name):
-            total += int(i.fine)
-        return total
+    # @property
+    # def vplacheno_1(self):
+    #     total = 0
+    #     for i in self.leave.filter(month=self.month, year=self.year, full_name=self.full_name):
+    #         total += int(i.fine)
+    #     return total
 
     @property
     def vplacheno(self):
@@ -473,6 +475,8 @@ class TotalDepartment(models.Model):
     @property
     def ostatok(self):
         return "{:,}".format(self.ostatok_1)
+
+    ostatok.fget.short_description = "Остаток"
 
     class Meta:
         verbose_name = "Итого Подразделение"

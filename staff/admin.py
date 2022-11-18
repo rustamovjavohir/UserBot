@@ -245,8 +245,8 @@ class Request_priceAdmin(admin.ModelAdmin):
 @admin.register(Total)
 class TotalAdmin(admin.ModelAdmin):
     change_list_template = 'import_export/change_list_import_export.html'
-    list_display = ["full_name", "department", "year", "month", "oklad", "bonuss", "paid", "itog", "vplacheno",
-                    "waiting", "ostatok"]
+    list_display = ["full_name", "department", "year", "month", "oklad", "bonuss", "paid", "itog",
+                    "vplacheno", "waiting", "ostatok"]
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
@@ -273,15 +273,42 @@ class TotalAdmin(admin.ModelAdmin):
             paid = 0
             itog = 0
             vplacheno = 0
+            waiting = 0
             ostatok = 0
             qs = response.context_data['cl'].queryset
-            for data in qs:
-                oklad += data.oklad_1
-                bonus += data.bonuss_1
-                paid += data.paid_1
-                itog += data.itog_1
-                vplacheno += data.vplacheno_1
-                ostatok += data.ostatok_1
+            # ------------------------------------------------------------------------
+
+            oklad = qs.aggregate(Sum("oklad_1")).get('oklad_1__sum', 0)
+            bonus = qs.aggregate(Sum("bonuss_1")).get('bonuss_1__sum', 0)
+            paid = qs.aggregate(Sum("paid_1")).get('paid_1__sum', 0)
+            vplacheno = qs.aggregate(Sum("vplacheno_1")).get('vplacheno_1__sum', 0)
+            waiting = qs.filter(request_price__answer=False).aggregate(waiting_sum=Sum('request_price__price')).get("waiting_sum", 0)
+            if waiting is None:
+                waiting = 0
+            if oklad is None:
+                oklad = 0
+            if bonus is None:
+                bonus = 0
+            if paid is None:
+                paid = 0
+            if vplacheno is None:
+                vplacheno = 0
+            itog = int(oklad) - int(paid) + int(bonus)
+            ostatok = int(itog) - int(vplacheno) - int(waiting)
+
+            bot.send_message(chat_id=779890968, text=waiting)
+
+            # -------------------------------------------------------------------------
+            # ostatok = qs.aggregate(Sum("ostatok_1")).get('ostatok_1__sum', 0)
+
+            # =============================================================
+            # for data in qs:
+            #     oklad += data.oklad_1
+            #     bonus += data.bonuss_1
+            #     paid += data.paid_1
+            #     itog += data.itog_1
+            #     vplacheno += data.vplacheno_1
+            #     ostatok += data.ostatok_1
 
             my_context = {
                 'oklad': "{:,}".format(oklad),

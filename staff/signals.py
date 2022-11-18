@@ -25,10 +25,11 @@ def post_save_order(sender, instance, created, *args, **kwargs):
             Total.objects.create(full_name=instance, year=str(year), month=month)
 
 
+#  bug ----------
 @receiver(post_save, sender=Salarys)
 def post_save_salary(sender, instance, created, *args, **kwargs):
     if created:
-        if Total.objects.filter(full_name=instance.full_name, year=instance.year, month=instance.month).exists():
+        if Total.objects.filter(full_name=instance.full_name, year=instance.year, month=instance.month, ).exists():
             pass
         else:
             Total.objects.create(full_name=instance.full_name, year=instance.year, month=instance.month)
@@ -36,7 +37,9 @@ def post_save_salary(sender, instance, created, *args, **kwargs):
 
 @receiver(post_delete, sender=Salarys)
 def delete_save_salary(sender, instance, *args, **kwargs):
-    Total.objects.filter(full_name=instance.full_name, year=instance.year, month=instance.month).first().delete()
+    total = Total.objects.filter(full_name=instance.full_name, year=instance.year, month=instance.month).first()
+    if total:
+        total.delete()
 
 
 @transaction.atomic
@@ -48,18 +51,19 @@ def pre_save_bonus(sender, instance, *args, **kwargs):
                                      month=old_instance.month).order_by('-id').first()
         if total:
             if instance.is_deleted:
-                total.bonuss_2 -= instance.bonus
-                total.paid_2 -= instance.paid
+                total.bonuss_1 -= instance.bonus
+                total.paid_1 -= instance.paid
             else:
-                total.bonuss_2 += (instance.bonus - old_instance.bonus)
-                total.paid_2 += (instance.paid - old_instance.paid)
+                total.bonuss_1 += (instance.bonus - old_instance.bonus)
+                total.paid_1 += (instance.paid - old_instance.paid)
             total.save()
     else:
         total = Total.objects.filter(full_name=instance.full_name, year=instance.year,
                                      month=instance.month).order_by('-id').first()
-        total.bonuss_2 += instance.bonus
-        total.paid_2 += instance.paid
-        total.save()
+        if total:
+            total.bonuss_1 += instance.bonus
+            total.paid_1 += instance.paid
+            total.save()
 
 
 @transaction.atomic
@@ -68,8 +72,8 @@ def pre_delete_bonus(sender, instance, using, **kwargs):
     total = Total.objects.filter(full_name=instance.full_name, year=instance.year,
                                  month=instance.month).order_by('-id').first()
     if total:
-        total.bonuss_2 -= instance.bonus
-        total.paid_2 -= instance.paid
+        total.bonuss_1 -= instance.bonus
+        total.paid_1 -= instance.paid
         total.save()
 
 
@@ -81,13 +85,14 @@ def pre_save_Leave(sender, instance, *args, **kwargs):
         total = Total.objects.filter(full_name=old_instance.full_name, year=old_instance.year,
                                      month=old_instance.month).order_by('-id').first()
         if total:
-            total.vplacheno_2 += (instance.fine - old_instance.fine)
+            total.vplacheno_1 += (instance.fine - old_instance.fine)
             total.save()
     else:
         total = Total.objects.filter(full_name=instance.full_name, year=instance.year,
                                      month=instance.month).order_by('-id').first()
-        total.vplacheno_2 += instance.fine
-        total.save()
+        if total:
+            total.vplacheno_1 += instance.fine
+            total.save()
 
 
 @transaction.atomic
@@ -96,5 +101,5 @@ def pre_delete_leave(sender, instance, using, **kwargs):
     total = Total.objects.filter(full_name=instance.full_name, year=instance.year,
                                  month=instance.month).order_by('-id').first()
     if total:
-        total.vplacheno_2 -= instance.fine
+        total.vplacheno_1 -= instance.fine
         total.save()

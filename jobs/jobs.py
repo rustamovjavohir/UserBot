@@ -1,3 +1,5 @@
+import random
+
 import requests
 from datetime import date
 
@@ -12,13 +14,12 @@ bot = Bot(token=S_TOKEN)
 
 
 def updateTotal():
-    # months = getMonthList()
-    # salary = Salarys.objects.all()
     try:
         bonus = Bonus.objects.filter(is_deleted=False)
         leave = Leave.objects.all()
-
-        totals = Total.objects.all().order_by('-id')[:100]
+        salary_obj = Salarys.objects.all()
+        bot.send_message(chat_id=779890968, text="Boshlandi")
+        totals = Total.objects.all().order_by('-id')
         for total in totals:
             total_bonus = bonus.filter(full_name=total.full_name, year=total.year, month=total.month). \
                 aggregate(Sum("bonus")).get('bonus__sum', 0)
@@ -26,18 +27,24 @@ def updateTotal():
                 aggregate(Sum("paid")).get('paid__sum', 0)
             total_fine = leave.filter(full_name=total.full_name, year=total.year, month=total.month). \
                 aggregate(Sum("fine")).get('fine__sum', 0)
+            total_salary = salary_obj.filter(full_name=total.full_name, year=total.year, month=total.month). \
+                aggregate(Sum("salary")).get('salary__sum', 0)
             if total_bonus is None:
                 total_bonus = 0
             if total_paid is None:
                 total_paid = 0
             if total_fine is None:
                 total_fine = 0
-            total.bonuss_2 = total_bonus
-            total.paid_2 = total_paid
-            total.vplacheno_2 = total_fine
+            if total_salary is None:
+                total_salary = 0
+            total.bonuss_1 = total_bonus
+            total.paid_1 = total_paid
+            total.vplacheno_1 = total_fine
+            total.oklad_1 = total_salary
             total.save()
+        bot.send_message(chat_id=779890968, text="Tugadi")
     except Exception as ex:
-        send_message(chat_id=779890968, text=ex.__str__())
+        bot.send_message(chat_id=779890968, text=ex.__str__())
 
 
 def salary():
