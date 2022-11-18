@@ -296,7 +296,6 @@ class TotalAdmin(admin.ModelAdmin):
             itog = int(oklad) - int(paid) + int(bonus)
             ostatok = int(itog) - int(vplacheno) - int(waiting)
 
-            bot.send_message(chat_id=779890968, text=waiting)
 
             # -------------------------------------------------------------------------
             # ostatok = qs.aggregate(Sum("ostatok_1")).get('ostatok_1__sum', 0)
