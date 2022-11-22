@@ -18,7 +18,6 @@ def updateTotal():
         bonus = Bonus.objects.filter(is_deleted=False)
         leave = Leave.objects.all()
         salary_obj = Salarys.objects.all()
-        bot.send_message(chat_id=779890968, text="Boshlandi")
         totals = Total.objects.all().order_by('-id')
         for total in totals:
             total_bonus = bonus.filter(full_name=total.full_name, year=total.year, month=total.month). \
@@ -42,7 +41,6 @@ def updateTotal():
             total.vplacheno_1 = total_fine
             total.oklad_1 = total_salary
             total.save()
-        bot.send_message(chat_id=779890968, text="Tugadi")
     except Exception as ex:
         bot.send_message(chat_id=779890968, text=ex.__str__())
 
