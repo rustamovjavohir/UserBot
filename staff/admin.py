@@ -245,7 +245,7 @@ class Request_priceAdmin(admin.ModelAdmin):
 @admin.register(Total)
 class TotalAdmin(admin.ModelAdmin):
     change_list_template = 'import_export/change_list_import_export.html'
-    list_display = ["full_name", "department", "year", "month", "oklad", "bonuss", "paid", "itog",
+    list_display = ["id", "full_name", "department", "year", "month", "oklad", "bonuss", "paid", "itog",
                     "vplacheno", "waiting", "ostatok"]
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
@@ -282,7 +282,8 @@ class TotalAdmin(admin.ModelAdmin):
             bonus = qs.aggregate(Sum("bonuss_1")).get('bonuss_1__sum', 0)
             paid = qs.aggregate(Sum("paid_1")).get('paid_1__sum', 0)
             vplacheno = qs.aggregate(Sum("vplacheno_1")).get('vplacheno_1__sum', 0)
-            waiting = qs.filter(request_price__answer=False).aggregate(waiting_sum=Sum('request_price__price')).get("waiting_sum", 0)
+            waiting = qs.filter(request_price__answer=False).aggregate(waiting_sum=Sum('request_price__price')).get(
+                "waiting_sum", 0)
             if waiting is None:
                 waiting = 0
             if oklad is None:
@@ -295,7 +296,6 @@ class TotalAdmin(admin.ModelAdmin):
                 vplacheno = 0
             itog = int(oklad) - int(paid) + int(bonus)
             ostatok = int(itog) - int(vplacheno) - int(waiting)
-
 
             # -------------------------------------------------------------------------
             # ostatok = qs.aggregate(Sum("ostatok_1")).get('ostatok_1__sum', 0)

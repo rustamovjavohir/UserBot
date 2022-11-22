@@ -319,7 +319,7 @@ class Total(models.Model):
     department.fget.short_description = "Подразделение"
 
     def __str__(self):
-        return self.full_name.full_name
+        return f"{self.full_name.full_name} {self.id}"
 
     class Meta:
         verbose_name = "Итого"
