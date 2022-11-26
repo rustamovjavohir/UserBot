@@ -58,7 +58,6 @@ def splitMoney(user_id, money: int) -> tuple:
     total_all = Total.objects.filter(full_name__telegram_id=user_id).order_by('-id')[1:2].first()
     current_day = datetime(int(total_all.year), int(total_all.month_index), 1)
     next_month = nextMonth(total_all)
-    print(total_all.ostatok_1)
     if total_all.ostatok_1 >= money:
         return (total_all.month_index, money), (0, 0)
     elif total_all.ostatok_1 == 0:
@@ -66,7 +65,6 @@ def splitMoney(user_id, money: int) -> tuple:
     elif 0 < total_all.ostatok_1 < money:
         return (current_day.month, total_all.ostatok_1), (next_month.month, abs(money - total_all.ostatok_1))
     # total_1 manfiy bulishi mumkin
-    print(f"xato{datetime.datetime.now()}")
     return 0, 0
 
 
@@ -160,6 +158,7 @@ def isKitchen(user_id) -> bool:
 def isCashier(user_id) -> bool:
     if isWorker(user_id):
         return getWorker(user_id).department.ids.__eq__("00-000041")
+        # return getWorker(user_id).department.ids.__eq__("00-000023")
     return False
 
 
@@ -252,8 +251,6 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
         update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.secondId}")
         update.message.reply_text("Bosh sahifa", reply_markup=avansButton())
     elif getattr(getWorker(worker_id), 'is_boss'):
-        update.message.reply_html("Bosh sahifa",
-                                  reply_markup=avansButton())
         price = int(step['price'])
         money_split = splitMoney(user_id=worker_id, money=price)
         for month, money in money_split:
@@ -292,7 +289,10 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                     update.message.reply_html("🚫Xatolik yuz berdi")
         step.update({"step": 0})
         Data.objects.filter(telegram_id=worker_id).update(data=step)
-        update.message.reply_text("Bosh sahifa", reply_markup=avansButton())
+        reply_markup = avansButton()
+        if isCashier(user_id):
+            reply_markup = cashierButton()
+        update.message.reply_text("Bosh sahifa", reply_markup=reply_markup())
 
     else:
         price = int(step['price'])
