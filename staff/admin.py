@@ -282,8 +282,13 @@ class TotalAdmin(admin.ModelAdmin):
             bonus = qs.aggregate(Sum("bonuss_1")).get('bonuss_1__sum', 0)
             paid = qs.aggregate(Sum("paid_1")).get('paid_1__sum', 0)
             vplacheno = qs.aggregate(Sum("vplacheno_1")).get('vplacheno_1__sum', 0)
-            waiting = qs.filter(request_price__answer=False).aggregate(waiting_sum=Sum('request_price__price')).get(
-                "waiting_sum", 0)
+            # waiting2 = qs.filter(request_price__answer=False).aggregate(waiting_sum=Sum('request_price__price')).get(
+            #     "waiting_sum", 0)
+            # ---------------------------------------slow-----------------------------------------------------------
+            waiting = 0
+            for wait in qs:
+                waiting += wait.waiting_1
+
             if waiting is None:
                 waiting = 0
             if oklad is None:
@@ -296,6 +301,8 @@ class TotalAdmin(admin.ModelAdmin):
                 vplacheno = 0
             itog = int(oklad) - int(paid) + int(bonus)
             ostatok = int(itog) - int(vplacheno) - int(waiting)
+            # bot.send_message(chat_id=779890968, text=waiting2)
+            # ostatok = int(itog) - int(vplacheno)
 
             # -------------------------------------------------------------------------
             # ostatok = qs.aggregate(Sum("ostatok_1")).get('ostatok_1__sum', 0)
@@ -359,7 +366,7 @@ class DepartmentAdmin(ImportExportModelAdmin):
                     "department": i.ids,
                     "price": price,
                     "avans": False,
-                    "comment": ""
+                    "comment": req.month
                 }
                 res = requests.post(url=url, auth=auth, json=js)
                 if 'success' in list(res.json().keys()):

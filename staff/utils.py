@@ -280,7 +280,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                     "department": req.department_id,
                     "price": req.price,
                     "avans": True,
-                    "comment": ""
+                    "comment": req.month
                 }
                 res = requests.post(url=url, auth=auth, json=js)
                 if 'success' in list(res.json().keys()):

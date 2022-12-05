@@ -29,7 +29,7 @@ def inline(update: Update, context):
                 "department": department,
                 "price": req.price,
                 "avans": True,
-                "comment": ""
+                "comment": req.month
             }
             res = requests.post(url=url, auth=auth, json=js)
             if 'success' in list(res.json().keys()):
