@@ -34,6 +34,9 @@ def post_save_salary(sender, instance, created, *args, **kwargs):
         else:
             Total.objects.create(full_name=instance.full_name, year=instance.year, month=instance.month,
                                  oklad_1=instance.salary)
+    else:
+        Total.objects.filter(full_name=instance.full_name, year=instance.year,
+                             month=instance.month).update(oklad_1=instance.salary)
 
 
 @receiver(post_delete, sender=Salarys)

@@ -199,10 +199,10 @@ class Total(models.Model):
     year = models.CharField(verbose_name="Год", max_length=10)
     month = models.CharField(choices=getMonths(), verbose_name="Месяц", max_length=100)
     created_at = models.DateField(auto_now_add=True, verbose_name="Дата создания")
-    oklad_1 = models.IntegerField(default=0, verbose_name="Оклад2")
-    bonuss_1 = models.IntegerField(default=0, verbose_name="Бонус2")
-    paid_1 = models.IntegerField(default=0, verbose_name="Штраф2")
-    vplacheno_1 = models.IntegerField(default=0, verbose_name="Выплачено2")
+    oklad_1 = models.IntegerField(default=0, verbose_name="Оклад")
+    bonuss_1 = models.IntegerField(default=0, verbose_name="Бонус")
+    paid_1 = models.IntegerField(default=0, verbose_name="Штраф")
+    vplacheno_1 = models.IntegerField(default=0, verbose_name="Выплачено")
 
     # queyset
     salary = Salarys.objects.all()
