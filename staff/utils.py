@@ -292,7 +292,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
         reply_markup = avansButton()
         if isCashier(user_id):
             reply_markup = cashierButton()
-        update.message.reply_text("Bosh sahifa", reply_markup=reply_markup())
+        update.message.reply_text("Bosh sahifa", reply_markup=reply_markup)
 
     else:
         price = int(step['price'])

@@ -67,7 +67,7 @@ def inline(update: Update, context):
             step.update({"step": 0})
             update.callback_query.delete_message()
             context.bot.send_message(chat_id=user_id, text="Habar jonatildi", reply_markup=foodMenuButton())
-            message = f"Oshonada <strong>{data[0]}</strong> ta joy bor"
+            message = f"Oshxonada <strong>{data[0]}</strong> ta joy bor"
             notification_bot_thread = threading.Thread(target=notificationBot, args=(message,))
             notification_bot_thread.start()
             Data.objects.filter(telegram_id=user_id).update(data=step)
