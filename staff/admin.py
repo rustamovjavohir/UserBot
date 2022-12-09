@@ -282,8 +282,8 @@ class TotalAdmin(admin.ModelAdmin):
             bonus = qs.aggregate(Sum("bonuss_1")).get('bonuss_1__sum', 0)
             paid = qs.aggregate(Sum("paid_1")).get('paid_1__sum', 0)
             vplacheno = qs.aggregate(Sum("vplacheno_1")).get('vplacheno_1__sum', 0)
-            # waiting2 = qs.filter(request_price__answer=False).aggregate(waiting_sum=Sum('request_price__price')).get(
-            #     "waiting_sum", 0)
+            waiting2 = qs.filter(request_price__answer=False).aggregate(waiting_sum=Sum('request_price__price')).get(
+                "waiting_sum", 0)
             # ---------------------------------------slow-----------------------------------------------------------
             waiting = 0
             for wait in qs:
