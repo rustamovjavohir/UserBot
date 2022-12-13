@@ -1,10 +1,17 @@
 {% extends "admin/change_list.html" %}
 
-{# Original template renders object-tools only when has_add_permission is True. #}
-{# This hack allows sub templates to add to object-tools #}
+{% block extrastyle %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    {{ block.super }}
+{% endblock %}
 {% block object-tools %}
     <ul class="object-tools">
         {% block object-tools-items %}
+            {% if user.is_authenticated %}
+                <li>
+                    <a href="#" class="create_button fa fa-eye-slash" id="hide" style="font-size:20px"></a>
+                </li>
+            {% endif %}
             {% if has_add_permission %}
                 {{ block.super }}
             {% endif %}
@@ -55,5 +62,35 @@
             </tr>
         </table>
     {% endif %}
+    <script>
+        (function ($) {
+            $(function () {
+                $('#hide').on('click', function () {
+                    $(this).toggleClass('fa fa-eye-slash')
+                    $(this).toggleClass('fa fa-eye')
+                    $(".field-oklad").toggleClass('hide-text')
+                    $(".field-bonuss").toggleClass('hide-text')
+                    $(".field-paid").toggleClass('hide-text')
+                    $(".field-itog").toggleClass('hide-text')
+                    $(".field-vplacheno").toggleClass('hide-text')
+                    $(".field-waiting").toggleClass('hide-text')
+                    $(".field-ostatok").toggleClass('hide-text')
+                    $(".field-musk_salary").toggleClass('hide-text')
+                    $(".field-musk_fine").toggleClass('hide-text')
+                });
+            })
+        })(django.jQuery);
+    </script>
+
+    <style>
+        .field-oklad, .field-bonuss, .field-paid, .field-itog, .field-vplacheno, .field-waiting, .field-ostatok,
+        .field-musk_salary, .field-musk_fine {
+            opacity: 0;
+        }
+
+        .hide-text {
+            opacity: 1;
+        }
+    </style>
     {{ block.super }}
 {% endblock %}
