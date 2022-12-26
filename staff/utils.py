@@ -56,6 +56,8 @@ def splitMoney(user_id, money: int) -> tuple:
     ((this_month, first_money), (next_month, second_money))
     """
     total_all = Total.objects.filter(full_name__telegram_id=user_id).order_by('-id')[1:2].first()
+    if total_all is None:
+        total_all = Total.objects.filter(full_name__telegram_id=user_id).order_by('-id').first()
     current_day = datetime(int(total_all.year), int(total_all.month_index), 1)
     next_month = nextMonth(total_all)
     if total_all.ostatok_1 >= money:
@@ -115,13 +117,14 @@ def getReportTotalText(total: Total):
     return text
 
 
-def getAvansText(name, req, month, money):
+def getAvansText(name, req, month, money, balance):
     months = getMonthList()
     text = f"<strong>ID:</strong> {req.pk}\n"
     text += f"<strong>Sana:</strong> {datetime.now().strftime('%d.%m.%Y')}\n"
     text += f"<strong>F.I.O.:</strong> {name}\n"
     text += f"<strong>Oy: {months[month - 1]}</strong>\n"
-    text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(money)} So`m\n"
+    text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(money)} So`m\n" \
+            f"<strong>Balans:</strong> {'{:,}'.format(balance)} So`m\n"
 
     return text
 
@@ -268,7 +271,8 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                 print(ex)
             staff = getWorker(worker_id)
             if staff.boss:
-                text = getAvansText(name=staff.full_name, req=req, month=month, money=money)
+                text = getAvansText(name=staff.full_name, req=req, month=month, money=money,
+                                    balance=obj.ostatok_1 + money)
                 context.bot.send_message(chat_id=staff.boss.telegram_id, text=text, parse_mode="html",
                                          reply_markup=acceptInlineButton(req.id))
                 update.message.reply_text(text=f"✅So`rov {staff.boss.full_name}ga yuborildi, ID:  {req.pk}")
@@ -315,7 +319,8 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
             update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.id}")
             boss = Workers.objects.filter(is_boss=True,
                                           department=Workers.objects.get(telegram_id=worker_id).department).first()
-            text = getAvansText(name=staff_name, req=req, month=month, money=money)
+            text = getAvansText(name=staff_name, req=req, month=month, money=money,
+                                balance=obj.ostatok_1 + money)
             context.bot.send_message(chat_id=boss.telegram_id, text=text, parse_mode="html",
                                      reply_markup=acceptInlineButton(req.id))
         reply_markup = avansButton()
