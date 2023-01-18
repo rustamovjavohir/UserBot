@@ -28,6 +28,11 @@ bot = Bot(token=S_TOKEN)
 # list_display = CustomUser._meta.get_all_field_name()
 
 
+@admin.register(Data)
+class DataAdmin(admin.ModelAdmin):
+    list_display = ["telegram_id", "data"]
+
+
 @admin.register(Workers)
 class WorkersAdmin(ExportMixin, admin.ModelAdmin):
     list_display = ["full_name", "department", "job", "phone", "boss", "is_boss"]

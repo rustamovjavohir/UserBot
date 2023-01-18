@@ -97,7 +97,7 @@ def getTotalList(user_id):
 
 def getFirstTotal(user_id):
     totals = getTotalList(user_id)
-    return totals[0]
+    return totals[-1]
 
 
 def nextMonth(obj):
