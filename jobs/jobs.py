@@ -1,7 +1,7 @@
 import random
 
 import requests
-from datetime import date
+from datetime import date, datetime as date_time
 
 from telegram import Bot
 
@@ -86,61 +86,18 @@ def auto_request_salary():
         else:
             Request_price.objects.get(pk=req.pk).delete()
 
-# def time(lists: tuple, index: int):
-#     lists1 = list(lists)
-#     lists1[index] = lists[index].strftime("%d.%m.%Y %H:%M:%S")
-#     return tuple(lists1)
 
-
-# def export_excel():
-#     wb = Workbook()
-#     wb1 = wb.active
-#     wb1.title = "Department"
-#     Dep = [obj.name for obj in Department._meta.fields]
-#     users_data = Department.objects.all().values_list()
-#     for i_col, header in enumerate(Dep, start=1):
-#         wb1.cell(row=1, column=i_col, value=header)
-#     for i_row, user_data in enumerate(users_data, start=2):
-#         for i_col, value in enumerate(user_data, start=1):
-#             wb1.cell(row=i_row, column=i_col, value=value)
-#
-#     wb1 = wb.create_sheet("Workers")
-#     Dep = [obj.name for obj in Workers._meta.fields]
-#     users_data = Workers.objects.all().values_list()
-#     for i_col, header in enumerate(Dep, start=1):
-#         wb1.cell(row=1, column=i_col, value=header)
-#     for i_row, user_data in enumerate(users_data, start=2):
-#         for i_col, value in enumerate(user_data, start=1):
-#             wb1.cell(row=i_row, column=i_col, value=value)
-#
-#     wb1 = wb.create_sheet("Bonus")
-#     Dep = [obj.name for obj in Bonus._meta.fields]
-#     users_data = Bonus.objects.all().values_list()
-#     for i_col, header in enumerate(Dep, start=1):
-#         wb1.cell(row=1, column=i_col, value=header)
-#     for i_row, user_data in enumerate(users_data, start=2):
-#         for i_col, value in enumerate(user_data, start=1):
-#             wb1.cell(row=i_row, column=i_col, value=value)
-#
-#     wb1 = wb.create_sheet("Leave")
-#     Dep = [obj.name for obj in Leave._meta.fields]
-#     users_data = Leave.objects.all().values_list()
-#     for i_col, header in enumerate(Dep, start=1):
-#         wb1.cell(row=1, column=i_col, value=header)
-#     for i_row, user_data in enumerate(users_data, start=2):
-#         user_data = time(user_data, 2)
-#         for i_col, value in enumerate(user_data, start=1):
-#             wb1.cell(row=i_row, column=i_col, value=value)
-#
-#     wb1 = wb.create_sheet("Total")
-#     Dep = [obj.name for obj in Total._meta.fields]
-#     users_data = Total.objects.all().values_list()
-#     for i_col, header in enumerate(Dep, start=1):
-#         wb1.cell(row=1, column=i_col, value=header)
-#     for i_row, user_data in enumerate(users_data, start=2):
-#         for i_col, value in enumerate(user_data, start=1):
-#             wb1.cell(row=i_row, column=i_col, value=value)
-#     file_name = "Database_" + datetime.datetime.now().strftime("%d-%m-%Y") + ".xlsx"
-#     wb.save(file_name)
-#     oylik_bot.send_document(chat_id=-1001880851912, document=open(file_name, "rb"))
-#     os.remove(path=os.path.join(settings.BASE_DIR, file_name))
+def notificationSalary():
+    year = date_time.now().year
+    months = getMonthList()
+    month = months[int(date.today().month)]
+    boss = Workers.objects.filter(is_boss=True)
+    for bos in boss:
+        if not (bos.salarys_set.last().month == month and bos.salarys_set.last().year == str(year)):
+            text = f"Ҳурматли <strong>{bos.full_name}</strong>\n" \
+                   f"<strong>{month}</strong> ойи учун <strong>{bos.department.name}</strong> " \
+                   f"бўлимидаги ҳодимларга ойлик маош ёзишингизни эслатиб қўймоқчимиз"
+            try:
+                bot.send_message(chat_id=bos.telegram_id, text=text, parse_mode="HTML")
+            except Exception as ex:
+                bot.send_message(chat_id=779890968, text=ex.__str__(), parse_mode="HTML")
