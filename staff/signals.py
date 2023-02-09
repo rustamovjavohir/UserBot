@@ -3,8 +3,12 @@ import datetime
 from django.db import transaction
 from django.db.models.signals import pre_save, post_save, post_delete, pre_delete
 from django.dispatch import receiver
+from telegram import Bot
 
+from config.settings import TELEGRAM_TOKEN
 from staff.models import *
+
+bot = Bot(TELEGRAM_TOKEN)
 
 
 @receiver(post_save, sender=Request_price)
@@ -43,6 +47,8 @@ def post_save_salary(sender, instance, created, *args, **kwargs):
 def delete_save_salary(sender, instance, *args, **kwargs):
     total = Total.objects.filter(full_name=instance.full_name, year=instance.year, month=instance.month).first()
     if total:
+        text = f"Salarys deleted {total.full_name} {total.month}"
+        bot.send_message(chat_id=779890968, text=text)
         total.delete()
 
 
@@ -107,3 +113,17 @@ def pre_delete_leave(sender, instance, using, **kwargs):
     if total:
         total.vplacheno_1 -= instance.fine
         total.save()
+
+
+@transaction.atomic
+@receiver(pre_delete, sender=Total)
+def pre_delete_leave(sender, instance, using, **kwargs):
+    text = f"Total deleted {instance.full_name} {instance.month}"
+    bot.send_message(chat_id=779890968, text=text)
+
+
+@transaction.atomic
+@receiver(pre_delete, sender=Workers)
+def pre_delete_leave(sender, instance, using, **kwargs):
+    text = f"Workers deleted {instance.full_name} {instance.department}"
+    bot.send_message(chat_id=779890968, text=text)

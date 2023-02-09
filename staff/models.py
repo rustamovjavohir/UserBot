@@ -214,17 +214,7 @@ class Total(models.Model):
         months = getMonthList()
         return months.index(self.month) + 1
 
-    # @property
-    # def oklad_1(self):
-    #     try:
-    #         salary = self.full_name.salarys_set.filter(month=self.month, year=self.year,
-    #                                                    full_name=self.full_name).first().salary
-    #         # salary = self.salary.filter(month=self.month, year=self.year, full_name=self.full_name).first().salary
-    #         if salary is None:
-    #             salary = 0
-    #     except:
-    #         salary = 0
-    #     return salary
+
 
     @property
     def oklad(self):
@@ -232,17 +222,6 @@ class Total(models.Model):
 
     oklad.fget.short_description = "Оклад"
 
-    # @property
-    # def bonuss_1(self):
-    #     try:
-    #         # bonus = [obj.bonus for obj in self.bonus.filter(month=self.month, year=self.year, full_name=self.full_name)]
-    #         bonus = self.bonus.filter(full_name__full_name=self.full_name.full_name, month=self.month,
-    #                                   is_deleted=False, year=self.year).aggregate(Sum('bonus')).get("bonus__sum")
-    #         if bonus is None:
-    #             bonus = 0
-    #     except:
-    #         bonus = 0
-    #     return bonus
 
     @property
     def bonuss(self):
@@ -250,13 +229,6 @@ class Total(models.Model):
 
     bonuss.fget.short_description = "Бонус"
 
-    # @property
-    # def paid_1(self):
-    #     try:
-    #         paid = [obj.paid for obj in self.bonus.filter(month=self.month, year=self.year, full_name=self.full_name)]
-    #     except:
-    #         paid = 0
-    #     return sum(paid)
 
     @property
     def paid(self):
@@ -274,12 +246,6 @@ class Total(models.Model):
 
     itog.fget.short_description = "Итого"
 
-    # @property
-    # def vplacheno_1(self):
-    #     total = 0
-    #     for i in self.leave.filter(month=self.month, year=self.year, full_name=self.full_name):
-    #         total += int(i.fine)
-    #     return total
 
     @property
     def vplacheno(self):
