@@ -14,6 +14,7 @@ import datetime
 from pytz import timezone
 from dateutil import parser
 from staff.models import *
+
 bot = Bot(token=S_TOKEN)
 
 
@@ -82,6 +83,7 @@ class BonusView(APIView):
     months = getMonthList()
     permission_classes = [IsAuthenticated]
     ip_address = '45.142.36.22'
+    # ip_address = '127.0.0.1'
     serializer_class = BonusSerializer
 
     def get_serializer(self, *args, **kwargs):
@@ -96,14 +98,28 @@ class BonusView(APIView):
                     if worker:
                         date = datetime.datetime.strptime(serializer.data.get("date"), '%Y-%m-%dT%H:%M:%S%z')
                         bonus = serializer.data.get('bonus')
-                        bonus = Bonus.objects.create(full_name=worker, month=self.months[date.month - 1], year=date.year,
-                                                     bonus_id=serializer.data.get('id'), bonus=bonus, paid=0)
-                        data = {
-                            "success": True,
-                            "status_code": 200,
-                            "statusMessage": "Бонус успешно добавлен",
-                            "id": bonus.id,
-                        }
+                        # bonus = Bonus.objects.create(full_name=worker, month=self.months[date.month - 1],
+                        #                              year=date.year,
+                        #                              bonus_id=serializer.data.get('id'), bonus=bonus, paid=0)
+                        bonus, created = Bonus.objects.update_or_create(full_name=worker,
+                                                                        month=self.months[date.month - 1],
+                                                                        year=date.year,
+                                                                        bonus_id=serializer.data.get('id'),
+                                                                        defaults={"bonus": bonus, "paid": 0})
+                        if created:
+                            data = {
+                                "success": True,
+                                "status_code": 200,
+                                "statusMessage": "Бонус успешно добавлен",
+                                "id": bonus.id,
+                            }
+                        else:
+                            data = {
+                                "success": True,
+                                "status_code": 200,
+                                "statusMessage": "Бонус успешно обновлен",
+                                "id": bonus.id,
+                            }
                     else:
                         data = {
                             "success": False,
