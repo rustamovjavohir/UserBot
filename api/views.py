@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 from telegram import Bot
 
 from api.utils import get_client_ip
+from apps.staff.models import *
 from config.settings import S_TOKEN
 from api.serializers import BonusSerializer
 import datetime

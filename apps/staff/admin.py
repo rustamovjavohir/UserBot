@@ -15,6 +15,7 @@ from .utils import sendNotification, getWorker
 from django.utils.html import escape
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from apps.staff.models import *
 
 bot = Bot(token=S_TOKEN)
 
