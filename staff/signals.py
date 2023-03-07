@@ -5,10 +5,10 @@ from django.db.models.signals import pre_save, post_save, post_delete, pre_delet
 from django.dispatch import receiver
 from telegram import Bot
 
-from config.settings import TELEGRAM_TOKEN
+from config.settings import TELEGRAM_TOKEN, S_TOKEN
 from staff.models import *
 
-bot = Bot(TELEGRAM_TOKEN)
+bot = Bot(S_TOKEN)
 
 
 @receiver(post_save, sender=Request_price)

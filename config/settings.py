@@ -25,9 +25,9 @@ env.read_env()
 # SECURITY WARNING: keep the secret key used in production secret!
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env.bool("DEBUG", default=False)
-
-ALLOWED_HOSTS = ["*"]
+# DEBUG = env.bool("DEBUG", default=False)
+#
+# ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -131,6 +131,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+#  variables
+DEBUG = env.bool("DEBUG", default=False)
+ALLOWED_HOSTS = ["*"]
 DATABASES = {'default': env.dj_db_url('DATABASE_URL')}
 SECRET_KEY = env.str('SECRET_KEY')
 TELEGRAM_TOKEN = env.str('TELEGRAM_TOKEN')

@@ -3,7 +3,7 @@ from django.core.management import BaseCommand
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 from config.settings import S_TOKEN
 from jobs.updater import startUpdater
-from staff.views import *
+from staff.views import order, start
 from staff.callback import inline
 
 
