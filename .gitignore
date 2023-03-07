@@ -216,3 +216,5 @@ config/local_settings.py
 .env
 
 **/migrations/*
+/migrations/*.py
+/migrations/*.pyc
