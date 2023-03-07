@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # local
-    "bot",
+    "apps.bot",
     "api",
     "staff",
     "jobs",

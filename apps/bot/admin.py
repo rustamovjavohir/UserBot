@@ -1,5 +1,5 @@
 from django.contrib import admin
-from bot.models import User, Group, Message
+from apps.bot.models import User, Group, Message
 
 
 # Register your models here.

@@ -1,9 +1,7 @@
-from django.shortcuts import render
-from django.conf import settings
-from telegram import Update, Bot
+from telegram import Update
 from telegram.ext import CallbackContext
-from bot.models import Message, User, Group
-from bot.utils import isGroup, findMessageId, sendMessageToGroup
+from apps.bot.models import Message, User, Group
+from apps.bot.utils import isGroup, findMessageId, sendMessageToGroup
 
 
 def start(update: Update, context: CallbackContext):

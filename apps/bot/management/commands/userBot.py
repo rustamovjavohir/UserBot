@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.management import BaseCommand
-from telegram.ext import (Updater, Dispatcher, CommandHandler, CallbackQueryHandler, MessageHandler, Filters)
-from bot.views import start, main_handler
+from telegram.ext import (Updater, Dispatcher, CommandHandler, MessageHandler, Filters)
+from apps.bot.views import start, main_handler
 
 
 class Command(BaseCommand):
