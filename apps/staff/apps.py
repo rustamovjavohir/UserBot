@@ -8,3 +8,4 @@ class StaffConfig(AppConfig):
 
     def ready(self):
         pass
+# pass
