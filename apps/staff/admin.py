@@ -4,15 +4,11 @@ from datetime import date
 import requests
 from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
-from django.contrib.auth.admin import UserAdmin
-from django.db.models import Sum
-from django.utils.translation import ngettext
 from import_export.formats import base_formats
-from import_export.admin import ImportExportModelAdmin, ImportMixin, ExportMixin
+from import_export.admin import ImportExportModelAdmin, ExportMixin
 
 from config.settings import URL_1C, PASSWORD_1C, LOGIN_1C
 from .resources import *
-from staff.models import *
 from telegram import Bot
 from config.settings import S_TOKEN
 from .utils import sendNotification, getWorker

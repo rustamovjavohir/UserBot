@@ -1,10 +1,7 @@
-import threading
-
 import requests
 from telegram.ext import CallbackContext
 
-from staff.buttons import *
-from staff.models import *
+from apps.staff.buttons import *
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 from telegram import Bot, Update

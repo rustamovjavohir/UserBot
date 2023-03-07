@@ -1,7 +1,4 @@
-from abc import ABC
-
 from rest_framework import serializers
-from staff.models import Bonus
 
 
 class BonusSerializer(serializers.Serializer):

@@ -43,8 +43,8 @@ INSTALLED_APPS = [
 
     # local
     "apps.bot",
+    "apps.staff",
     "api",
-    "staff",
     "jobs",
 
     # lib

@@ -4,16 +4,12 @@ from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.generics import CreateAPIView
 from telegram import Bot
 
 from api.utils import get_client_ip
 from config.settings import S_TOKEN
 from api.serializers import BonusSerializer
 import datetime
-from pytz import timezone
-from dateutil import parser
-from staff.models import *
 
 bot = Bot(token=S_TOKEN)
 

@@ -4,10 +4,10 @@ import requests
 from telegram import Update
 
 from config.settings import URL_1C, LOGIN_1C, PASSWORD_1C
-from staff.buttons import foodMenuButton
-from staff.models import Request_price, ITRequestPrice, Data
-from staff.utils import getWorker, notificationBot
-from staff.views import isWorker
+from apps.staff.buttons import foodMenuButton
+from apps.staff.models import Request_price, ITRequestPrice, Data
+from apps.staff.utils import getWorker, notificationBot
+from apps.staff.views import isWorker
 
 
 def inline(update: Update, context):

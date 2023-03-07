@@ -1,6 +1,3 @@
-from staff.utils import *
-
-
 def inform(user_id, active=True):
     worker = getWorker(user_id, active)
     text = f"<strong>F.I.O.:</strong> {worker.full_name}\n"

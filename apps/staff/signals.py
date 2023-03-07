@@ -5,8 +5,7 @@ from django.db.models.signals import pre_save, post_save, post_delete, pre_delet
 from django.dispatch import receiver
 from telegram import Bot
 
-from config.settings import TELEGRAM_TOKEN, S_TOKEN
-from staff.models import *
+from config.settings import S_TOKEN
 
 bot = Bot(S_TOKEN)
 
