@@ -437,7 +437,7 @@ class NotificationAdmin(admin.ModelAdmin):
 
 @admin.register(TotalDepartment)
 class TotalDepartmentAdmin(admin.ModelAdmin):
-    list_display = ["department", "year", "month", "oklad", "bonuss", "paid", "itog", "vplacheno", "ostatok"]
+    list_display = ["department", "year", "month", "oklad", "bonuss", "paid", "itog", "vplacheno", "ostatok", "salom"]
 
 
 @admin.register(LogEntry)
