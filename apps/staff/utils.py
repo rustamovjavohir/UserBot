@@ -5,6 +5,8 @@ from apps.staff.buttons import *
 from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 from telegram import Bot, Update
+
+from apps.staff.models import *
 from config.settings import S_TOKEN, URL_1C, LOGIN_1C, PASSWORD_1C
 
 bot = Bot(token=S_TOKEN)
