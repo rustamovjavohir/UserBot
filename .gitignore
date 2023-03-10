@@ -218,3 +218,6 @@ config/local_settings.py
 **/migrations/*
 /migrations/*.py
 /migrations/*.pyc
+
+# fixtures files
+/fixtures/*.json
