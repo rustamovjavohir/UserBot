@@ -354,7 +354,6 @@ class TotalDepartment(models.Model):
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     month = models.CharField(max_length=20, choices=getMonths(), verbose_name="Месяц")
     year = models.CharField(max_length=4, default=datetime.datetime.now().year, verbose_name="Год")
-    salom = models.BigIntegerField(default=0, verbose_name="Салом")
 
     salary = Salarys.objects.all()
     bonus = Bonus.objects.filter(is_deleted=False)
