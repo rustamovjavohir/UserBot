@@ -1,3 +1,9 @@
+import threading
+
+from apps.staff.utils import *
+from apps.staff.models import *
+
+
 def inform(user_id, active=True):
     worker = getWorker(user_id, active)
     text = f"<strong>F.I.O.:</strong> {worker.full_name}\n"

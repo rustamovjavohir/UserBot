@@ -1,4 +1,6 @@
 import random
+
+from apps.staff.models import *
 from apps.staff.utils import getMonthList
 
 

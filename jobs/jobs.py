@@ -3,6 +3,7 @@ from datetime import date, datetime as date_time
 
 from telegram import Bot
 
+from apps.staff.models import Bonus, Leave, Salarys, Total, getMonthList, Workers, Department, Request_price
 from config.settings import S_TOKEN
 from django.db.models import Sum
 
