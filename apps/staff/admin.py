@@ -31,7 +31,8 @@ class DataAdmin(admin.ModelAdmin):
 
 
 @admin.register(Workers)
-class WorkersAdmin(ExportMixin, admin.ModelAdmin):
+# class WorkersAdmin(ExportMixin, admin.ModelAdmin):
+class WorkersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["full_name", "department", "job", "phone", "boss", "is_boss"]
     list_display_links = ["full_name", "department", "job", "phone"]
     list_filter = ("department",)

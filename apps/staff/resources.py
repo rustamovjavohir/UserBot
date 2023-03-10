@@ -49,21 +49,21 @@ class PaidResource(resources.ModelResource):
 
 
 class WorkerResource(resources.ModelResource):
-    full_name = Field(attribute="full_name", column_name="Имя")
-    year = Field(column_name="Год")
-    month = Field(column_name="Месяц")
-    salary = Field(column_name="Оклад")
-    bonus = Field(column_name="Бонус")
-    paid = Field(column_name="Штраф")
-
-    # id = Field(attribute='id')
     # full_name = Field(attribute="full_name", column_name="Имя")
-    # department = Field(attribute="department", column_name="", widget=ForeignKeyWidget(Department, 'name'))
-    # job = Field(attribute="job", column_name="")
-    # is_boss = Field(attribute="is_boss", column_name="")
-    # phone = Field(attribute="phone", column_name="")
-    # active = Field(attribute="active", column_name="")
-    # telegram_id = Field(attribute="telegram_id", column_name="")
+    # year = Field(column_name="Год")
+    # month = Field(column_name="Месяц")
+    # salary = Field(column_name="Оклад")
+    # bonus = Field(column_name="Бонус")
+    # paid = Field(column_name="Штраф")
+
+    id = Field(attribute='id')
+    full_name = Field(attribute="full_name", column_name="Имя")
+    department = Field(attribute="department", column_name="", widget=ForeignKeyWidget(Department, 'name'))
+    job = Field(attribute="job", column_name="")
+    is_boss = Field(attribute="is_boss", column_name="")
+    phone = Field(attribute="phone", column_name="")
+    active = Field(attribute="active", column_name="")
+    telegram_id = Field(attribute="telegram_id", column_name="")
 
     class Meta:
         model = Workers
