@@ -128,4 +128,4 @@ def pre_delete_leave(sender, instance, using, **kwargs):
     text = f"Workers deleted {instance.full_name} {instance.department}"
     bot.send_message(chat_id=779890968, text=text)
 
-# Salom
+# Salom Test
