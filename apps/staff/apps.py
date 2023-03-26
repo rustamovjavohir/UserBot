@@ -7,4 +7,4 @@ class StaffConfig(AppConfig):
     verbose_name = "Зарплата"
 
     def ready(self):
-        pass
+        import apps.staff.signals
