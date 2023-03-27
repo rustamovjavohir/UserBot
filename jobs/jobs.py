@@ -98,3 +98,18 @@ def notificationSalary():
                 bot.send_message(chat_id=bos.telegram_id, text=text, parse_mode="HTML")
             except Exception as ex:
                 bot.send_message(chat_id=779890968, text=ex.__str__(), parse_mode="HTML")
+
+
+def addSalary():
+    year = date_time.now().year
+    months = getMonthList()
+    month = months[int(date.today().month) - 1]
+    next_month = months[int(date.today().month)]
+    w_salary = Salarys.objects.filter(year=str(year), month=month)
+    print(w_salary)
+    for item in w_salary:
+        if not Salarys.objects.filter(full_name=item.full_name, year=str(year), month=next_month).exists():
+            Salarys.objects.update_or_create(full_name=item.full_name, salary=item.salary,
+                                             year=str(year), month=next_month)
+
+    return year, month, next_month

@@ -134,6 +134,7 @@ class Salarys(models.Model):
     department.fget.short_description = "Подразделение"
 
     class Meta:
+        unique_together = (("full_name", "year", "month"),)
         verbose_name = "Зарплаты"
         verbose_name_plural = "Зарплаты"
 
@@ -214,21 +215,17 @@ class Total(models.Model):
         months = getMonthList()
         return months.index(self.month) + 1
 
-
-
     @property
     def oklad(self):
         return "{:,}".format(self.oklad_1)
 
     oklad.fget.short_description = "Оклад"
 
-
     @property
     def bonuss(self):
         return "{:,}".format(self.bonuss_1)
 
     bonuss.fget.short_description = "Бонус"
-
 
     @property
     def paid(self):
@@ -245,7 +242,6 @@ class Total(models.Model):
         return "{:,}".format(self.itog_1)
 
     itog.fget.short_description = "Итого"
-
 
     @property
     def vplacheno(self):
