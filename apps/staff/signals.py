@@ -34,7 +34,8 @@ def post_save_order(sender, instance, created, *args, **kwargs):
 def post_save_salary(sender, instance, created, *args, **kwargs):
     if created:
         if Total.objects.filter(full_name=instance.full_name, year=instance.year, month=instance.month).exists():
-            pass
+            Total.objects.filter(full_name=instance.full_name, year=instance.year,
+                                 month=instance.month).update(oklad_1=instance.salary)
         else:
             Total.objects.create(full_name=instance.full_name, year=instance.year, month=instance.month,
                                  oklad_1=instance.salary)

@@ -12,6 +12,10 @@ from datetime import datetime, date
 bot = Bot(token=S_TOKEN)
 
 
+def sortedByMonthIndex(iterable, reverse=True):
+    return sorted(iterable, key=lambda t: (t.year, t.month_index), reverse=reverse)
+
+
 def checkReceivedSalary(user_id, month=""):
     if not month:
         months = getMonthList()
@@ -23,7 +27,9 @@ def checkReceivedSalary(user_id, month=""):
 
 def checkMoney(user_id, money: int) -> bool:
     sum_money = 0
-    total = Total.objects.filter(full_name__telegram_id=user_id).order_by('-id')[0:2]
+    # total = Total.objects.filter(full_name__telegram_id=user_id).order_by('-id')[0:2]
+    total = Total.objects.filter(full_name__telegram_id=user_id)
+    total = sortedByMonthIndex(total)[0:2]
     for item in total:
         sum_money += item.ostatok_1
     if sum_money >= money:
@@ -54,9 +60,13 @@ def splitMoney(user_id, money: int) -> tuple:
     """
     ((this_month, first_money), (next_month, second_money))
     """
-    total_all = Total.objects.filter(full_name__telegram_id=user_id).order_by('-id')[1:2].first()
-    if total_all is None:
-        total_all = Total.objects.filter(full_name__telegram_id=user_id).order_by('-id').first()
+    # total_all = Total.objects.filter(full_name__telegram_id=user_id).order_by('-id')[1:2].first()
+    total_all = Total.objects.filter(full_name__telegram_id=user_id)
+    try:
+        total_all = sortedByMonthIndex(total_all)[1]
+    except IndexError:
+        # total_all = Total.objects.filter(full_name__telegram_id=user_id)
+        total_all = sortedByMonthIndex(total_all)[0]
     current_day = datetime(int(total_all.year), int(total_all.month_index), 1)
     next_month = nextMonth(total_all)
     if total_all.ostatok_1 >= money:

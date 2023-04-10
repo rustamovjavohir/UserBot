@@ -27,3 +27,7 @@ def addLeave(year=2023, month=0):
     for worker in workers:
         Leave.objects.create(full_name=worker, year=year, month=months[month],
                              fine=random.randint(99999, 999999) // 1000 * 1000)
+
+
+def sortedByMonthIndex(iterable, reverse=True):
+    return sorted(iterable, key=lambda t: (t.year, t.month_index), reverse=reverse)
