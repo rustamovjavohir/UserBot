@@ -28,4 +28,4 @@ urlpatterns = [
                   re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-handler404 = 'api.views.error_404'
+handler404 = 'api.staff.views.views.error_404'

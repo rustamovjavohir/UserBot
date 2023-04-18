@@ -8,8 +8,8 @@ from telegram import Bot
 
 from api.utils import get_client_ip
 from apps.staff.models import *
-from config.settings import S_TOKEN
-from api.serializers import BonusSerializer
+from config.settings import S_TOKEN, ALLOWED_IPS
+from api.staff.serializers.serializers import BonusSerializer
 import datetime
 
 bot = Bot(token=S_TOKEN)
@@ -79,15 +79,14 @@ class BonusView(APIView):
     queryset = Bonus.objects.filter(is_deleted=False)
     months = getMonthList()
     permission_classes = [IsAuthenticated]
-    ip_address = '45.142.36.22'
-    # ip_address = '127.0.0.1'
+    ip_address = ALLOWED_IPS
     serializer_class = BonusSerializer
 
     def get_serializer(self, *args, **kwargs):
         return self.serializer_class(*args, **kwargs)
 
     def post(self, request):
-        if self.ip_address == get_client_ip(request):
+        if get_client_ip(request) in self.ip_address:
             serializer = self.serializer_class(data=request.data)
             if serializer.is_valid(raise_exception=True):
                 worker = Workers.objects.filter(telegram_id=serializer.data.get('idmaneger')).first()
