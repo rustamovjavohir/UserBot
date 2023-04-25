@@ -27,3 +27,5 @@ def save_cr_code(image_data, code_type="image"):
     image_name = f"{code_type}_{unique_code}.png"
     data = ContentFile(base64.b64decode(image_data), name=f'{image_name}')
     return data
+
+#  dev branch
