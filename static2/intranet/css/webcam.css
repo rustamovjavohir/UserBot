@@ -35,6 +35,8 @@
 
 .user-select {
     padding: 0 0.75rem !important;
+    height: 2.5rem !important;
+    font-size: 20px;
 }
 
 .take-photo-button {
