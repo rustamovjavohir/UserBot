@@ -4,8 +4,8 @@ from django.db import models
 # Create your models here.
 
 class AllowedIPS(models.Model):
-    name = models.CharField(max_length=50)
-    ip = models.CharField(max_length=15)
+    name = models.CharField(max_length=50, verbose_name='Название')
+    ip = models.CharField(max_length=15, verbose_name='IP-адрес')
 
     def __str__(self):
         return self.ip
