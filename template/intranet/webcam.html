@@ -1,0 +1,24 @@
+{% extends 'admin/base_site.html' %}
+{% load static %}
+{% block title %}
+    Webcam Photo
+{% endblock %}
+
+{% block content %}
+
+
+    <div id="my_camera"></div>
+
+
+    <input id="open-cam" type=button value="Open Camera" onClick="open_webcam()">
+    <input type=button value="Take Snapshot" onClick="take_snapshot()">
+    <input type=button value="Save image" onClick="saveSnap()">
+
+    <div id="results"></div>
+
+
+    <script src="{% static 'intranet/js/webcam.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
+
+
+{% endblock %}
