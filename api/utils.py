@@ -28,4 +28,6 @@ def save_cr_code(image_data, code_type="image"):
     data = ContentFile(base64.b64decode(image_data), name=f'{image_name}')
     return data
 
-#  dev branch
+
+def get_current_date():
+    return datetime.now().strftime('%Y-%m-%d')

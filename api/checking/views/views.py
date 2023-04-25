@@ -12,14 +12,14 @@ from telegram import InputMediaPhoto, InputFile
 
 from api.utils import get_client_ip, base64_to_image
 from telegram.bot import Bot
+from apps.checking.models import AllowedIPS
 
 from config import settings
-from config.settings import ALLOWED_IPS
 
 
 class CheckingPage(TemplateView):
     template_name = 'intranet/checking.html'
-    allowed_ips = ALLOWED_IPS
+    allowed_ips = AllowedIPS.getIPsList()
 
     def get_users(self, request):
         try:
@@ -51,6 +51,7 @@ def getIpAddress(request):
 
 
 class SaveImage(APIView):
+    send_checking_id = settings.SEND_CHECKING_ID
     permission_classes = [IsAuthenticated, ]
     bot = Bot(token=settings.S_TOKEN)
 
@@ -58,8 +59,8 @@ class SaveImage(APIView):
         if request.data.get('imageData') is not None:
             image_data = request.data.get('imageData')
             image_bytes = base64.b64decode(image_data.split('base64,')[1])
-            image_file = InputFile(io.BytesIO(image_bytes), filename='image.png')
-            self.bot.send_photo(chat_id=779890968, photo=image_file)
+            image_file = InputFile(io.BytesIO(image_bytes), filename=f'image.png')
+            self.bot.send_photo(chat_id=self.send_checking_id, photo=image_file)
             response = {
                 'status': 'success',
                 'message': 'Image processed successfully',

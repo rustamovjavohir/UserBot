@@ -15,6 +15,10 @@ class AllowedIPS(models.Model):
         # Check whether the product is in the table or not
         return ip in cls.objects.values_list('ip', flat=True)
 
+    @classmethod
+    def getIPsList(cls):
+        return cls.objects.values_list('ip', flat=True)
+
     class Meta:
         verbose_name = 'Разрешенный IP-адрес'
         verbose_name_plural = 'Разрешенные IP-адреса'
