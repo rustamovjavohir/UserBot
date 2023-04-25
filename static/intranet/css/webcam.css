@@ -1,9 +1,10 @@
 .my_camera {
     justify-content: center;
-    width: 320px;
-    height: 240px;
-    border: 3px solid black;
+    width: 410px;
+    height: 320px;
+    /*border: 1px solid black;*/
     border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
 }
 
 .image_canvas {
@@ -13,22 +14,30 @@
     width: 80% !important;
     height: 480px;
 }
+
 @media (max-width: 1032px) {
     .image_block {
         flex-direction: column;
     }
 }
+
 .image_block {
-    display:flex;
+    display: flex;
     gap: 20px;
-    align-items:flex-start;
-    /*width: 100%;*/
-}
-#canvas {
-    border: 3px solid black;
-    border-radius: 10px;
-    /*width: 100%; !important;*/
-    /*height: 100%; !important;*/
+    align-items: flex-start;
 }
 
+#canvas {
+    /*border: 2px solid black;*/
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.3) 0px 19px 38px, rgba(0, 0, 0, 0.22) 0px 15px 12px;
+}
+
+.user-select {
+    padding: 0 0.75rem !important;
+}
+
+.take-photo-button {
+    margin-top: 15px;
+}
 
