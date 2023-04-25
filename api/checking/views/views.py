@@ -39,7 +39,8 @@ class CheckingPage(TemplateView):
         context = {
             'message': 'Hello World',
             'ip': get_client_ip(request),
-            'user': request.user.username,
+            'username': request.user.username,
+            'user': request.user,
             'users': self.get_users(request)
         }
         return render(request, self.template_name, context=context)
