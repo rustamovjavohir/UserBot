@@ -307,7 +307,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
             reply_markup = cashierButton()
         update.message.reply_text("Bosh sahifa", reply_markup=reply_markup)
 
-    else:
+    else:   # oddiy ishchilar
         price = int(step['price'])
         money_split = splitMoney(user_id=worker_id, money=price)
         for month, money in money_split:
@@ -325,13 +325,19 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                 print(ex)
             step.update({"step": 0})
             Data.objects.filter(telegram_id=user_id).update(data=step)
-            update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.id}")
-            boss = Workers.objects.filter(is_boss=True,
-                                          department=Workers.objects.get(telegram_id=worker_id).department).first()
-            text = getAvansText(name=staff_name, req=req, month=month, money=money,
+            staff = getWorker(worker_id)
+            text = getAvansText(name=staff.full_name, req=req, month=month, money=money,
                                 balance=obj.ostatok_1 + money)
-            context.bot.send_message(chat_id=boss.telegram_id, text=text, parse_mode="html",
-                                     reply_markup=acceptInlineButton(req.id))
+            if staff.boss:
+                context.bot.send_message(chat_id=staff.boss.telegram_id, text=text, parse_mode="html",
+                                         reply_markup=acceptInlineButton(req.id))
+                update.message.reply_text(text=f"✅So`rov {staff.boss.full_name}ga yuborildi, ID:  {req.pk}")
+            else:
+                boss = Workers.objects.filter(is_boss=True,
+                                              department=Workers.objects.get(telegram_id=worker_id).department).first()
+                context.bot.send_message(chat_id=boss.telegram_id, text=text, parse_mode="html",
+                                         reply_markup=acceptInlineButton(req.id))
+                update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.id}")
         reply_markup = avansButton()
         if isCashier(user_id):
             reply_markup = cashierButton()
