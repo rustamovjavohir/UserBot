@@ -138,9 +138,9 @@ def getAvansText(name, req, month, money, balance):
     return text
 
 
-def notificationBot(message, workers: Workers = 0, info_staff: InfTech = 0, is_all=True, **kwargs):
+def notificationBot(message, workers: Workers = 0, info_staff: InfTech = 0, is_all=True, is_office=True, ** kwargs):
     if is_all:
-        workers = Workers.objects.filter(active=True)
+        workers = Workers.objects.filter(active=True, in_office=is_office)
         info_staff = InfTech.objects.filter(active=True)
     for staff in info_staff:
         try:

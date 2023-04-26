@@ -106,6 +106,7 @@ class Workers(models.Model):
     boss = models.ForeignKey('self', null=True, blank=True, on_delete=models.DO_NOTHING, verbose_name="Главный")
     user = models.ForeignKey(User, null=True, blank=True, on_delete=models.DO_NOTHING)
     is_access = models.BooleanField(default=False, null=True, blank=True, verbose_name="Право доступа")
+    in_office = models.BooleanField(default=True, null=True, blank=True, verbose_name="В офисе")
 
     def __str__(self):
         return self.full_name
