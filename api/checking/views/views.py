@@ -19,7 +19,10 @@ from config import settings
 
 class CheckingPage(TemplateView):
     template_name = 'intranet/checking.html'
-    allowed_ips = AllowedIPS.getIPsList()
+
+    @staticmethod
+    def get_allowed_ips():
+        return AllowedIPS.getIPsList()
 
     def get_users(self, request):
         try:
@@ -31,7 +34,7 @@ class CheckingPage(TemplateView):
     def get(self, request, *args, **kwargs):
         if request.user.is_anonymous:
             return redirect('login')
-        if get_client_ip(request) not in self.allowed_ips:
+        if get_client_ip(request) not in self.get_allowed_ips():
             # return render(request, '404.html')
             html = "<html><body><h1>IP address is %s.</h1></body></html>" % get_client_ip(request)
             return HttpResponse(html)
