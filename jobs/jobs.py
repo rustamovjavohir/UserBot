@@ -106,7 +106,7 @@ def addSalary():
     month = months[int(date.today().month) - 1]
     next_month = months[int(date.today().month)]
     w_salary = Salarys.objects.filter(year=str(year), month=month)
-    print(w_salary)
+    # print(w_salary)
     for item in w_salary:
         if not Salarys.objects.filter(full_name=item.full_name, year=str(year), month=next_month).exists():
             Salarys.objects.update_or_create(full_name=item.full_name, salary=item.salary,
