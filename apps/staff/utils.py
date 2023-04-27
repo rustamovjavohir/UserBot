@@ -349,7 +349,7 @@ def report(update: Update, context: CallbackContext):
     msg = update.message.text
     step = Data.objects.get(telegram_id=user_id).data
     if not isITStaff(user_id):
-        for total in getTotalList(user_id):
+        for total in getTotalList(user_id)[-3:]:
             text = getReportTotalText(total)
             context.bot.send_message(chat_id=user_id, text=text, parse_mode="HTML",
                                      reply_markup=homeButton())
