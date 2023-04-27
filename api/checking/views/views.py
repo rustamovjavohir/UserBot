@@ -10,9 +10,9 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from telegram import InputMediaPhoto, InputFile
 
-from api.utils import get_client_ip, base64_to_image
+from api.utils import get_client_ip, base64_to_image, get_worker_by_name, get_current_date
 from telegram.bot import Bot
-from apps.checking.models import AllowedIPS
+from apps.checking.models import AllowedIPS, Timekeeping
 
 from config import settings
 
@@ -65,9 +65,15 @@ class SaveImage(APIView):
             image_bytes = base64.b64decode(image_data.split('base64,')[1])
             image_file = InputFile(io.BytesIO(image_bytes), filename=f'image.png')
             self.bot.send_photo(chat_id=self.send_checking_id, photo=image_file)
+
+            worker = get_worker_by_name(name=request.data.get('worker'))
+            worker_time = Timekeeping.objects.get_or_create(worker=worker, date=get_current_date().date())[0]
+            worker_time.setCheckIn()
+
             response = {
                 'status': 'success',
                 'message': 'Image processed successfully',
+                'worker': request.data.get('worker')
             }
             return JsonResponse(response, status=200)
 

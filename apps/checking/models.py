@@ -1,4 +1,7 @@
 from django.db import models
+from apps.staff.models import Workers
+from datetime import datetime
+from pytz import timezone
 
 
 # Create your models here.
@@ -22,3 +25,30 @@ class AllowedIPS(models.Model):
     class Meta:
         verbose_name = 'Разрешенный IP-адрес'
         verbose_name_plural = 'Разрешенные IP-адреса'
+
+
+class Timekeeping(models.Model):
+    worker = models.ForeignKey(Workers, on_delete=models.DO_NOTHING, verbose_name='Сотрудник')
+    check_in = models.DateTimeField(null=True, blank=True, verbose_name='Время прихода')
+    check_out = models.DateTimeField(null=True, blank=True, verbose_name='Время ухода')
+    date = models.DateField(null=True, blank=True, verbose_name='Дата')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+
+    def __str__(self):
+        return self.worker.full_name
+
+    @staticmethod
+    def get_tz_info():
+        return timezone('Asia/Tashkent')
+
+    def setCheckIn(self):
+        self.check_in = datetime.now(tz=self.get_tz_info())
+        self.save()
+
+    def setCheckOut(self):
+        self.check_out = datetime.now(tz=self.get_tz_info())
+        self.save()
+
+    class Meta:
+        verbose_name = 'Проверка'
+        verbose_name_plural = 'Проверки'

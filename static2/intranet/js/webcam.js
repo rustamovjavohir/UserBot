@@ -83,8 +83,8 @@ function take_snapshot() {
                             'X-CSRFToken': getCSRFToken()
                         },
                         body: JSON.stringify({
-                            imageData: imageData
-                            // imageData: "salom"
+                            imageData: imageData,
+                            worker: user_val
                         })
                     })
                         .then((response) => response.json())

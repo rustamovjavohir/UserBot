@@ -1,10 +1,12 @@
 import base64
 from datetime import datetime
-
+from apps.checking.models import Workers
 from PIL import Image
 from io import BytesIO
-
+from pytz import timezone
 from django.core.files.base import ContentFile
+
+from apps.staff.models import InfTech
 
 
 def get_client_ip(request):
@@ -29,5 +31,16 @@ def save_cr_code(image_data, code_type="image"):
     return data
 
 
+def get_worker_by_name(name, active=True):
+    try:
+        worker = Workers.objects.filter(full_name=name, active=active).first()
+        if not worker:
+            worker = InfTech.objects.filter(full_name=name, active=active).first()
+        return worker
+    except Workers.DoesNotExist:
+        return None
+
+
 def get_current_date():
-    return datetime.now().strftime('%Y-%m-%d')
+    tz = timezone('Asia/Tashkent')
+    return datetime.now(tz=tz)

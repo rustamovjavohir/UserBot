@@ -23,8 +23,8 @@
             <h4 id="user" class="user-shop">Shop: {{ user.first_name }}</h4>
             <select id="user_select" class="form-select user-select" aria-label="Userni tanlang" required>
                 <option selected value="-1">Select</option>
-                {% for user in users %}
-                    <option value="{{ user }}">{{ user }}</option>
+                {% for worker in users %}
+                    <option value="{{ worker }}">{{ worker }}</option>
                 {% endfor %}
             </select>
         </div>
