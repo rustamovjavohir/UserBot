@@ -102,8 +102,15 @@ def sendNotification(notifications, workers):
 
 
 def getTotalList(user_id):
-    totals = [total for total in Total.objects.filter(full_name__telegram_id=user_id) if total.ostatok_1.__ge__(0)]
-    return totals
+    total_list = []
+    totals = Total.objects.filter(full_name__telegram_id=user_id).order_by('id')
+    for total in totals:
+        if total.ostatok_1.__ge__(0):
+            total_list.append(total)
+
+    # totals = [total for total in Total.objects.filter(full_name__telegram_id=user_id).order_by('id') if
+    #           total.ostatok_1.__ge__(0)]
+    return total_list
 
 
 def getFirstTotal(user_id):
@@ -140,7 +147,7 @@ def getAvansText(name, req, month, money, balance):
     return text
 
 
-def notificationBot(message, workers: Workers = 0, info_staff: InfTech = 0, is_all=True, is_office=True, ** kwargs):
+def notificationBot(message, workers: Workers = 0, info_staff: InfTech = 0, is_all=True, is_office=True, **kwargs):
     if is_all:
         workers = Workers.objects.filter(active=True, in_office=is_office)
         info_staff = InfTech.objects.filter(active=True)
@@ -309,7 +316,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
             reply_markup = cashierButton()
         update.message.reply_text("Bosh sahifa", reply_markup=reply_markup)
 
-    else:   # oddiy ishchilar
+    else:  # oddiy ishchilar
         price = int(step['price'])
         money_split = splitMoney(user_id=worker_id, money=price)
         for month, money in money_split:
