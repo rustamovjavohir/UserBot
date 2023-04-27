@@ -1,3 +1,5 @@
+from time import sleep
+
 import requests
 from telegram.ext import CallbackContext
 
@@ -351,6 +353,7 @@ def report(update: Update, context: CallbackContext):
     if not isITStaff(user_id):
         for total in getTotalList(user_id)[-3:]:
             text = getReportTotalText(total)
+            sleep(0.1)
             context.bot.send_message(chat_id=user_id, text=text, parse_mode="HTML",
                                      reply_markup=homeButton())
 
