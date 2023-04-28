@@ -362,7 +362,7 @@ class DepartmentAdmin(ImportExportModelAdmin):
                     price += int(w.ostatok_1)
             Request_price.objects.filter(pk=req.pk).update(price=price)
             if Request_price.objects.get(pk=req.pk).workers.all().exists():
-                url = f"{URL_1C}ut3/hs/radius_bot/create_applications"
+                url = f"{URL_1C}radiusut/hs/radius_bot/create_applications"
                 auth = (LOGIN_1C, PASSWORD_1C)
                 js = {
                     "id": str(req.pk),
