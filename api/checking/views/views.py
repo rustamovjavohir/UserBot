@@ -10,6 +10,8 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from telegram import InputMediaPhoto, InputFile
 
+from api.checking.mixins import IsRadiusMixin
+from api.checking.permissions import RadiusPermission
 from api.utils import get_client_ip, base64_to_image, get_worker_by_name, get_current_date
 from telegram.bot import Bot
 from apps.checking.models import AllowedIPS, Timekeeping
@@ -17,7 +19,7 @@ from apps.checking.models import AllowedIPS, Timekeeping
 from config import settings
 
 
-class CheckingPage(TemplateView):
+class CheckingPage(IsRadiusMixin, TemplateView):
     template_name = 'intranet/checking.html'
 
     @staticmethod
@@ -34,10 +36,6 @@ class CheckingPage(TemplateView):
     def get(self, request, *args, **kwargs):
         if request.user.is_anonymous:
             return redirect('login')
-        if get_client_ip(request) not in self.get_allowed_ips():
-            # return render(request, '404.html')
-            html = "<html><body><h1>IP address is %s.</h1></body></html>" % get_client_ip(request)
-            return HttpResponse(html)
 
         context = {
             'message': 'Hello World',
