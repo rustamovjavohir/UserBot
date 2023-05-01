@@ -147,6 +147,7 @@ LOGIN_1C = env.str('LOGIN_1C')
 PASSWORD_1C = env.str('PASSWORD_C')
 ALLOWED_IPS = env.list('ALLOWED_IPS')
 SEND_CHECKING_ID = env.str('SEND_CHECKING_ID')
+WORKING_TIME = env.str('WORKING_TIME')
 
 try:
     from .local_settings import *

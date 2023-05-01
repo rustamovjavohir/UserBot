@@ -47,9 +47,13 @@ function open_webcam() {
 
 function getDateTime() {
     let now = new Date();
-    let date = now.getDate() + '/' + (now.getMonth() + 1) + '/' + now.getFullYear();
-    let time = now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
-    let dateTime = time + '  ' + date;
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hour = String(now.getHours()).padStart(2, '0');
+    const minute = String(now.getMinutes()).padStart(2, '0');
+    const second = String(now.getSeconds()).padStart(2, '0');
+    let dateTime = `${day}.${month}.${year} ${hour}:${minute}:${second}`;
     return dateTime
 }
 

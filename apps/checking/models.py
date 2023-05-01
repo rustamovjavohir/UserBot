@@ -1,7 +1,9 @@
 from django.db import models
 from apps.staff.models import Workers
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import timezone
+
+from config.settings import WORKING_TIME
 
 
 # Create your models here.
@@ -46,8 +48,15 @@ class Timekeeping(models.Model):
         self.save()
 
     def setCheckOut(self):
-        self.check_out = datetime.now(tz=self.get_tz_info())
-        self.save()
+        if datetime.now(tz=self.get_tz_info()) - self.check_in > timedelta(hours=WORKING_TIME):
+            self.check_out = datetime.now(tz=self.get_tz_info())
+            self.save()
+
+    def setCheckInOrOut(self):
+        if self.check_in:
+            self.setCheckOut()
+        else:
+            self.setCheckIn()
 
     class Meta:
         verbose_name = 'Проверка'
