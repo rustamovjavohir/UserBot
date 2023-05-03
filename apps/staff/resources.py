@@ -67,8 +67,10 @@ class WorkerResource(resources.ModelResource):
 
     class Meta:
         model = Workers
-        exclude = ('id', 'department', 'job', 'phone', 'telegram_id', "is_boss", "active")
-        # import_id_fields = ('id', 'full_name', 'department', 'job', 'is_boss', 'phone', 'active', 'telegram_id')
+        exclude = ('id', 'department', 'job', 'phone', 'telegram_id', "is_boss", "active", "start_work" "is_deleted",
+                   "created_at")
+        # import_id_fields = ('id', 'full_name', 'department', 'job', 'is_boss', 'phone', 'active', 'telegram_id',
+        #                     "start_work" "is_deleted", "created_at")
 
 
 class DepartmentResource(resources.ModelResource):
