@@ -39,6 +39,7 @@ class WorkersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_filter = ("department",)
     search_fields = ["full_name", "department__name", "job"]
     list_editable = ["is_boss"]
+    readonly_fields = ['created_at']
     resource_class = WorkerResource
 
     def get_queryset(self, request):
