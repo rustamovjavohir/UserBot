@@ -15,6 +15,7 @@ class AdminTimekeeping(admin.ModelAdmin):
     list_display = ['worker', 'worker_department', 'date', 'check_in', 'check_out', 'created_at']
     list_filter = ['worker', 'date', 'worker__department']
     ordering = ('-date', 'worker__department')
+    date_hierarchy = 'date'
 
     def worker_department(self, obj):
         return obj.worker.department
