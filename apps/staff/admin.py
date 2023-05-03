@@ -4,6 +4,7 @@ from datetime import date
 import requests
 from django.contrib import admin, messages
 from django.contrib.admin.models import DELETION, LogEntry
+from django.contrib.contenttypes.models import ContentType
 from import_export.formats import base_formats
 from import_export.admin import ImportExportModelAdmin, ExportMixin
 
@@ -47,7 +48,7 @@ class WorkersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
         if request.user.workers_set.first():
             staff = getWorker(user_id=request.user.workers_set.first().telegram_id)
             if not staff.is_access:
-                return qs.filter(department=staff.department)
+                return qs.filter(department=staff.department, is_deleted=False)
         return qs
 
     def get_export_formats(self):
@@ -55,6 +56,31 @@ class WorkersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             base_formats.XLSX,
         )
         return [f for f in formats if f().can_export()]
+
+    def delete_model(self, request, obj):
+        obj.is_deleted = True
+        obj.save()
+        LogEntry.objects.log_action(
+            user_id=request.user.id,
+            content_type_id=ContentType.objects.get_for_model(obj).pk,
+            object_id=obj.pk,
+            object_repr=escape(obj.full_name),
+            action_flag=DELETION
+        )
+        messages.success(request, 'Удалено успешно!')
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.is_deleted = True
+            obj.save()
+            LogEntry.objects.log_action(
+                user_id=request.user.id,
+                content_type_id=ContentType.objects.get_for_model(obj).pk,
+                object_id=obj.pk,
+                object_repr=escape(obj.full_name),
+                action_flag=DELETION
+            )
+        messages.success(request, 'Удалено успешно!')
 
 
 @admin.register(Salarys)
