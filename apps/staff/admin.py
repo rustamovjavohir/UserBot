@@ -37,9 +37,10 @@ class WorkersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["full_name", "department", "job", "phone", "boss", "is_boss", "in_office"]
     list_display_links = ["full_name", "department", "job", "phone"]
     list_filter = ("department",)
-    search_fields = ["full_name", "department__name", "job"]
+    search_fields = ["full_name", "job"]
     list_editable = ["is_boss"]
     readonly_fields = ['created_at']
+    autocomplete_fields = ['department', 'boss']
     resource_class = WorkerResource
 
     def get_queryset(self, request):
@@ -366,6 +367,7 @@ class DepartmentAdmin(ImportExportModelAdmin):
     list_display_links = ["name"]
     actions = ["make_published"]
     resource_class = DepartmentResource
+    search_fields = ["name"]
 
     def innerFunc(self, request, queryset, message_user):
         success = ""
