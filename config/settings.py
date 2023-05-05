@@ -32,7 +32,7 @@ env.read_env()
 # Application definition
 
 INSTALLED_APPS = [
-    'jazzmin',
+    # 'jazzmin',
     'admin_interface',
     'colorfield',
     'django.contrib.admin',
