@@ -281,7 +281,8 @@ class TotalAdmin(admin.ModelAdmin):
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
-    list_per_page = 70
+    list_per_page = 50
+
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -299,22 +300,16 @@ class TotalAdmin(admin.ModelAdmin):
             extra_context=extra_context,
         )
         try:
-            oklad = 0
-            bonus = 0
-            paid = 0
-            itog = 0
-            vplacheno = 0
-            waiting = 0
-            ostatok = 0
             qs = response.context_data['cl'].queryset
+            qs = response.context_data['cl'].result_list
             # ------------------------------------------------------------------------
 
             oklad = qs.aggregate(Sum("oklad_1")).get('oklad_1__sum', 0)
             bonus = qs.aggregate(Sum("bonuss_1")).get('bonuss_1__sum', 0)
             paid = qs.aggregate(Sum("paid_1")).get('paid_1__sum', 0)
             vplacheno = qs.aggregate(Sum("vplacheno_1")).get('vplacheno_1__sum', 0)
-            waiting2 = qs.filter(request_price__answer=False).aggregate(waiting_sum=Sum('request_price__price')).get(
-                "waiting_sum", 0)
+            # waiting2 = qs.filter(request_price__answer=False).aggregate(waiting_sum=Sum('request_price__price')).get(
+            #     "waiting_sum", 0)
             # ---------------------------------------slow-----------------------------------------------------------
             waiting = 0
             for wait in qs:
@@ -332,20 +327,6 @@ class TotalAdmin(admin.ModelAdmin):
                 vplacheno = 0
             itog = int(oklad) - int(paid) + int(bonus)
             ostatok = int(itog) - int(vplacheno) - int(waiting)
-            # bot.send_message(chat_id=779890968, text=waiting2)
-            # ostatok = int(itog) - int(vplacheno)
-
-            # -------------------------------------------------------------------------
-            # ostatok = qs.aggregate(Sum("ostatok_1")).get('ostatok_1__sum', 0)
-
-            # =============================================================
-            # for data in qs:
-            #     oklad += data.oklad_1
-            #     bonus += data.bonuss_1
-            #     paid += data.paid_1
-            #     itog += data.itog_1
-            #     vplacheno += data.vplacheno_1
-            #     ostatok += data.ostatok_1
 
             my_context = {
                 'oklad': "{:,}".format(oklad),

@@ -8,9 +8,10 @@
     <ul class="object-tools">
         {% block object-tools-items %}
             {% if user.is_authenticated %}
-                <li>
-                    <a href="#" class="create_button fa fa-eye-slash" id="hide" style="font-size:20px"></a>
-                </li>
+{#                <li>#}
+                    <a href="#" class="btn btn-success create_button fa fa-eye-slash" id="hide" style="font-size:20px;
+                    margin-right: 5px"></a>
+{#                </li>#}
             {% endif %}
             {% if has_add_permission %}
                 {{ block.super }}
