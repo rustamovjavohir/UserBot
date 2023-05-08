@@ -193,7 +193,8 @@ class BonusAdmin(ImportExportModelAdmin):
 
 
 @admin.register(Leave)
-class LeaveAdmin(ExportMixin, admin.ModelAdmin):
+# class LeaveAdmin(ExportMixin, admin.ModelAdmin):
+class LeaveAdmin(admin.ModelAdmin):
     change_list_template = 'import_export/change_list_import_export.html'
     list_display = ["full_name", "datetime_create", "department", "year", "month", "musk_fine"]
     list_display_links = ["full_name"]
