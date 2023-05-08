@@ -3,7 +3,7 @@ from apps.staff.models import Department
 
 
 class DepartmentFilter(SimpleListFilter):
-    title = 'Department'
+    title = 'Подразделение'
     parameter_name = 'department_id'
     model = Department
 
