@@ -303,7 +303,7 @@ class Request_price(models.Model):
     answer = models.BooleanField(default=False, verbose_name="Ответил")
     status = models.CharField(max_length=256, default="", null=True, blank=True)
     is_deleted = models.BooleanField(default=False)
-    created_at = models.DateField(auto_now_add=True, verbose_name="Дата создания")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     departments = Department.objects.all()
 
