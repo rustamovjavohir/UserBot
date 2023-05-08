@@ -10,7 +10,7 @@
             {% if user.is_authenticated %}
 {#                <li>#}
                     <a href="#" class="btn btn-success create_button fa fa-eye-slash" id="hide" style="font-size:20px;
-                    margin-right: 5px"></a>
+                    margin-right: 5px; margin-left: 5px"></a>
 {#                </li>#}
             {% endif %}
             {% if has_add_permission %}
@@ -78,6 +78,8 @@
                     $(".field-ostatok").toggleClass('hide-text')
                     $(".field-musk_salary").toggleClass('hide-text')
                     $(".field-musk_fine").toggleClass('hide-text')
+                    $(".field-musk_bonus").toggleClass('hide-text')
+                    $(".field-musk_paid").toggleClass('hide-text')
                 });
             })
         })(django.jQuery);
@@ -85,7 +87,7 @@
 
     <style>
         .field-oklad, .field-bonuss, .field-paid, .field-itog, .field-vplacheno, .field-waiting, .field-ostatok,
-        .field-musk_salary, .field-musk_fine {
+        .field-musk_salary, .field-musk_fine, .field-musk_bonus, .field-musk_paid{
             opacity: 0;
         }
 
