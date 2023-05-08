@@ -9,6 +9,7 @@ from import_export.formats import base_formats
 from import_export.admin import ImportExportModelAdmin, ExportMixin
 
 from config.settings import URL_1C, PASSWORD_1C, LOGIN_1C
+from .filters.filters import DepartmentFilter
 from .resources import *
 from telegram import Bot
 from config.settings import S_TOKEN
@@ -247,19 +248,7 @@ class Request_priceAdmin(admin.ModelAdmin):
     list_display = ["id", "all_workers", "department", "month", "price", "avans", "answer", "created_at"]
     list_display_links = ["all_workers", "department"]
     list_per_page = 70
-
-    # def save_model(self, request, obj, form, change):
-    #     super().save_model(request, obj, form, change)
-    #     url = f"{URL_1C}ut3/hs/radius_bot/create_applications"
-    #     auth = (LOGIN_1C, PASSWORD_1C)
-    #     js = {
-    #         "id": str(obj.pk),
-    #         "department": obj.department_id,
-    #         "price": obj.price,
-    #         "avans": obj.avans,
-    #         "comment": obj.comment
-    #     }
-    #     requests.post(url=url, auth=auth, json=js)
+    list_filter = (DepartmentFilter, "month")
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -282,7 +271,6 @@ class TotalAdmin(admin.ModelAdmin):
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
     list_per_page = 50
-
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
