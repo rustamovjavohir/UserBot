@@ -166,7 +166,7 @@ class BonusAdmin(ImportExportModelAdmin):
             extra_context=extra_context,
         )
         try:
-            qs = response.context_data['cl'].queryset
+            qs = response.context_data['cl'].result_list
             bonus = sum([data.bonus for data in qs])
             paid = sum([data.paid for data in qs])
 
@@ -219,7 +219,7 @@ class LeaveAdmin(ExportMixin, admin.ModelAdmin):
         )
         try:
 
-            qs = response.context_data['cl'].queryset
+            qs = response.context_data['cl'].result_list
             fine = sum([data.fine for data in qs])
 
             my_context = {
@@ -288,7 +288,6 @@ class TotalAdmin(admin.ModelAdmin):
             extra_context=extra_context,
         )
         try:
-            qs = response.context_data['cl'].queryset
             qs = response.context_data['cl'].result_list
             # ------------------------------------------------------------------------
 
