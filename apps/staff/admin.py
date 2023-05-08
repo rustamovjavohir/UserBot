@@ -113,7 +113,7 @@ class SalaryAdmin(ImportExportModelAdmin):
             extra_context=extra_context,
         )
         try:
-            qs = response.context_data['cl'].queryset
+            qs = response.context_data['cl'].result_list
             salary = sum([data.salary for data in qs])
 
             my_context = {
