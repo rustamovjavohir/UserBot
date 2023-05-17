@@ -295,7 +295,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                                          reply_markup=acceptInlineButton(req.id))
                 update.message.reply_text(text=f"✅So`rov {staff.boss.full_name}ga yuborildi, ID:  {req.pk}")
             else:
-                url = f"{URL_1C}radiusut/hs/radius_bot/create_applications"
+                url = f"{URL_1C}hs/radius_bot/create_applications"
                 auth = (LOGIN_1C, PASSWORD_1C)
                 js = {
                     "id": str(req.pk),

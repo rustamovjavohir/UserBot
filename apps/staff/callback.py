@@ -22,7 +22,7 @@ def inline(update: Update, context):
                 department = "00-000022"
             else:
                 department = req.department_id
-            url = f"{URL_1C}radiusut/hs/radius_bot/create_applications"
+            url = f"{URL_1C}hs/radius_bot/create_applications"
             auth = (LOGIN_1C, PASSWORD_1C)
             js = {
                 "id": str(req.pk),
