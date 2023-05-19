@@ -15,7 +15,13 @@ class AdminTimekeeping(admin.ModelAdmin):
     list_display = ['worker', 'worker_department', 'date', 'check_in', 'check_out', 'created_at']
     list_filter = ['worker', 'date', 'worker__department']
     ordering = ('-date', 'worker__department')
+    readonly_fields = ('created_at', 'check_in', 'check_out', 'date', 'is_deleted')
     date_hierarchy = 'date'
+
+    def get_readonly_fields(self, request, obj=None):
+        if request.user.is_superuser:
+            return []
+        return self.readonly_fields
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
