@@ -35,6 +35,7 @@ class Timekeeping(models.Model):
     check_out = models.DateTimeField(null=True, blank=True, verbose_name='Время ухода')
     date = models.DateField(null=True, blank=True, verbose_name='Дата')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    is_deleted = models.BooleanField(default=False, verbose_name='Удален')
 
     def __str__(self):
         return self.worker.full_name

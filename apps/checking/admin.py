@@ -17,6 +17,10 @@ class AdminTimekeeping(admin.ModelAdmin):
     ordering = ('-date', 'worker__department')
     date_hierarchy = 'date'
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.filter(is_deleted=False)
+
     def worker_department(self, obj):
         return obj.worker.department
 
