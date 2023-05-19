@@ -27,11 +27,13 @@
                     <option value="{{ worker }}">{{ worker }}</option>
                 {% endfor %}
             </select>
+            <label for="comment" class="form-label">Комментарий</label>
+            <input type="text" id="comment" class="form-control user-select" aria-describedby="comment">
         </div>
 
         <div class="image_canvas">
             <canvas id="canvas" width="810" height="520"></canvas>
-{#            <button type="button" id="open-cam" class="btn btn-primary" onClick="open_webcam()">Open Camera</button>#}
+            {#            <button type="button" id="open-cam" class="btn btn-primary" onClick="open_webcam()">Open Camera</button>#}
             <button type="button" class="btn btn-success take-photo-button" onClick=take_snapshot()>Фотографировать
             </button>
 

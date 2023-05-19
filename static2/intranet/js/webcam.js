@@ -59,6 +59,7 @@ function getDateTime() {
 
 function take_snapshot() {
     let user_val = $('#user_select').val();
+    let comment = $('#comment').val();
     if (user_val === '-1')
         Swal.fire(
             'Foydalanuvchi tanlanmadi',
@@ -88,7 +89,8 @@ function take_snapshot() {
                         },
                         body: JSON.stringify({
                             imageData: imageData,
-                            worker: user_val
+                            worker: user_val,
+                            comment: comment,
                         })
                     })
                         .then((response) => response.json())

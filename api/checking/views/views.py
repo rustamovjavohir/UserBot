@@ -63,9 +63,12 @@ class SaveImage(APIView):
             image_bytes = base64.b64decode(image_data.split('base64,')[1])
             image_file = InputFile(io.BytesIO(image_bytes), filename=f'image.png')
             worker = get_worker_by_name(name=request.data.get('worker'))
+            comment = request.data.get('comment', None)
             worker_department = worker.department.name.replace(' ', '_')
             worker_name = worker.full_name.replace(' ', '_')
             caption = f"#{worker_department} \n#{worker_name}"
+            if comment:
+                caption += f"\n{comment}"
             self.bot.send_photo(chat_id=self.send_checking_id, photo=image_file, caption=caption)
 
             worker_time = Timekeeping.objects.get_or_create(worker=worker, date=get_current_date().date())[0]
@@ -73,7 +76,8 @@ class SaveImage(APIView):
             response = {
                 'status': 'success',
                 'message': 'Image processed successfully',
-                'worker': request.data.get('worker')
+                'worker': request.data.get('worker'),
+                'comment': request.data.get('comment'),
             }
             return JsonResponse(response, status=200)
 
