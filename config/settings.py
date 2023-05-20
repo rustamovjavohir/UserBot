@@ -148,7 +148,7 @@ LOGIN_1C = env.str('LOGIN_1C')
 PASSWORD_1C = env.str('PASSWORD_C')
 ALLOWED_IPS = env.list('ALLOWED_IPS')
 SEND_CHECKING_ID = env.str('SEND_CHECKING_ID')
-WORKING_TIME = env.str('WORKING_TIME')
+WORKING_TIME = env.int('WORKING_TIME')
 
 JAZZMIN_SETTINGS = {
     # title of the window (Will default to current_admin_site.site_title if absent or None)

@@ -49,7 +49,7 @@ class Timekeeping(models.Model):
         self.save()
 
     def setCheckOut(self):
-        if datetime.now(tz=self.get_tz_info()) - self.check_in > timedelta(hours=int(WORKING_TIME)):
+        if datetime.now(tz=self.get_tz_info()) - self.check_in > timedelta(hours=WORKING_TIME):
             self.check_out = datetime.now(tz=self.get_tz_info())
             self.save()
 
