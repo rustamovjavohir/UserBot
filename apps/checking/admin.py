@@ -12,7 +12,7 @@ class AdminAllowedIPS(admin.ModelAdmin):
 
 @admin.register(Timekeeping)
 class AdminTimekeeping(admin.ModelAdmin):
-    list_display = ['worker', 'worker_department', 'date', 'check_in', 'check_out', 'created_at']
+    list_display = ['worker', 'worker_department', 'date', 'check_in', 'check_out']
     list_filter = ['worker', 'date', 'worker__department']
     ordering = ('-date', 'worker__department')
     readonly_fields = ('created_at', 'check_in', 'check_out', 'date', 'is_deleted')
