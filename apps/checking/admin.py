@@ -1,5 +1,6 @@
 from django.contrib import admin
 from apps.checking.models import AllowedIPS, Timekeeping
+import pytz
 
 
 # Register your models here.
@@ -18,6 +19,10 @@ class AdminTimekeeping(admin.ModelAdmin):
     readonly_fields = ('created_at', 'check_in', 'check_out', 'date', 'is_deleted')
     date_hierarchy = 'date'
 
+    @staticmethod
+    def get_tz_info():
+        return pytz.timezone('Asia/Tashkent')
+
     def get_readonly_fields(self, request, obj=None):
         if request.user.is_superuser:
             return []
@@ -30,13 +35,13 @@ class AdminTimekeeping(admin.ModelAdmin):
         return qs.filter(is_deleted=False)
 
     def check_in_pretty(self, obj):
-        return obj.check_in.strftime("%d/%m  %H:%M")
+        return obj.check_in.astimezone(self.get_tz_info()).strftime("%d/%m  %H:%M")
 
     check_in_pretty.short_description = 'Время прихода'
 
     def check_out_pretty(self, obj):
         if obj.check_out:
-            return obj.check_out.strftime("%d/%m  %H:%M")
+            return obj.check_out.astimezone(self.get_tz_info()).strftime("%d/%m  %H:%M")
         return '-'
 
     check_out_pretty.short_description = 'Время ухода'
