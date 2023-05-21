@@ -35,13 +35,13 @@ class AdminTimekeeping(admin.ModelAdmin):
         return qs.filter(is_deleted=False)
 
     def check_in_pretty(self, obj):
-        return obj.check_in.astimezone(self.get_tz_info()).strftime("%d/%m  %H:%M")
+        return obj.check_in.astimezone(self.get_tz_info()).strftime("%H:%M")
 
     check_in_pretty.short_description = 'Время прихода'
 
     def check_out_pretty(self, obj):
         if obj.check_out:
-            return obj.check_out.astimezone(self.get_tz_info()).strftime("%d/%m  %H:%M")
+            return obj.check_out.astimezone(self.get_tz_info()).strftime("%H:%M")
         return '-'
 
     check_out_pretty.short_description = 'Время ухода'
