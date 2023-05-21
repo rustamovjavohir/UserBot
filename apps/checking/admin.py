@@ -12,7 +12,7 @@ class AdminAllowedIPS(admin.ModelAdmin):
 
 @admin.register(Timekeeping)
 class AdminTimekeeping(admin.ModelAdmin):
-    list_display = ['worker', 'worker_department', 'date', 'check_in', 'check_out']
+    list_display = ['worker', 'worker_department', 'date', 'check_in_pretty', 'check_out_pretty']
     list_filter = ['worker', 'date', 'worker__department']
     ordering = ('-date', 'worker__department')
     readonly_fields = ('created_at', 'check_in', 'check_out', 'date', 'is_deleted')
@@ -28,6 +28,18 @@ class AdminTimekeeping(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(is_deleted=False)
+
+    def check_in_pretty(self, obj):
+        return obj.check_in.strftime("%d/%m  %H:%M")
+
+    check_in_pretty.short_description = 'Время прихода'
+
+    def check_out_pretty(self, obj):
+        if obj.check_out:
+            return obj.check_out.strftime("%d/%m  %H:%M")
+        return '-'
+
+    check_out_pretty.short_description = 'Время ухода'
 
     def worker_department(self, obj):
         return obj.worker.department
