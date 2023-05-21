@@ -110,5 +110,8 @@ function take_snapshot() {
             width: 400,
         })
 
+        $('#user_select').val('-1')
+        $('#comment').val('')
+
     }
 }
