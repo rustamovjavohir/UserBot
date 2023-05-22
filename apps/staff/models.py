@@ -5,6 +5,11 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import Sum
 from django.utils.safestring import mark_safe
+from telegram import Bot
+
+from config.settings import S_TOKEN
+
+bot = Bot(S_TOKEN)
 
 
 def getMonths() -> list:
@@ -170,6 +175,14 @@ class Bonus(models.Model):
         return "{:,}".format(self.paid)
 
     musk_paid.fget.short_description = "Штраф"
+
+    def send_bonus_notification(self):
+        bot.send_message(self.full_name.telegram_id,
+                         f"Вам начислен бонус в размере {self.musk_bonus} сум за {self.month} месяц")
+
+    def send_paid_notification(self):
+        bot.send_message(self.full_name.telegram_id,
+                         f"Вам начислен штраф в размере {self.musk_paid} сум за {self.month} месяц")
 
     class Meta:
         verbose_name = "Бонус и шртаф"

@@ -68,6 +68,10 @@ def pre_save_bonus(sender, instance, *args, **kwargs):
                 total.bonuss_1 += (instance.bonus - old_instance.bonus)
                 total.paid_1 += (instance.paid - old_instance.paid)
             total.save()
+        if old_instance.bonus != instance.bonus:
+            instance.send_bonus_notification()
+        if old_instance.paid != instance.paid:
+            instance.send_paid_notification()
     else:
         total = Total.objects.filter(full_name=instance.full_name, year=instance.year,
                                      month=instance.month).order_by('-id').first()
@@ -75,6 +79,11 @@ def pre_save_bonus(sender, instance, *args, **kwargs):
             total.bonuss_1 += instance.bonus
             total.paid_1 += instance.paid
             total.save()
+
+        if instance.bonus:
+            instance.send_bonus_notification()
+        if instance.paid:
+            instance.send_paid_notification()
 
 
 @transaction.atomic
