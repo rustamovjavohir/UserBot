@@ -150,7 +150,7 @@ class Salarys(models.Model):
 
 
 class Bonus(models.Model):
-    bonus_id = models.CharField(max_length=250, null=True, blank=True, verbose_name="Удален ид")
+    bonus_id = models.CharField(max_length=250, null=True, blank=True, verbose_name="1c bonus ид")
     full_name = models.ForeignKey(Workers, verbose_name="Ф.И.О", on_delete=models.CASCADE)
     month = models.CharField(choices=getMonths(), verbose_name="Месяц", max_length=100)
     year = models.CharField(default=datetime.datetime.now().year, verbose_name="Год", max_length=10)

@@ -148,6 +148,11 @@ class BonusAdmin(ImportExportModelAdmin):
     search_fields = ["full_name__full_name", "month"]
     resource_class = PaidResource
     list_per_page = 70
+    exclude = ['is_deleted', "bonus_id"]
+
+    def get_exclude(self, request, obj=None):
+        if request.user.is_superuser:
+            return ["bonus_id"]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
