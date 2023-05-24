@@ -6,12 +6,15 @@ from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
 from rest_framework import status
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from telegram import InputMediaPhoto, InputFile
 
+from api.authorization.serializers.serializers import WorkerSerializers
 from api.checking.mixins import IsRadiusMixin
+from api.checking.paginations.paginations import TimekeepingPagination
 from api.checking.permissions import RadiusPermission
+from api.checking.serializers.serializers import TimekeepingSerializer
 from api.utils import get_client_ip, base64_to_image, get_worker_by_name, get_current_date
 from telegram.bot import Bot
 from apps.checking.models import AllowedIPS, Timekeeping
@@ -94,3 +97,24 @@ class SaveImage(APIView):
         response.data.pop('detail')
 
         return response
+
+
+class UserTimekeepingView(ListAPIView):
+    serializer_class = TimekeepingSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = Timekeeping.objects.all()
+    worker_serializer_class = WorkerSerializers
+    pagination_class = TimekeepingPagination
+
+    def get_queryset(self):
+        qs = super().get_queryset().filter(worker=self.request.user.workers_set.first())
+        return qs
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        worker_serializer = self.worker_serializer_class(self.request.user.workers_set.first())
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response({'worker': worker_serializer.data, 'timekeeping': serializer.data})
+
