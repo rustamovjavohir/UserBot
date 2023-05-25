@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from rest_framework import status
@@ -83,6 +84,7 @@ class LogoutView(GenericAPIView):
 class CustomUserProfile(GenericAPIView):
     serializer_class = UserProfilesSerializer
     permission_classes = [IsAuthenticated, ]
+    # authentication_classes = [JWTAuthentication, ]
 
     def get(self, request, *args, **kwargs):
         serializer = self.get_serializer(request.user)

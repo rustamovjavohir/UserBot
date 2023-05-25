@@ -95,20 +95,33 @@ function take_snapshot() {
                     })
                         .then((response) => response.json())
                         .then((data) => {
+                            if (data.status === 'success') {
+                                Swal.fire({
+                                    position: 'top-end',
+                                    icon: 'success',
+                                    title: data.message,
+                                    showConfirmButton: false,
+                                    timer: 2000,
+                                    width: 400,
+                                })
+                            } else {
+                                Swal.fire({
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: data.message,
+                                    showConfirmButton: false,
+                                    timer: 2000,
+                                    width: 400,
+                                })
+                            }
+
                             console.log(data);
                         });
                 };
                 image.src = data_uri;
             });
         });
-        Swal.fire({
-            position: 'top-end',
-            icon: 'success',
-            title: 'Your work has been saved',
-            showConfirmButton: false,
-            timer: 2000,
-            width: 400,
-        })
+
 
         $('#user_select').val('-1')
         $('#comment').val('')

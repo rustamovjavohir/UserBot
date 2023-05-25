@@ -5,6 +5,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
 from rest_framework import status
+from rest_framework.authentication import SessionAuthentication
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -57,6 +58,7 @@ def getIpAddress(request):
 
 class SaveImage(APIView):
     send_checking_id = settings.SEND_CHECKING_ID
+    authentication_classes = [SessionAuthentication, ]
     permission_classes = [IsAuthenticated, ]
     bot = Bot(token=settings.S_TOKEN)
 
@@ -117,4 +119,3 @@ class UserTimekeepingView(ListAPIView):
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response({'worker': worker_serializer.data, 'timekeeping': serializer.data})
-
