@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-from api.authorization.serializers.serializers import WorkerSerializers
 from apps.checking.models import Timekeeping
 
 
@@ -9,9 +8,9 @@ class CheckingSerializer(serializers.Serializer):
 
 
 class TimekeepingSerializer(serializers.ModelSerializer):
-    # worker = WorkerSerializers(many=False)
+    worker = serializers.CharField(source='worker.full_name', read_only=True)
 
     class Meta:
         model = Timekeeping
-        fields = ['worker', 'date', 'check_in', 'check_out', 'created_at']
-        read_only_fields = ['worker', 'date', 'check_in', 'check_out', 'created_at']
+        fields = ['worker', 'date', 'check_in', 'check_out', 'comment']
+        read_only_fields = ['worker', 'date', 'check_in', 'check_out']

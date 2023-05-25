@@ -34,6 +34,7 @@ class Timekeeping(models.Model):
     check_in = models.DateTimeField(null=True, blank=True, verbose_name='Время прихода')
     check_out = models.DateTimeField(null=True, blank=True, verbose_name='Время ухода')
     date = models.DateField(null=True, blank=True, verbose_name='Дата')
+    comment = models.CharField(max_length=300, null=True, blank=True, verbose_name='Комментарий')
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     is_deleted = models.BooleanField(default=False, verbose_name='Удален')
 
@@ -46,11 +47,15 @@ class Timekeeping(models.Model):
 
     def setCheckIn(self):
         self.check_in = datetime.now(tz=self.get_tz_info())
+        self.worker.is_active = True
+        self.worker.save()
         self.save()
 
     def setCheckOut(self):
         if datetime.now(tz=self.get_tz_info()) - self.check_in > timedelta(hours=WORKING_TIME):
             self.check_out = datetime.now(tz=self.get_tz_info())
+            self.worker.is_active = False
+            self.worker.save()
             self.save()
 
     def setCheckInOrOut(self):
@@ -62,3 +67,4 @@ class Timekeeping(models.Model):
     class Meta:
         verbose_name = 'Проверка'
         verbose_name_plural = 'Проверки'
+        ordering = ['-date']

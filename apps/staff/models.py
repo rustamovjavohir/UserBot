@@ -114,6 +114,7 @@ class Workers(models.Model):
     in_office = models.BooleanField(default=True, null=True, blank=True, verbose_name="В офисе")
     start_work = models.TimeField(default=datetime.datetime.strptime("09:00:00", '%H:%M:%S').time(),
                                   verbose_name="Начало работы")
+    is_active = models.BooleanField(default=False, verbose_name="Активный")
     is_deleted = models.BooleanField(default=False, verbose_name="Удален")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 

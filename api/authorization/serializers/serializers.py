@@ -4,7 +4,10 @@ from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer, \
     TokenVerifySerializer
-from apps.staff.models import Workers
+
+from api.checking.serializers.serializers import TimekeepingSerializer
+from api.utils import get_current_date
+from apps.staff.models import Workers, Department
 
 
 class CustomObtainPairSerializer(TokenObtainPairSerializer):
@@ -49,10 +52,42 @@ class LogoutSerializer(serializers.Serializer):
     refresh = serializers.CharField()
 
 
+class DepartmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Department
+        fields = ['id', 'name']
+
+
 class WorkerSerializers(serializers.ModelSerializer):
+    department = serializers.CharField(source='department.name')
+    # timekeeping_set = TimekeepingSerializer(many=True)
+    timekeeping_set = serializers.SerializerMethodField(source='get_timekeeping_set')
+
+    def get_timekeeping_set(self, obj):
+        timekeeping = obj.timekeeping_set.filter(date=get_current_date().date()).first()
+        if not timekeeping:
+            return None
+        serializer = TimekeepingSerializer(timekeeping, many=False)
+        return serializer.data
+
     class Meta:
         model = Workers
-        fields = ['id', 'full_name', 'department', 'job', 'phone']
+        fields = ['id', 'full_name', 'department', 'job', 'phone', 'is_active', 'timekeeping_set']
+
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        if response['timekeeping_set']:
+            response['date'] = response['timekeeping_set']['date']
+            response['check_in'] = response['timekeeping_set']['check_in']
+            response['check_out'] = response['timekeeping_set']['check_out']
+            response['comment'] = response['timekeeping_set']['comment']
+        else:
+            response['date'] = None
+            response['check_in'] = None
+            response['check_out'] = None
+            response['comment'] = None
+        response.pop('timekeeping_set')
+        return response
 
 
 class WorkerTimekeepingSerializer(serializers.ModelSerializer):
@@ -72,6 +107,10 @@ class UserProfilesSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
+        response['worker'] = None
+        if response['workers_set']:
+            response['worker'] = response['workers_set'][0]
+        response.pop('workers_set')
         data = OrderedDict([
             ('success', True),
             ('statusCode', 200),

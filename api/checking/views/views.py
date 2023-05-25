@@ -1,5 +1,6 @@
 import base64
 import io
+from collections import OrderedDict
 
 from django.http import HttpResponse, JsonResponse
 from django.views.generic import TemplateView
@@ -9,6 +10,7 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from telegram import InputMediaPhoto, InputFile
 
 from api.authorization.serializers.serializers import WorkerSerializers
@@ -119,3 +121,26 @@ class UserTimekeepingView(ListAPIView):
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response({'worker': worker_serializer.data, 'timekeeping': serializer.data})
+
+
+class SetTimekeepingView(GenericAPIView):
+    serializer_class = TimekeepingSerializer
+    authentication_classes = [JWTAuthentication, ]
+    permission_classes = [IsAuthenticated, ]
+
+    def post(self, request, *args, **kwargs):
+        worker = request.user.workers_set.first()
+        comment = request.data.get('comment', None)
+        action = request.data.get('action', None)
+        worker_time = Timekeeping.objects.get_or_create(worker=worker, date=get_current_date().date())[0]
+        worker_time.setCheckInOrOut()
+        if comment:
+            worker_time.comment = comment
+            worker_time.save()
+        serializer = self.get_serializer(worker_time)
+        response = OrderedDict([
+            ('success', True),
+            ("statusCode", 200),
+            ("result", serializer.data),
+        ])
+        return JsonResponse(response, status=200)
