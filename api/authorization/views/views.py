@@ -106,5 +106,4 @@ class VerifyTokenView(TokenVerifyView):
             response.data['message'] = response.data['detail']
             response.data['result'] = None
             response.data.pop('detail')
-            response.status_code = status.HTTP_200_OK
         return response
