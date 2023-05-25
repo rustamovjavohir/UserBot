@@ -41,14 +41,12 @@ class LoginView(TokenObtainPairView):
             response.data['message'] = response.data['detail']
             response.data['result'] = None
             response.data.pop('detail')
-            response.status_code = status.HTTP_200_OK
             return response
 
         response.data['success'] = False
         response.data['message'] = str(exc)
         response.data['result'] = None
         response.data["status_code"] = response.status_code
-        response.status_code = status.HTTP_200_OK
         response.data.pop('detail')
         return response
 
