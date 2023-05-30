@@ -101,6 +101,11 @@ class ITRequestPrice(models.Model):
 
 
 class Workers(models.Model):
+    class Role(models.TextChoices):
+        SUPER_ADMIN = 'super_admin', 'Супер Администратор'
+        ADMIN = 'admin', 'Администратор'
+        USER = 'user', 'Пользователь'
+
     full_name = models.CharField(max_length=70, verbose_name="Ф.И.О", unique=True)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, verbose_name="Подразделение")
     job = models.CharField(max_length=70, verbose_name="Должность")
@@ -114,6 +119,7 @@ class Workers(models.Model):
     in_office = models.BooleanField(default=True, null=True, blank=True, verbose_name="В офисе")
     start_work = models.TimeField(default=datetime.datetime.strptime("09:00:00", '%H:%M:%S').time(),
                                   verbose_name="Начало работы")
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.USER, verbose_name="Роль")
     is_active = models.BooleanField(default=False, verbose_name="Активный")
     is_deleted = models.BooleanField(default=False, verbose_name="Удален")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")

@@ -9,8 +9,9 @@ class CheckingSerializer(serializers.Serializer):
 
 class TimekeepingSerializer(serializers.ModelSerializer):
     worker = serializers.CharField(source='worker.full_name', read_only=True)
+    action = serializers.ChoiceField(choices=Timekeeping.ActionChoices, read_only=True)
 
     class Meta:
         model = Timekeeping
-        fields = ['worker', 'date', 'check_in', 'check_out', 'comment']
+        fields = ['worker', 'date', 'check_in', 'check_out', 'comment', 'action']
         read_only_fields = ['worker', 'date', 'check_in', 'check_out']

@@ -1,9 +1,11 @@
 import requests
 from datetime import date, datetime as date_time
 
+from pytz import timezone
 from telegram import Bot
 
 from apps.staff.models import Bonus, Leave, Salarys, Total, getMonthList, Workers, Department, Request_price
+from apps.checking.models import Timekeeping
 from config.settings import S_TOKEN
 from django.db.models import Sum
 
@@ -113,3 +115,8 @@ def addSalary():
                                              year=str(year), month=next_month)
 
     return year, month, next_month
+
+
+def setCheckOut():
+    tz_info = timezone('Asia/Tashkent')
+    Timekeeping.objects.filter(check_out__isnull=True).update(check_out=date_time.now(tz=tz_info))

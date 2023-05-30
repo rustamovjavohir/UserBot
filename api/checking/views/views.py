@@ -133,7 +133,12 @@ class SetTimekeepingView(GenericAPIView):
         comment = request.data.get('comment', None)
         action = request.data.get('action', None)
         worker_time = Timekeeping.objects.get_or_create(worker=worker, date=get_current_date().date())[0]
-        worker_time.setCheckInOrOut()
+        if action == Timekeeping.ActionChoices.CHECK_IN:
+            worker_time.setCheckIn()
+        elif action == Timekeeping.ActionChoices.CHECK_OUT:
+            worker_time.setCheckOutByApi()
+        else:
+            worker_time.setCheckInOrOut()
         if comment:
             worker_time.comment = comment
             worker_time.save()

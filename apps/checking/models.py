@@ -30,6 +30,10 @@ class AllowedIPS(models.Model):
 
 
 class Timekeeping(models.Model):
+    class ActionChoices(models.TextChoices):
+        CHECK_IN = 'check_in', 'Приход'
+        CHECK_OUT = 'check_out', 'Уход'
+
     worker = models.ForeignKey(Workers, on_delete=models.DO_NOTHING, verbose_name='Сотрудник')
     check_in = models.DateTimeField(null=True, blank=True, verbose_name='Время прихода')
     check_out = models.DateTimeField(null=True, blank=True, verbose_name='Время ухода')
@@ -46,13 +50,18 @@ class Timekeeping(models.Model):
         return timezone('Asia/Tashkent')
 
     def setCheckIn(self):
-        self.check_in = datetime.now(tz=self.get_tz_info())
-        self.worker.is_active = True
-        self.worker.save()
-        self.save()
+        if not self.check_in:
+            self.check_in = datetime.now(tz=self.get_tz_info())
+            self.worker.is_active = True
+            self.worker.save()
+            self.save()
 
     def setCheckOut(self):
         if datetime.now(tz=self.get_tz_info()) - self.check_in > timedelta(hours=WORKING_TIME):
+            self.setCheckOutByApi()
+
+    def setCheckOutByApi(self):
+        if not self.check_out:
             self.check_out = datetime.now(tz=self.get_tz_info())
             self.worker.is_active = False
             self.worker.save()
