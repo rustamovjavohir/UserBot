@@ -120,3 +120,4 @@ def addSalary():
 def setCheckOut():
     tz_info = timezone('Asia/Tashkent')
     Timekeeping.objects.filter(check_out__isnull=True).update(check_out=date_time.now(tz=tz_info))
+    Workers.objects.filter(is_active=True).update(is_active=False)

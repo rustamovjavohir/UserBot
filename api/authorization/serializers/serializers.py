@@ -72,7 +72,7 @@ class WorkerSerializers(serializers.ModelSerializer):
 
     class Meta:
         model = Workers
-        fields = ['id', 'full_name', 'department', 'job', 'phone', 'is_active', 'timekeeping_set']
+        fields = ['id', 'full_name', 'department', 'job', 'phone', 'is_active', 'role', 'timekeeping_set']
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
