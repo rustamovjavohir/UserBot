@@ -61,7 +61,7 @@ class Timekeeping(models.Model):
             self.setCheckOutByApi()
 
     def setCheckOutByApi(self):
-        if not self.check_out:
+        if not self.check_out and self.check_in:
             self.check_out = datetime.now(tz=self.get_tz_info())
             self.worker.is_active = False
             self.worker.save()
