@@ -7,6 +7,7 @@ from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -15,12 +16,13 @@ from telegram import InputMediaPhoto, InputFile
 
 from api.authorization.serializers.serializers import WorkerSerializers
 from api.checking.mixins import IsRadiusMixin
-from api.checking.paginations.paginations import TimekeepingPagination
+from api.checking.paginations.paginations import TimekeepingPagination, WorkerPagination
 from api.checking.permissions import RadiusPermission
 from api.checking.serializers.serializers import TimekeepingSerializer
 from api.utils import get_client_ip, base64_to_image, get_worker_by_name, get_current_date
 from telegram.bot import Bot
 from apps.checking.models import AllowedIPS, Timekeeping
+from apps.staff.models import Workers
 
 from config import settings
 
@@ -149,3 +151,46 @@ class SetTimekeepingView(GenericAPIView):
             ("result", serializer.data),
         ])
         return JsonResponse(response, status=200)
+
+
+class WorkerTimekeepingView(ListAPIView):
+    serializer_class = TimekeepingSerializer
+    authentication_classes = [JWTAuthentication, ]
+    permission_classes = [IsAuthenticated]
+    queryset = Timekeeping.objects.all()
+    pagination_class = TimekeepingPagination
+
+    def get_queryset(self):
+        qs = super().get_queryset().filter(worker__id=self.kwargs.get('pk'))
+        return qs
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        worker = Workers.objects.filter(id=self.kwargs.get('pk')).first()
+        if worker is None:
+            raise NotFound('Worker not found')
+        worker_serializer = WorkerSerializers(worker)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response({'worker': worker_serializer.data, 'timekeeping': serializer.data})
+
+
+class WorkersDailyTimekeepingView(ListAPIView):
+    serializer_class = WorkerSerializers
+    authentication_classes = [JWTAuthentication, ]
+    permission_classes = [IsAuthenticated]
+    queryset = Workers.objects.all().order_by('id')
+    pagination_class = WorkerPagination
+
+    def get_queryset(self):
+        qs = super().get_queryset().filter(department__id=self.request.user.workers_set.first().department.id)
+        return qs
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
