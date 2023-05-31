@@ -17,7 +17,7 @@ from telegram import InputMediaPhoto, InputFile
 from api.authorization.serializers.serializers import WorkerSerializers
 from api.checking.mixins import IsRadiusMixin
 from api.checking.paginations.paginations import TimekeepingPagination, WorkerPagination
-from api.checking.permissions import RadiusPermission
+from api.checking.permissions import RadiusPermission, AdminPermission
 from api.checking.serializers.serializers import TimekeepingSerializer
 from api.utils import get_client_ip, base64_to_image, get_worker_by_name, get_current_date
 from telegram.bot import Bot
@@ -179,7 +179,7 @@ class WorkerTimekeepingView(ListAPIView):
 class WorkersDailyTimekeepingView(ListAPIView):
     serializer_class = WorkerSerializers
     authentication_classes = [JWTAuthentication, ]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, AdminPermission]
     queryset = Workers.objects.all().order_by('id')
     pagination_class = WorkerPagination
 
