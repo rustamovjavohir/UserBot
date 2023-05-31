@@ -184,6 +184,9 @@ class WorkersDailyTimekeepingView(ListAPIView):
     pagination_class = WorkerPagination
 
     def get_queryset(self):
+        if self.request.user.workers_set.first().role == Workers.Role.SUPER_ADMIN:
+            qs = super().get_queryset()
+            return qs
         qs = super().get_queryset().filter(department__id=self.request.user.workers_set.first().department.id)
         return qs
 
