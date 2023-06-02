@@ -1,11 +1,16 @@
 # from django.contrib.gis.utils import GeoIP
+from collections import OrderedDict
+
 from django.db import transaction
+from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from telegram import Bot
 
+from api.checking.permissions import SuperAdminPermission
 from api.utils import get_client_ip
 from apps.staff.models import *
 from config.settings import S_TOKEN, ALLOWED_IPS
@@ -174,3 +179,74 @@ class BonusView(APIView):
             }
 
         return Response(status=200, data=data)
+
+
+class WorkerAttributeView(APIView):
+    authentication_classes = [JWTAuthentication, ]
+    permission_classes = [IsAuthenticated, ]
+    queryset = Workers.objects.all()
+    department_queryset = Department.objects.all()
+
+    def get_department_list(self):
+        return list(self.department_queryset.order_by('name').values_list('name', flat=True))
+
+    def get_department_json(self):
+        return OrderedDict([
+            ('name', 'department'),
+            ('data', self.get_department_list())
+        ])
+
+    def get_job_list(self):
+        return list(self.queryset.order_by('job').values_list('job', flat=True).distinct())
+
+    def get_job_json(self):
+        return OrderedDict([
+            ('name', 'job'),
+            ('data', self.get_job_list())
+        ])
+
+    def get_role_list(self):
+        return Workers.Role.values
+
+    def get_role_json(self):
+        return OrderedDict([
+            ('name', 'role'),
+            ('data', self.get_role_list())
+        ])
+
+    @staticmethod
+    def get_is_active_json():
+        return OrderedDict([
+            ('name', 'is_active'),
+            ('data', [True, False])
+        ])
+
+    @staticmethod
+    def get_in_office_json():
+        return OrderedDict([
+            ('name', 'in_office'),
+            ('data', [True, False])
+        ])
+
+    @staticmethod
+    def get_is_boss_json():
+        return OrderedDict([
+            ('name', 'is_boss'),
+            ('data', [True, False])
+        ])
+
+    def get(self, request, *args, **kwargs):
+        result = [
+            self.get_department_json(),
+            self.get_job_json(),
+            self.get_role_json(),
+            self.get_is_active_json(),
+            self.get_in_office_json(),
+            self.get_is_boss_json()
+        ]
+
+        return JsonResponse(OrderedDict([
+            ('success', True),
+            ("statusCode", 200),
+            ('result', result)
+        ]))

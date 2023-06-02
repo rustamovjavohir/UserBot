@@ -12,6 +12,15 @@ class RadiusPermission(BasePermission):
 
 class AdminPermission(BasePermission):
     def has_permission(self, request, view):
-        if request.user.workers_set.first().is_boss:
-            return True
+        worker = request.user.workers_set.first()
+        if worker:
+            return worker.is_boss
+        return False
+
+
+class SuperAdminPermission(BasePermission):
+    def has_permission(self, request, view):
+        worker = request.user.workers_set.first()
+        if worker:
+            return True if worker.role == Workers.Role.SUPER_ADMIN else False
         return False

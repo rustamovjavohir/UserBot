@@ -5,9 +5,11 @@ from collections import OrderedDict
 from django.http import HttpResponse, JsonResponse
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.exceptions import NotFound
+from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -15,14 +17,16 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from telegram import InputMediaPhoto, InputFile
 
 from api.authorization.serializers.serializers import WorkerSerializers
+from api.checking.filters.filters import TimekeepingFilter
 from api.checking.mixins import IsRadiusMixin
 from api.checking.paginations.paginations import TimekeepingPagination, WorkerPagination
-from api.checking.permissions import RadiusPermission, AdminPermission
+from api.checking.permissions import RadiusPermission, AdminPermission, SuperAdminPermission
 from api.checking.serializers.serializers import TimekeepingSerializer
+from api.staff.filters.filters import WorkerFilter
 from api.utils import get_client_ip, base64_to_image, get_worker_by_name, get_current_date
 from telegram.bot import Bot
 from apps.checking.models import AllowedIPS, Timekeeping
-from apps.staff.models import Workers
+from apps.staff.models import Workers, Department
 
 from config import settings
 
@@ -180,15 +184,16 @@ class WorkersDailyTimekeepingView(ListAPIView):
     serializer_class = WorkerSerializers
     authentication_classes = [JWTAuthentication, ]
     permission_classes = [IsAuthenticated, AdminPermission]
-    queryset = Workers.objects.all().order_by('id')
+    queryset = Workers.objects.all().order_by('department__name')
     pagination_class = WorkerPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ['full_name', ]
+    filterset_class = WorkerFilter
 
     def get_queryset(self):
         if self.request.user.workers_set.first().role == Workers.Role.SUPER_ADMIN:
-            qs = super().get_queryset()
-            return qs
-        qs = super().get_queryset().filter(department__id=self.request.user.workers_set.first().department.id)
-        return qs
+            return super().get_queryset()
+        return super().get_queryset().filter(department__id=self.request.user.workers_set.first().department.id)
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())

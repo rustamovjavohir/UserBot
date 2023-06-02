@@ -73,6 +73,7 @@ class WorkerSerializers(serializers.ModelSerializer):
     class Meta:
         model = Workers
         fields = ['id', 'full_name', 'department', 'job', 'phone', 'is_active', 'role', 'timekeeping_set']
+        read_only_fields = ['id', 'department']
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
@@ -104,6 +105,7 @@ class UserProfilesSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'is_superuser', 'workers_set']
+        read_only_fields = ['id', 'is_superuser']
 
     def to_representation(self, instance):
         response = super().to_representation(instance)
