@@ -45,6 +45,11 @@ class WorkersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     resource_class = WorkerResource
     exclude = ['is_deleted']
 
+    def get_exclude(self, request, obj=None):
+        if request.user.is_superuser:
+            return []
+        return ['is_deleted']
+
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         if request.user.is_superuser:

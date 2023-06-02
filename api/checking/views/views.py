@@ -40,7 +40,8 @@ class CheckingPage(IsRadiusMixin, TemplateView):
 
     def get_users(self, request):
         try:
-            users = request.user.workers_set.first().department.workers_set.all().values_list('full_name', flat=True)
+            users = request.user.workers_set.first().department.workers_set.all()\
+                .filter(is_deleted=False).values_list('full_name', flat=True)
         except AttributeError:
             users = []
         return users
