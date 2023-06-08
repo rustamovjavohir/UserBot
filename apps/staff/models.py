@@ -106,7 +106,7 @@ class Workers(models.Model):
         ADMIN = 'admin', 'Администратор'
         USER = 'user', 'Пользователь'
 
-    full_name = models.CharField(max_length=70, verbose_name="Ф.И.О", unique=True)
+    full_name = models.CharField(max_length=70, verbose_name="Ф.И.О",)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, verbose_name="Подразделение")
     job = models.CharField(max_length=70, verbose_name="Должность")
     is_boss = models.BooleanField(default=False, verbose_name="Начальник отдела")

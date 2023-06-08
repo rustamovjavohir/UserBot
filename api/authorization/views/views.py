@@ -10,8 +10,9 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken, Authen
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
-from api.authorization.serializers.serializers import CustomObtainPairSerializer, CustomTokenRefreshSerializer, \
-    LogoutSerializer, UserProfilesSerializer, VerifyTokenSerializer
+from api.authorization.serializers.serializers import (CustomObtainPairSerializer, CustomTokenRefreshSerializer,
+                                                       LogoutSerializer, UserProfilesSerializer, VerifyTokenSerializer,
+                                                       ChangeUserPasswordSerializer)
 
 
 def LoginPage(request):
@@ -82,11 +83,23 @@ class LogoutView(GenericAPIView):
 class CustomUserProfile(GenericAPIView):
     serializer_class = UserProfilesSerializer
     permission_classes = [IsAuthenticated, ]
-    # authentication_classes = [JWTAuthentication, ]
+    authentication_classes = [JWTAuthentication, ]
 
     def get(self, request, *args, **kwargs):
         serializer = self.get_serializer(request.user)
         return JsonResponse(serializer.data)
+
+    def put(self, request, *args, **kwargs):
+        serializer = self.get_serializer(request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return JsonResponse(serializer.data)
+
+
+class ChangePasswordView(GenericAPIView):
+    serializer_class = ChangeUserPasswordSerializer
+    permission_classes = [IsAuthenticated, ]
+    authentication_classes = [JWTAuthentication, ]
 
     def put(self, request, *args, **kwargs):
         serializer = self.get_serializer(request.user, data=request.data)

@@ -59,7 +59,8 @@ class DepartmentSerializer(serializers.ModelSerializer):
 
 
 class WorkerSerializers(serializers.ModelSerializer):
-    department = serializers.CharField(source='department.name')
+    department = serializers.CharField(source='department.name', required=False)
+    job = serializers.CharField(required=False)
     # timekeeping_set = TimekeepingSerializer(many=True)
     timekeeping_set = serializers.SerializerMethodField(source='get_timekeeping_set')
 
@@ -89,6 +90,17 @@ class WorkerSerializers(serializers.ModelSerializer):
             response['comment'] = None
         response.pop('timekeeping_set')
         return response
+
+    def update(self, instance, validated_data):
+        instance.full_name = validated_data.get('full_name', instance.full_name)
+        instance.job = validated_data.get('job', instance.job)
+        instance.phone = validated_data.get('phone', instance.phone)
+        instance.is_active = validated_data.get('is_active', instance.is_active)
+        instance.role = validated_data.get('role', instance.role)
+        instance.department = Department.objects.filter(
+            name=validated_data.get('department', instance.department)).first()
+        instance.save()
+        return instance
 
 
 class WorkerTimekeepingSerializer(serializers.ModelSerializer):
@@ -136,7 +148,12 @@ class UserProfilesSerializer(serializers.ModelSerializer):
         instance.first_name = validated_data.get('result', {}).get('first_name', instance.first_name)
         instance.last_name = validated_data.get('result', {}).get('last_name', instance.last_name)
         instance.email = validated_data.get('result', {}).get('email', instance.email)
-        instance.is_superuser = validated_data.get('result', {}).get('is_superuser', instance.is_superuser)
+        worker_data = validated_data.get('result', {}).get('workers_set', instance.workers_set)
+        if worker_data:
+            worker = Workers.objects.filter(id=instance.workers_set.first().id).first()
+            worker.full_name = worker_data[0].get('full_name', worker.full_name)
+            worker.phone = worker_data[0].get('phone', worker.phone)
+            worker.save()
         instance.save()
         return instance
 
@@ -155,3 +172,37 @@ class VerifyTokenSerializer(TokenVerifySerializer):
             ('code', 'token_valid')
         ])
         return response
+
+
+class ChangeUserPasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(required=True)
+    confirm_password = serializers.CharField(required=True)
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        response = OrderedDict([
+            ('success', True),
+            ('result', data),
+            ('code', 'password_changed')
+        ])
+        return response
+
+    def validate_confirm_password(self, value):
+        if value != self.initial_data.get('new_password'):
+            raise serializers.ValidationError('Password and confirm password does not match')
+        return value
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data.get('result', {}).get('new_password'))
+        instance.save()
+        return instance
+
+    def to_representation(self, instance):
+        return OrderedDict([
+            ('success', True),
+            ('code', 'password_changed')
+        ])
+
+    class Meta:
+        model = User
+        fields = ['new_password', 'confirm_password']
