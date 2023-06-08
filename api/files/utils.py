@@ -54,8 +54,8 @@ def workers_2_xlsx(query):
     for enum, data in enumerate(query, start=1):
         worksheet.cell(row=BODY_ROW, column=1, value=enum)
         worksheet.cell(row=BODY_ROW, column=2, value=data.department.name)
-        # worksheet.cell(row=BODY_ROW, column=3, value=data.full_name)
-        worksheet.cell(row=BODY_ROW, column=3, value=_now.strftime("%H:%M"))
+        worksheet.cell(row=BODY_ROW, column=3, value=data.full_name)
+        # worksheet.cell(row=BODY_ROW, column=3, value=_now.strftime("%H:%M"))
         worksheet.cell(row=BODY_ROW, column=4, value=timedelta(seconds=60000))
         BODY_ROW += 1
 
