@@ -15,6 +15,7 @@ class AdminAllowedIPS(admin.ModelAdmin):
 class AdminTimekeeping(admin.ModelAdmin):
     list_display = ['worker', 'worker_department', 'date', 'check_in_pretty', 'check_out_pretty']
     list_filter = ['worker', 'date', 'worker__department']
+    search_fields = ['worker__full_name', 'worker__department__name']
     ordering = ('-date', 'worker__department')
     readonly_fields = ('created_at', 'check_in', 'check_out', 'date', 'is_deleted')
     date_hierarchy = 'date'
