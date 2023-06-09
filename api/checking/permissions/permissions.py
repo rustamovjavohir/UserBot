@@ -14,7 +14,7 @@ class AdminPermission(BasePermission):
     def has_permission(self, request, view):
         worker = request.user.workers_set.first()
         if worker:
-            return worker.is_boss
+            return True if worker.is_boss or worker.role == Workers.Role.ADMIN else False
         return False
 
 
