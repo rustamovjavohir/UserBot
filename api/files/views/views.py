@@ -17,8 +17,8 @@ from apps.staff.models import Workers
 
 
 class ExportWorkersView(GenericAPIView):
-    # authentication_classes = [JWTAuthentication, ]
-    # permission_classes = [IsAuthenticated, AdminPermission]
+    authentication_classes = [JWTAuthentication, ]
+    permission_classes = [IsAuthenticated, AdminPermission]
     queryset = Workers.objects.all().order_by('department__name')
     filter_backends = [DjangoFilterBackend, SearchFilter]
     serializer_class = WorkerSerializers
