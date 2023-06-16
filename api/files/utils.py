@@ -48,8 +48,8 @@ def workers_2_xlsx(query, start_date=None, end_date=None):
     date_style = NamedStyle(name='date_style', number_format='mm/dd/yyyy')
     start_time_style = NamedStyle(name='start_time_style', number_format='h:mm', font=Font(bold=True))
     today = datetime.now()
-    start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date else datetime_date(today.year, 5, 1)
-    end_date = datetime.strptime(end_date, '%Y-%m-%d') if end_date else datetime_date(today.year, 5, 30)
+    start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date else datetime_date(today.year, today.month, 1)
+    end_date = datetime.strptime(end_date, '%Y-%m-%d') if end_date else datetime_date(today.year, today.month, 30)
     start_date = datetime_date(start_date.year, start_date.month, start_date.day)
     end_date = datetime_date(end_date.year, end_date.month, end_date.day)
     delta = end_date - start_date
