@@ -48,8 +48,8 @@ def workers_2_xlsx(query, start_date=None, end_date=None):
     date_style = NamedStyle(name='date_style', number_format='mm/dd/yyyy')
     start_time_style = NamedStyle(name='start_time_style', number_format='h:mm', font=Font(bold=True))
     today = datetime.now()
-    start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date else datetime_date(today.year, today.month, 1)
-    end_date = datetime.strptime(end_date, '%Y-%m-%d') if end_date else datetime_date(today.year, today.month, 30)
+    start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date else datetime_date(today.year, 5, 1)
+    end_date = datetime.strptime(end_date, '%Y-%m-%d') if end_date else datetime_date(today.year, 5, 30)
     start_date = datetime_date(start_date.year, start_date.month, start_date.day)
     end_date = datetime_date(end_date.year, end_date.month, end_date.day)
     delta = end_date - start_date
@@ -70,17 +70,13 @@ def workers_2_xlsx(query, start_date=None, end_date=None):
             time_keeping_date = data.timekeeping_set.filter(date=timedelta(days=(i - 4) / 2) + start_date).first()
             if time_keeping_date:
                 if i % 2 == 0:
-                    time_keeping_check_in = time_keeping_date.check_in
-                    if is_aware(time_keeping_date.check_in):
-                        time_keeping_check_in = make_naive(time_keeping_date.check_in)
+                    time_keeping_check_in = timedelta(hours=5) + time_keeping_date.check_in.replace(tzinfo=None)
                     check_in_cell = worksheet.cell(row=BODY_ROW, column=i, value=time_keeping_check_in)
                     check_in_cell.number_format = numbers.FORMAT_DATE_TIME6
                     check_in_cell.style = time_style
                     check_in_cell.alignment = Alignment(horizontal='center', vertical='center')
                 else:
-                    time_keeping_check_out = time_keeping_date.check_out
-                    if is_aware(time_keeping_date.check_out):
-                        time_keeping_check_out = make_naive(time_keeping_date.check_out)
+                    time_keeping_check_out = timedelta(hours=5) + time_keeping_date.check_out.replace(tzinfo=None)
                     check_out_cell = worksheet.cell(row=BODY_ROW, column=i,
                                                     value=time_keeping_check_out)
                     check_out_cell.number_format = numbers.FORMAT_DATE_TIME6
