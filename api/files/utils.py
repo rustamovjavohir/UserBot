@@ -68,24 +68,27 @@ def workers_2_xlsx(query, start_date=None, end_date=None):
         worksheet.cell(row=BODY_ROW, column=3, value=data.full_name)
         for i in range(4, 2 * delta.days + 5):
             time_keeping_date = data.timekeeping_set.filter(date=timedelta(days=(i - 4) / 2) + start_date).first()
-            if time_keeping_date:
+            try:
+                if time_keeping_date:
+                    if i % 2 == 0:
+                        time_keeping_check_in = timedelta(hours=5) + time_keeping_date.check_in.replace(tzinfo=None)
+                        check_in_cell = worksheet.cell(row=BODY_ROW, column=i, value=time_keeping_check_in)
+                        check_in_cell.number_format = numbers.FORMAT_DATE_TIME6
+                        check_in_cell.style = time_style
+                        check_in_cell.alignment = Alignment(horizontal='center', vertical='center')
+                    else:
+                        time_keeping_check_out = timedelta(hours=5) + time_keeping_date.check_out.replace(tzinfo=None)
+                        check_out_cell = worksheet.cell(row=BODY_ROW, column=i,
+                                                        value=time_keeping_check_out)
+                        check_out_cell.number_format = numbers.FORMAT_DATE_TIME6
+                        check_out_cell.style = time_style
+                        check_out_cell.alignment = Alignment(horizontal='center', vertical='center')
                 if i % 2 == 0:
-                    time_keeping_check_in = timedelta(hours=5) + time_keeping_date.check_in.replace(tzinfo=None)
-                    check_in_cell = worksheet.cell(row=BODY_ROW, column=i, value=time_keeping_check_in)
-                    check_in_cell.number_format = numbers.FORMAT_DATE_TIME6
-                    check_in_cell.style = time_style
-                    check_in_cell.alignment = Alignment(horizontal='center', vertical='center')
-                else:
-                    time_keeping_check_out = timedelta(hours=5) + time_keeping_date.check_out.replace(tzinfo=None)
-                    check_out_cell = worksheet.cell(row=BODY_ROW, column=i,
-                                                    value=time_keeping_check_out)
-                    check_out_cell.number_format = numbers.FORMAT_DATE_TIME6
-                    check_out_cell.style = time_style
-                    check_out_cell.alignment = Alignment(horizontal='center', vertical='center')
-            if i % 2 == 0:
-                date_cell = worksheet.cell(row=2, column=i, value=timedelta(days=(i - 4) / 2) + start_date)
-                date_cell.style = date_style
-                date_cell.alignment = Alignment(horizontal='center', vertical='center')
+                    date_cell = worksheet.cell(row=2, column=i, value=timedelta(days=(i - 4) / 2) + start_date)
+                    date_cell.style = date_style
+                    date_cell.alignment = Alignment(horizontal='center', vertical='center')
+            except Exception as ex:
+                print(ex)
         BODY_ROW += 1
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
