@@ -70,13 +70,19 @@ def workers_2_xlsx(query, start_date=None, end_date=None):
             time_keeping_date = data.timekeeping_set.filter(date=timedelta(days=(i - 4) / 2) + start_date).first()
             if time_keeping_date:
                 if i % 2 == 0:
-                    check_in_cell = worksheet.cell(row=BODY_ROW, column=i, value=make_naive(time_keeping_date.check_in))
+                    time_keeping_check_in = time_keeping_date.check_in
+                    if is_aware(time_keeping_date.check_in):
+                        time_keeping_check_in = make_naive(time_keeping_date.check_in)
+                    check_in_cell = worksheet.cell(row=BODY_ROW, column=i, value=time_keeping_check_in)
                     check_in_cell.number_format = numbers.FORMAT_DATE_TIME6
                     check_in_cell.style = time_style
                     check_in_cell.alignment = Alignment(horizontal='center', vertical='center')
                 else:
+                    time_keeping_check_out = time_keeping_date.check_out
+                    if is_aware(time_keeping_date.check_out):
+                        time_keeping_check_out = make_naive(time_keeping_date.check_out)
                     check_out_cell = worksheet.cell(row=BODY_ROW, column=i,
-                                                    value=make_naive(time_keeping_date.check_out))
+                                                    value=time_keeping_check_out)
                     check_out_cell.number_format = numbers.FORMAT_DATE_TIME6
                     check_out_cell.style = time_style
                     check_out_cell.alignment = Alignment(horizontal='center', vertical='center')
