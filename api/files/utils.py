@@ -1,9 +1,9 @@
 from datetime import datetime, date as datetime_date, timedelta
+from django.utils.timezone import is_aware, make_naive
 import calendar
 import openpyxl
 from django.http import HttpResponse
-from openpyxl.styles import Font, Alignment, NamedStyle
-
+from openpyxl.styles import Font, Alignment, NamedStyle, numbers, DEFAULT_FONT
 
 
 def workers_2_xlsx2(query):
@@ -42,72 +42,72 @@ def workers_2_xlsx2(query):
     return response
 
 
-def workers_2_xlsx(query):
+def workers_2_xlsx(query, start_date=None, end_date=None):
+    month_style = NamedStyle(name='month_style', number_format='mmmm', font=Font(name='Calibri', size=11, bold=True))
     time_style = NamedStyle(name='time_style', number_format='h:mm')
-    HEADER_ROW = 3
-    BODY_ROW = 3
+    date_style = NamedStyle(name='date_style', number_format='mm/dd/yyyy')
+    start_time_style = NamedStyle(name='start_time_style', number_format='h:mm', font=Font(bold=True))
     today = datetime.now()
-    date = today.strftime("%Y-%m-%d")
+    start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date else datetime_date(today.year, today.month, 1)
+    end_date = datetime.strptime(end_date, '%Y-%m-%d') if end_date else datetime_date(today.year, today.month, 30)
+    start_date = datetime_date(start_date.year, start_date.month, start_date.day)
+    end_date = datetime_date(end_date.year, end_date.month, end_date.day)
+    delta = end_date - start_date
+    BODY_ROW = 3
     workbook = openpyxl.load_workbook(filename='media/check_in_out.xlsx')
     worksheet = workbook.active
-    _now = datetime.now()
+    month_cell = worksheet.cell(row=1, column=1, value=start_date)
+    month_cell.style = month_style
+    month_cell.alignment = Alignment(horizontal='center', vertical='center')
+    month_cell.number_format = numbers.FORMAT_DATE_TIME6
+    worksheet.cell(row=1, column=2).style = start_time_style
+    worksheet.cell(row=1, column=3).style = start_time_style
     for enum, data in enumerate(query, start=1):
         worksheet.cell(row=BODY_ROW, column=1, value=enum)
         worksheet.cell(row=BODY_ROW, column=2, value=data.department.name)
         worksheet.cell(row=BODY_ROW, column=3, value=data.full_name)
-        # worksheet.cell(row=BODY_ROW, column=3, value=_now.strftime("%H:%M"))
-        worksheet.cell(row=BODY_ROW, column=4, value=timedelta(seconds=60000))
+        for i in range(4, 2 * delta.days + 5):
+            time_keeping_date = data.timekeeping_set.filter(date=timedelta(days=(i - 4) / 2) + start_date).first()
+            if time_keeping_date:
+                if i % 2 == 0:
+                    check_in_cell = worksheet.cell(row=BODY_ROW, column=i, value=make_naive(time_keeping_date.check_in))
+                    check_in_cell.number_format = numbers.FORMAT_DATE_TIME6
+                    check_in_cell.style = time_style
+                    check_in_cell.alignment = Alignment(horizontal='center', vertical='center')
+                else:
+                    check_out_cell = worksheet.cell(row=BODY_ROW, column=i,
+                                                    value=make_naive(time_keeping_date.check_out))
+                    check_out_cell.number_format = numbers.FORMAT_DATE_TIME6
+                    check_out_cell.style = time_style
+                    check_out_cell.alignment = Alignment(horizontal='center', vertical='center')
+            if i % 2 == 0:
+                date_cell = worksheet.cell(row=2, column=i, value=timedelta(days=(i - 4) / 2) + start_date)
+                date_cell.style = date_style
+                date_cell.alignment = Alignment(horizontal='center', vertical='center')
         BODY_ROW += 1
 
-    # workbook.iter_rows(min_row=HEADER_ROW, max_row=BODY_ROW, min_col=1, max_col=3)
-    # set_timekeeping_2_workbook(worksheet, query, BODY_ROW)
-
-    worksheet.cell(row=3, column=7, value="salom")
-
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename=Workers-{date}.xlsx'
+    response['Content-Disposition'] = 'attachment; filename=Workers-timekeeping.xlsx'
     workbook.save(response)
     return response
-
-
-def set_timekeeping_2_workbook(worksheet, query, BODY_ROW: int = 3):
-    _now = datetime.now()
-    range_date = calendar.monthrange(_now.year, _now.month)[1]
-    start_date = date(_now.year, _now.month, 1)
-    for day in range(range_date):
-        _date = start_date + timedelta(days=day)
-        worksheet.cell(row=3, column=4, value=start_date)
-
-    # for data in query:
-    #     for timekeeping in data.timekeeping_set.all():
-    #         for day in range(1, calendar.monthrange(timekeeping.date.year, timekeeping.date.month)[1] + 1):
-    #             worksheet.cell(row=BODY_ROW, column=1, value=timekeeping.worker.department.name)
-    #             worksheet.cell(row=BODY_ROW, column=2, value=timekeeping.worker.full_name)
-    #             worksheet.cell(row=BODY_ROW, column=3, value=timekeeping.date)
-    #             worksheet.cell(row=BODY_ROW, column=4, value=timekeeping.check_in)
-    #             worksheet.cell(row=BODY_ROW, column=5, value=timekeeping.check_out)
-    #             BODY_ROW += 1
-    #         worksheet.cell(row=BODY_ROW, column=4, value=timekeeping.check_in)
-    #         worksheet.cell(row=BODY_ROW, column=5, value=timekeeping.check_out)
-    #         BODY_ROW += 1
-    return worksheet
-
-
-def timekeeping_2_xlsx(query):
-    HEADER_ROW = 3
-    BODY_ROW = 2
-    today = datetime.now()
-    date = today.strftime("%Y-%m-%d")
-    workbook = openpyxl.load_workbook(filename='media/check_in_out.xlsx')
-    worksheet = workbook.active
-
-    for enum, data in enumerate(query, start=1):
-        worksheet.cell(row=BODY_ROW, column=1, value=enum)
-        worksheet.cell(row=BODY_ROW, column=2, value=data.worker.department.name)
-        worksheet.cell(row=BODY_ROW, column=3, value=data.worker.full_name)
-
-        BODY_ROW += 1
-    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = f'attachment; filename=Workers-{date}.xlsx'
-    workbook.save(response)
-    return response
+#
+# for i in range(4, 2 * delta.days + 5):
+#            time_keeping_date = data.timekeeping_set.filter(date=timedelta(days=(i - 4) / 2) + start_date).first()
+#            if time_keeping_date:
+#                if i % 2 == 0:
+#                    check_in_cell = worksheet.cell(row=BODY_ROW, column=i, value=make_naive(time_keeping_date.check_in))
+#                    check_in_cell.number_format = numbers.FORMAT_DATE_TIME6
+#                    check_in_cell.style = time_style
+#                    check_in_cell.alignment = Alignment(horizontal='center', vertical='center')
+#                else:
+#                    check_out_cell = worksheet.cell(row=BODY_ROW, column=i,
+#                                                    value=make_naive(time_keeping_date.check_out))
+#                    check_out_cell.number_format = numbers.FORMAT_DATE_TIME6
+#                    check_out_cell.style = time_style
+#                    check_out_cell.alignment = Alignment(horizontal='center', vertical='center')
+#
+#            if i % 2 == 0:
+#                date_cell = worksheet.cell(row=2, column=i, value=timedelta(days=(i - 4) / 2) + start_date)
+#                date_cell.style = date_style
+#                date_cell.alignment = Alignment(horizontal='center', vertical='center')
+#        BODY_ROW += 1

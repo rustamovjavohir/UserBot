@@ -5,6 +5,8 @@ from apps.staff.models import Workers
 
 class WorkerFilter(FilterSet):
     department = CharFilter(method='by_department')
+    # start_date = DateFilter(method='by_start_date')
+    # end_date = DateFilter(method='by_end_date')
 
     class Meta:
         model = Workers
@@ -18,4 +20,12 @@ class WorkerFilter(FilterSet):
 
     def by_department(self, queryset, name, value):
         queryset = queryset.filter(department__name=value)
+        return queryset
+
+    def by_start_date(self, queryset, name, value):
+        queryset = queryset.filter(timekeeping__date__gte=value)
+        return queryset
+
+    def by_end_date(self, queryset, name, value):
+        queryset = queryset.filter(timekeeping__date__lte=value)
         return queryset
