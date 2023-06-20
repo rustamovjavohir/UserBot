@@ -175,6 +175,7 @@ class VerifyTokenSerializer(TokenVerifySerializer):
 
 
 class ChangeUserPasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
     confirm_password = serializers.CharField(required=True)
 
@@ -189,10 +190,13 @@ class ChangeUserPasswordSerializer(serializers.Serializer):
 
     def validate_confirm_password(self, value):
         if value != self.initial_data.get('new_password'):
-            raise serializers.ValidationError('Password and confirm password does not match')
+            raise serializers.ValidationError('Пароль и подтверждение пароля не совпадают')
         return value
 
     def update(self, instance, validated_data):
+        user = self.context['request'].user
+        if not user.check_password(self.initial_data.get('old_password')):
+            raise serializers.ValidationError('Старый пароль неверен')
         instance.set_password(validated_data.get('result', {}).get('new_password'))
         instance.save()
         return instance
@@ -205,4 +209,4 @@ class ChangeUserPasswordSerializer(serializers.Serializer):
 
     class Meta:
         model = User
-        fields = ['new_password', 'confirm_password']
+        fields = ['old_password', 'new_password', 'confirm_password']
