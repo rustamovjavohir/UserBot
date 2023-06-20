@@ -188,6 +188,11 @@ class ChangeUserPasswordSerializer(serializers.Serializer):
         ])
         return response
 
+    def validate_new_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError('Пароль должен содержать не менее 8 символов')
+        return value
+
     def validate_confirm_password(self, value):
         if value != self.initial_data.get('new_password'):
             raise serializers.ValidationError('Пароль и подтверждение пароля не совпадают')
