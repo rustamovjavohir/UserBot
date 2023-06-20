@@ -188,6 +188,14 @@ class WorkerAttributeView(APIView):
     department_queryset = Department.objects.all()
 
     def get_department_list(self):
+        user = self.request.user
+        worker_user = user.workers_set.first()
+        if user.is_anonymous:
+            return []
+        if worker_user.role == Workers.Role.ADMIN:
+            return list(
+                self.department_queryset.filter(id=worker_user.department_id).order_by('name').values_list('name',
+                                                                                                           flat=True))
         return list(self.department_queryset.order_by('name').values_list('name', flat=True))
 
     def get_department_json(self):
@@ -197,6 +205,14 @@ class WorkerAttributeView(APIView):
         ])
 
     def get_job_list(self):
+        user = self.request.user
+        worker_user = user.workers_set.first()
+        if user.is_anonymous:
+            return []
+        if worker_user.role == Workers.Role.ADMIN:
+            return list(self.queryset.filter(
+                department_id=worker_user.department_id
+            ).order_by('job').values_list('job', flat=True).distinct())
         return list(self.queryset.order_by('job').values_list('job', flat=True).distinct())
 
     def get_job_json(self):
