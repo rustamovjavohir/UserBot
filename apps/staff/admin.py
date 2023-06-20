@@ -44,6 +44,7 @@ class WorkersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     autocomplete_fields = ['department', 'boss']
     resource_class = WorkerResource
     exclude = ['is_deleted']
+    actions = ["create_user"]
 
     def get_exclude(self, request, obj=None):
         if request.user.is_superuser:
@@ -90,6 +91,19 @@ class WorkersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
                 action_flag=DELETION
             )
         messages.success(request, 'Удалено успешно!')
+
+    def create_user(self, request, queryset):
+        data = ''
+        for obj in queryset:
+            user, username, password = obj.create_user()
+            text = f"Ваш аккаунт был создан. " \
+                   f"\nСайт: https://office.radius.uz " \
+                   f"\nЛогин: {username}, " \
+                   f"\nПароль: {password}"
+            bot.send_message(chat_id=obj.telegram_id, text=text)
+        messages.success(request, 'Пользователи созданы успешно!')
+
+    create_user.short_description = "Создать пользователя"
 
 
 @admin.register(Salarys)

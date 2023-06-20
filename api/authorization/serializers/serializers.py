@@ -1,3 +1,4 @@
+import re
 from collections import OrderedDict
 
 from django.contrib.auth.models import User
@@ -194,8 +195,15 @@ class ChangeUserPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError('Старый пароль неверен')
 
     def validate_new_password(self, value):
+        user = self.context['request'].user
         if len(value) < 8:
             raise serializers.ValidationError('Пароль должен содержать не менее 8 символов')
+        if not re.search(r'\d', value):
+            raise serializers.ValidationError('Пароль должен содержать хотя бы одну цифру')
+        if not re.search(r'[A-Z]', value):
+            raise serializers.ValidationError('Пароль должен содержать хотя бы одну заглавную букву')
+        if user.username in value:
+            raise serializers.ValidationError('Пароль не должен содержать username')
         return value
 
     def validate_confirm_password(self, value):

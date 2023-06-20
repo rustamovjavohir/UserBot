@@ -1,4 +1,6 @@
 import datetime
+import random
+from string import ascii_letters, digits
 
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.db import models
@@ -6,6 +8,7 @@ from django.contrib.auth.models import User
 from django.db.models import Sum
 from django.utils.safestring import mark_safe
 from telegram import Bot
+from faker import Faker
 
 from config.settings import S_TOKEN
 
@@ -106,7 +109,7 @@ class Workers(models.Model):
         ADMIN = 'admin', 'Администратор'
         USER = 'user', 'Пользователь'
 
-    full_name = models.CharField(max_length=70, verbose_name="Ф.И.О",)
+    full_name = models.CharField(max_length=70, verbose_name="Ф.И.О", )
     department = models.ForeignKey(Department, on_delete=models.CASCADE, verbose_name="Подразделение")
     job = models.CharField(max_length=70, verbose_name="Должность")
     is_boss = models.BooleanField(default=False, verbose_name="Начальник отдела")
@@ -126,6 +129,41 @@ class Workers(models.Model):
 
     def __str__(self):
         return self.full_name
+
+    def generate_username(self):
+        username = Faker().user_name()
+        return username
+
+    def generate_password(self):
+        password = ''.join(random.choice(ascii_letters + digits) for _ in range(8))
+        return password
+
+    @classmethod
+    def get_all_workers_without_users(cls):
+        return cls.objects.all().filter(user__isnull=True, is_deleted=False, in_office=True)
+
+    @classmethod
+    def get_all_workers_with_users(cls):
+        return cls.objects.all().filter(user__isnull=False, is_deleted=False, in_office=True)
+
+    def generate_gmail(self):
+        gmail = self.generate_username() + "@gmail.com"
+        return gmail
+
+    def create_user(self):
+        if not self.user:
+            username = self.generate_username()
+            password = self.generate_password()
+            user = User.objects.create_user(username=username, is_staff=False, password=password, is_superuser=False,
+                                            email=self.generate_gmail(), first_name=self.full_name)
+            self.user = user
+            self.save()
+            return user, username, password
+        else:
+            password = self.generate_password()
+            self.user.set_password(password)
+            self.user.save()
+            return self.user, self.user.username, password
 
     class Meta:
         verbose_name = "Сотрудники"

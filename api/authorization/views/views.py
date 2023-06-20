@@ -121,7 +121,6 @@ class ChangePasswordView(GenericAPIView):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 class VerifyTokenView(TokenVerifyView):
     serializer_class = VerifyTokenSerializer
 
