@@ -188,10 +188,15 @@ class ChangeUserPasswordSerializer(serializers.Serializer):
         ])
         return response
 
-    # def validate_new_password(self, value):
-    #     if len(value) < 8:
-    #         raise serializers.ValidationError('Пароль должен содержать не менее 8 символов')
-    #     return value
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(self.initial_data.get('old_password')):
+            raise serializers.ValidationError('Старый пароль неверен')
+
+    def validate_new_password(self, value):
+        if len(value) < 8:
+            raise serializers.ValidationError('Пароль должен содержать не менее 8 символов')
+        return value
 
     def validate_confirm_password(self, value):
         if value != self.initial_data.get('new_password'):
@@ -199,9 +204,6 @@ class ChangeUserPasswordSerializer(serializers.Serializer):
         return value
 
     def update(self, instance, validated_data):
-        user = self.context['request'].user
-        if not user.check_password(self.initial_data.get('old_password')):
-            raise serializers.ValidationError('Старый пароль неверен')
         instance.set_password(validated_data.get('result', {}).get('new_password'))
         instance.save()
         return instance
