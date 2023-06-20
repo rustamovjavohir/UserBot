@@ -161,7 +161,7 @@ class SetTimekeepingView(GenericAPIView):
 class WorkerTimekeepingView(ListAPIView):
     serializer_class = TimekeepingSerializer
     authentication_classes = [JWTAuthentication, ]
-    permission_classes = [IsAuthenticated, AdminPermission, SuperAdminPermission]
+    permission_classes = [IsAuthenticated, AdminPermission]
     queryset = Timekeeping.objects.all()
     pagination_class = TimekeepingPagination
 
