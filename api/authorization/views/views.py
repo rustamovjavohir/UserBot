@@ -1,4 +1,7 @@
+from collections import OrderedDict
+
 from django.contrib.auth import authenticate, login
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
@@ -106,6 +109,17 @@ class ChangePasswordView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return JsonResponse(serializer.data)
+
+    def handle_exception(self, exc):
+        if isinstance(exc, ValidationError):
+            data = OrderedDict([
+                ('success', False),
+                ('message', 'Validation Error'),
+                ('result', None),
+                ('errors', exc.detail),
+            ])
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class VerifyTokenView(TokenVerifyView):
