@@ -8,10 +8,10 @@ from django.shortcuts import render, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView, ListAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from telegram import InputMediaPhoto, InputFile
@@ -21,7 +21,7 @@ from api.checking.filters.filters import TimekeepingFilter
 from api.checking.mixins import IsRadiusMixin
 from api.checking.paginations.paginations import TimekeepingPagination, WorkerPagination
 from api.checking.permissions import RadiusPermission, AdminPermission, SuperAdminPermission
-from api.checking.serializers.serializers import TimekeepingSerializer
+from api.checking.serializers.serializers import TimekeepingSerializer, TimekeepingDetailSerializer
 from api.staff.filters.filters import WorkerFilter
 from api.utils import get_client_ip, base64_to_image, get_worker_by_name, get_current_date
 from telegram.bot import Bot
@@ -40,7 +40,7 @@ class CheckingPage(IsRadiusMixin, TemplateView):
 
     def get_users(self, request):
         try:
-            users = request.user.workers_set.first().department.workers_set.all()\
+            users = request.user.workers_set.first().department.workers_set.all() \
                 .filter(is_deleted=False).values_list('full_name', flat=True)
         except AttributeError:
             users = []
@@ -203,3 +203,25 @@ class WorkersDailyTimekeepingView(ListAPIView):
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
+
+
+class DetailTimekeepingView(RetrieveUpdateAPIView):
+    serializer_class = TimekeepingDetailSerializer
+    authentication_classes = [JWTAuthentication, ]
+    permission_classes = [IsAuthenticated, SuperAdminPermission]
+    queryset = Timekeeping.objects.all()
+
+    def get_object(self):
+        obj = super().get_object()
+        return obj
+
+    def handle_exception(self, exc):
+        if isinstance(exc, PermissionDenied):
+            data = OrderedDict([
+                ('success', False),
+                ("statusCode", 403),
+                ("message", exc.detail),
+                ("result", None),
+            ])
+            return JsonResponse(data, status=403)
+        return super().handle_exception(exc)
