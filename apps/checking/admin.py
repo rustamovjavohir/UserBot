@@ -54,3 +54,10 @@ class AdminTimekeeping(admin.ModelAdmin):
         return obj.worker.department
 
     worker_department.short_description = 'Отдел'
+
+    def delete_model(self, request, obj):
+        obj.is_deleted = True
+        obj.save()
+
+    def delete_queryset(self, request, queryset):
+        queryset.update(is_deleted=True)

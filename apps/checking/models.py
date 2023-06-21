@@ -73,6 +73,10 @@ class Timekeeping(models.Model):
         else:
             self.setCheckIn()
 
+    def delete(self, using=None, keep_parents=False):
+        self.is_deleted = True
+        self.save()
+
     class Meta:
         verbose_name = 'Проверка'
         verbose_name_plural = 'Проверки'

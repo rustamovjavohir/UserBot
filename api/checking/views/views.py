@@ -113,7 +113,7 @@ class SaveImage(APIView):
 class UserTimekeepingView(ListAPIView):
     serializer_class = TimekeepingSerializer
     permission_classes = [IsAuthenticated]
-    queryset = Timekeeping.objects.all()
+    queryset = Timekeeping.objects.all().filter(is_deleted=False)
     worker_serializer_class = WorkerSerializers
     pagination_class = TimekeepingPagination
 
@@ -162,7 +162,7 @@ class WorkerTimekeepingView(ListAPIView):
     serializer_class = TimekeepingSerializer
     authentication_classes = [JWTAuthentication, ]
     permission_classes = [IsAuthenticated, AdminPermission]
-    queryset = Timekeeping.objects.all()
+    queryset = Timekeeping.objects.all().filter(is_deleted=False)
     pagination_class = TimekeepingPagination
 
     def get_queryset(self):
@@ -209,7 +209,7 @@ class DetailTimekeepingView(RetrieveUpdateAPIView):
     serializer_class = TimekeepingDetailSerializer
     authentication_classes = [JWTAuthentication, ]
     permission_classes = [IsAuthenticated, SuperAdminPermission]
-    queryset = Timekeeping.objects.all()
+    queryset = Timekeeping.objects.all().filter(is_deleted=False)
 
     def get_object(self):
         obj = super().get_object()
