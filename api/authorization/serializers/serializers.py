@@ -9,7 +9,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, Toke
 from api.checking.serializers.serializers import TimekeepingSerializer
 from api.utils import get_current_date
 from apps.staff.models import Workers, Department
-
+from datetime import datetime
 
 class CustomObtainPairSerializer(TokenObtainPairSerializer):
 
@@ -26,6 +26,10 @@ class CustomObtainPairSerializer(TokenObtainPairSerializer):
 
     def validate(self, attrs):
         data = super().validate(attrs)
+        exp = self.get_token(self.user).access_token.get('exp')
+        iat = self.get_token(self.user).access_token.get('iat')
+        data['iat'] = datetime.fromtimestamp(iat)
+        data['exp'] = datetime.fromtimestamp(exp)
         response = OrderedDict([
             ('success', True),
             ('result', data),
