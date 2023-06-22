@@ -4,17 +4,22 @@ from collections import OrderedDict
 from django.db import transaction
 from django.http import JsonResponse
 from django.shortcuts import render
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import RetrieveAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from telegram import Bot
 
-from api.checking.permissions import SuperAdminPermission
+from api.checking.permissions import SuperAdminPermission, AdminPermission
+from api.staff.filters.filters import WorkerFilter
+from api.staff.paginations.paginations import WorkerPagination
 from api.utils import get_client_ip
 from apps.staff.models import *
 from config.settings import S_TOKEN, ALLOWED_IPS
-from api.staff.serializers.serializers import BonusSerializer
+from api.staff.serializers.serializers import BonusSerializer, WorkerSerializer
 import datetime
 
 bot = Bot(token=S_TOKEN)
@@ -266,3 +271,65 @@ class WorkerAttributeView(APIView):
             ("statusCode", 200),
             ('result', result)
         ]))
+
+
+class WorkerListView(ListAPIView):
+    authentication_classes = [JWTAuthentication, ]
+    permission_classes = [IsAuthenticated, AdminPermission]
+    queryset = Workers.objects.filter(is_deleted=False).order_by('id')
+    serializer_class = WorkerSerializer
+    pagination_class = WorkerPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = WorkerFilter
+    search_fields = ['full_name', 'department__name', 'phone', 'job']
+    ordering_fields = ['id', 'department__name', 'job']
+
+    def handle_exception(self, exc):
+        response = super().handle_exception(exc)
+        data = OrderedDict([
+            ('success', False),
+            ('statusCode', response.status_code),
+            ('error', exc.detail),
+            ('result', None)
+        ])
+        return Response(status=response.status_code, data=data)
+
+
+class WorkerDetailView(RetrieveUpdateDestroyAPIView):
+    authentication_classes = [JWTAuthentication, ]
+    permission_classes = [IsAuthenticated, AdminPermission]
+    queryset = Workers.objects.filter(is_deleted=False).order_by('id')
+    serializer_class = WorkerSerializer
+
+    def get(self, request, *args, **kwargs):
+        data = OrderedDict([
+            ('success', True),
+            ('statusCode', 200),
+            ('error', None),
+            ('result', self.get_serializer(self.get_object()).data)
+        ])
+        return Response(status=200, data=data)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.is_deleted = True
+        instance.save()
+        serializer = self.get_serializer(instance)
+        data = OrderedDict([
+            ('success', True),
+            ('statusCode', 200),
+            ('error', None),
+            ('result', serializer.data)
+        ])
+        return Response(status=200, data=data)
+
+    def handle_exception(self, exc):
+        response = super().handle_exception(exc)
+        error = exc.detail if hasattr(exc, "detail") else str(exc)
+        data = OrderedDict([
+            ('success', False),
+            ('statusCode', response.status_code),
+            ('error', error),
+            ('result', None)
+        ])
+        return Response(status=response.status_code, data=data)

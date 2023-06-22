@@ -19,10 +19,11 @@ from telegram import InputMediaPhoto, InputFile
 from api.authorization.serializers.serializers import WorkerSerializers
 from api.checking.filters.filters import TimekeepingFilter
 from api.checking.mixins import IsRadiusMixin
-from api.checking.paginations.paginations import TimekeepingPagination, WorkerPagination
+from api.checking.paginations.paginations import TimekeepingPagination
 from api.checking.permissions import RadiusPermission, AdminPermission, SuperAdminPermission
 from api.checking.serializers.serializers import TimekeepingSerializer, TimekeepingDetailSerializer
 from api.staff.filters.filters import WorkerFilter
+from api.staff.paginations.paginations import WorkerPagination
 from api.utils import get_client_ip, base64_to_image, get_worker_by_name, get_current_date
 from telegram.bot import Bot
 from apps.checking.models import AllowedIPS, Timekeeping
@@ -185,7 +186,7 @@ class WorkersDailyTimekeepingView(ListAPIView):
     serializer_class = WorkerSerializers
     authentication_classes = [JWTAuthentication, ]
     permission_classes = [IsAuthenticated, AdminPermission]
-    queryset = Workers.objects.all().order_by('department__name')
+    queryset = Workers.objects.all().order_by('department__name', 'id').filter(is_deleted=False)
     pagination_class = WorkerPagination
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ['full_name', ]
