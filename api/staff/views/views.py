@@ -312,8 +312,7 @@ class WorkerDetailView(RetrieveUpdateDestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
-        instance.is_deleted = True
-        instance.save()
+        instance.user_delete()
         serializer = self.get_serializer(instance)
         data = OrderedDict([
             ('success', True),

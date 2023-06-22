@@ -150,6 +150,13 @@ class Workers(models.Model):
         gmail = self.generate_username() + "@gmail.com"
         return gmail
 
+    def user_delete(self):
+        self.is_deleted = True
+        self.save()
+        if self.user:
+            self.user.is_active = False
+            self.user.save()
+
     def create_user(self):
         if not self.user:
             username = self.generate_username()
