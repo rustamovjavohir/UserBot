@@ -131,7 +131,8 @@ class Workers(models.Model):
         return self.full_name
 
     def generate_username(self):
-        username = Faker().user_name()
+        # username = Faker().user_name()
+        username = Faker().name_male().split(' ')[0].lower() + str(random.randint(1, 100))
         return username
 
     def generate_password(self):
