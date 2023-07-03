@@ -149,7 +149,7 @@ class SetTimekeepingView(GenericAPIView):
             worker_time.setCheckInOrOut()
         if comment:
             old_comment = worker_time.comment if worker_time.comment else ""
-            worker_time.comment = old_comment + ", " + comment
+            worker_time.comment = old_comment + " " + comment + ","
             worker_time.save()
         serializer = self.get_serializer(worker_time)
         response = OrderedDict([
