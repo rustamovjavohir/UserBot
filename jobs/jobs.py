@@ -121,3 +121,18 @@ def setCheckOut():
     tz_info = timezone('Asia/Tashkent')
     Timekeeping.objects.filter(check_out__isnull=True).update(check_out=date_time.now(tz=tz_info))
     Workers.objects.filter(is_active=True).update(is_active=False)
+
+
+def sendNotificationSetCheckout():
+    tz_info = timezone('Asia/Tashkent')
+    today = date_time.today()
+    workers = Workers.objects.filter(is_active=True, is_deleted=False)
+    for worker in workers:
+        if Timekeeping.objects.filter(worker=worker, date=today, check_out__isnull=True).exists():
+            text = f"Ҳурматли <strong>{worker.full_name}</strong>\n" \
+                   f"<strong>{date_time.now(tz=tz_info).strftime('%d.%m.%Y')}" \
+                   f"</strong> куни учун check out қилишингизни эслатиб қўймоқчимиз"
+            try:
+                bot.send_message(chat_id=worker.telegram_id, text=text, parse_mode="HTML")
+            except Exception as ex:
+                bot.send_message(chat_id=779890968, text=ex.__str__(), parse_mode="HTML")
