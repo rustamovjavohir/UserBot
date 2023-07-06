@@ -126,7 +126,7 @@ def setCheckOut():
 def sendNotificationSetCheckout():
     tz_info = timezone('Asia/Tashkent')
     today = date_time.today()
-    workers = Workers.objects.filter(is_active=True, is_deleted=False)
+    workers = Workers.objects.filter(is_active=True, is_deleted=False, in_office=True)
     for worker in workers:
         if Timekeeping.objects.filter(worker=worker, date=today, check_out__isnull=True).exists():
             text = f"Ҳурматли <strong>{worker.full_name}</strong>\n" \
