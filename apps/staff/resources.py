@@ -32,7 +32,7 @@ class SalarysResource(resources.ModelResource):
 
 
 class PaidResource(resources.ModelResource):
-    id = Field(attribute='id', column_name="ID")
+    # id = Field(attribute='id', column_name="ID")
     full_name = Field(attribute="full_name", widget=ForeignKeyWidget(Workers, "full_name"), column_name="Имя")
     department = Field(attribute="department", column_name="Подразделение")
     year = Field(attribute="year", column_name="Год")
@@ -44,7 +44,7 @@ class PaidResource(resources.ModelResource):
         model = Bonus
         skip_unchanged = True
         report_skipped = True
-        exclude = ('id',)
+        exclude = ('id', 'is_deleted')
         import_id_fields = ('full_name', 'year', 'month', 'bonus', 'paid')
 
 
