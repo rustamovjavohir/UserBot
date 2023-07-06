@@ -44,8 +44,8 @@ class PaidResource(resources.ModelResource):
         model = Bonus
         skip_unchanged = True
         report_skipped = True
-        exclude = ('id', 'is_deleted')
-        import_id_fields = ('full_name', 'year', 'month', 'bonus', 'paid')
+        exclude = ('id', 'is_deleted', 'bonus_id')
+        import_id_fields = ('full_name', 'department', 'year', 'month', 'bonus', 'paid')
 
 
 class WorkerResource(resources.ModelResource):
