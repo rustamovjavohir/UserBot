@@ -34,7 +34,7 @@ class SalarysResource(resources.ModelResource):
 class PaidResource(resources.ModelResource):
     # id = Field(attribute='id', column_name="ID")
     full_name = Field(attribute="full_name", widget=ForeignKeyWidget(Workers, "full_name"), column_name="Имя")
-    department = Field(attribute="department", column_name="Подразделение")
+    # department = Field(attribute="department", column_name="Подразделение")
     year = Field(attribute="year", column_name="Год")
     month = Field(attribute="month", column_name="Месяц")
     bonus = Field(attribute="bonus", column_name="Бонус")
