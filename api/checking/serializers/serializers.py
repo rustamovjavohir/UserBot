@@ -18,13 +18,17 @@ class TimekeepingSerializer(serializers.ModelSerializer):
         read_only_fields = ['worker', 'date', 'check_in', 'check_out']
 
     def get_date(self, obj):
-        return obj.date.strftime('%a %d-%m-%Y')
+        return obj.date.strftime('%d-%m-%Y')
 
 
 class TimekeepingDetailSerializer(serializers.ModelSerializer):
     worker = serializers.CharField(source='worker.full_name', read_only=True)
+    date = serializers.SerializerMethodField(source='get_date')
 
     class Meta:
         model = Timekeeping
         fields = ['id', 'worker', 'date', 'check_in', 'check_out', 'comment']
         read_only_fields = ['id', 'worker', 'comment']
+
+    def get_date(self, obj):
+        return obj.date.strftime('%d-%m-%Y')
