@@ -45,7 +45,7 @@ def workers_2_xlsx2(query):
 def workers_2_xlsx(query, start_date=None, end_date=None):
     month_style = NamedStyle(name='month_style', number_format='mmmm', font=Font(name='Calibri', size=11, bold=True))
     time_style = NamedStyle(name='time_style', number_format='h:mm')
-    date_style = NamedStyle(name='date_style', number_format='mm/dd/yyyy')
+    date_style = NamedStyle(name='date_style', number_format='dd/mm/yyyy')
     start_time_style = NamedStyle(name='start_time_style', number_format='h:mm', font=Font(bold=True))
     today = datetime.now()
     start_date = datetime.strptime(start_date, '%Y-%m-%d') if start_date else datetime_date(today.year, today.month, 1)
