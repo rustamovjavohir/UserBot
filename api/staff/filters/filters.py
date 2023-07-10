@@ -19,7 +19,12 @@ class WorkerFilter(FilterSet):
         }
 
     def by_department(self, queryset, name, value):
-        queryset = queryset.filter(department__name=value)
+        worker = self.request.user.workers_set.first()
+        if worker.role == Workers.Role.SUPER_ADMIN:
+            queryset = queryset.filter(department__name=value)
+        else:
+            queryset = queryset.filter(department__name=worker.department.name)
+
         return queryset
 
     def by_start_date(self, queryset, name, value):
