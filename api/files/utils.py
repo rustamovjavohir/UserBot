@@ -106,9 +106,9 @@ class WorkdayReportXlsx:
         self.start_date = start_date
         self.end_date = end_date
         self.workbook = openpyxl.load_workbook(filename='media/workday_report.xlsx')
-        self.active_color = "#239B56"
-        self.inactive_color = "#D35400"
-        self.day_color = "#F1C40F"
+        self.active_color = "239B56"
+        self.inactive_color = "D35400"
+        self.day_color = "F1C40F"
         self.tz = pytz.timezone('Asia/Tashkent')
 
     @staticmethod
@@ -127,6 +127,9 @@ class WorkdayReportXlsx:
             datetime.now().month,
             31)
 
+    def set_color(self, cell, color):
+        cell.fill = PatternFill(start_color=color, end_color=color, fill_type="solid")
+
     def get_delta_day(self, delta):
         return self.get_start_date() + timedelta(days=delta)
 
@@ -141,7 +144,7 @@ class WorkdayReportXlsx:
         return self.get_worksheet.cell(row=row, column=column, value=value)
 
     def set_now_date_style(self, cell):
-        pass
+        self.set_color(cell, self.day_color)
 
     def set_now_date(self, row, column, value):
         cell = self.set_now_date_value(row, column, value)
@@ -165,7 +168,7 @@ class WorkdayReportXlsx:
     def set_day_style(self, cell):
         cell.alignment = Alignment(horizontal='center', vertical='center')
         cell.font = Font(name='Calibri', size=11, bold=True)
-        # cell.color = self.day_color
+        self.set_color(cell, self.day_color)
         return cell
 
     def set_day(self, row, column, value):
@@ -175,15 +178,17 @@ class WorkdayReportXlsx:
     def set_work_time_value(self, row, column, value):
         return self.get_worksheet.cell(row=row, column=column, value=value)
 
-    def set_work_time_style(self, cell, active=True):
+    def set_work_time_style(self, cell):
         cell.alignment = Alignment(horizontal='center', vertical='center')
         cell.font = Font(name='Calibri', size=11, bold=True)
-        # cell.color = self.active_color if active else self.inactive_color
+        self.set_color(cell, self.inactive_color)
         return cell
 
-    def set_work_time(self, row, column, value, active=True):
+    def set_work_time(self, row, column, value):
         cell = self.set_work_time_value(row, column, value)
-        self.set_work_time_style(cell, active)
+        self.set_work_time_style(cell)
+        if value:
+            self.set_color(cell, self.active_color)
 
     def set_total_work_time_value(self, row, column, value):
         return self.get_worksheet.cell(row=row, column=column, value=value)
