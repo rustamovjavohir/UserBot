@@ -2,13 +2,14 @@ import base64
 import io
 from collections import OrderedDict
 
+from django.core.exceptions import BadRequest
 from django.http import HttpResponse, JsonResponse
 from django.views.generic import TemplateView
 from django.shortcuts import render, redirect
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from rest_framework.generics import GenericAPIView, ListAPIView, RetrieveAPIView, RetrieveUpdateAPIView
@@ -246,3 +247,14 @@ class CreateTimekeepingView(GenericAPIView):
             ("result", serializer.data),
         ])
         return JsonResponse(response, status=200)
+
+    def handle_exception(self, exc):
+        if isinstance(exc, BadRequest):
+            data = OrderedDict([
+                ('success', False),
+                ("statusCode", 400),
+                ("message", str(exc)),
+                ("result", None),
+            ])
+            return JsonResponse(data, status=400)
+        return super().handle_exception(exc)
