@@ -211,7 +211,7 @@ class WorkdayReportXlsx:
         if 475 <= minutes <= 510:
             return 1
         elif 510 < minutes:
-            return round((minutes - 480) * 0.125 * 2 / 60 + 1, 2)
+            return round((minutes - 480) * 0.125 * 2 / 60 + 1, 1)
         else:
             return 0
 
