@@ -42,6 +42,6 @@ class CreateTimekeepingSerializer(serializers.ModelSerializer):
         read_only_fields = ['id']
 
     def validate_date(self, value):
-        if self.Meta.model.objects.filter(worker=self.initial_data['worker'], date=value).exists():
+        if self.Meta.model.objects.filter(worker=self.initial_data['worker'], date=value, is_deleted=False).exists():
             raise BadRequest('Запись на эту дату уже существует')
         return value
