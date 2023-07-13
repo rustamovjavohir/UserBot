@@ -1,6 +1,7 @@
 from django.urls import path
 from api.checking.views.views import (CheckingPage, getIpAddress, SaveImage, UserTimekeepingView, SetTimekeepingView,
-                                      WorkerTimekeepingView, WorkersDailyTimekeepingView, DetailTimekeepingView)
+                                      WorkerTimekeepingView, WorkersDailyTimekeepingView, DetailTimekeepingView,
+                                      CreateTimekeepingView)
 
 urlpatterns = [
     path('checking/', CheckingPage.as_view(), name='checking'),
@@ -11,5 +12,5 @@ urlpatterns = [
     path('timekeeping/workers/', WorkersDailyTimekeepingView.as_view(), name='workers-timekeeping'),
     path('timekeeping/set-time/', SetTimekeepingView.as_view(), name='set-timekeeping'),
     path('timekeeping/<int:pk>/', DetailTimekeepingView.as_view(), name='detail-timekeeping'),
-
+    path('timekeeping/create/', CreateTimekeepingView.as_view(), name='create-timekeeping'),
 ]

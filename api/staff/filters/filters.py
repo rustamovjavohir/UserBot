@@ -24,7 +24,6 @@ class WorkerFilter(FilterSet):
             queryset = queryset.filter(department__name=value)
         else:
             queryset = queryset.filter(department__name=worker.department.name)
-
         return queryset
 
     def by_start_date(self, queryset, name, value):

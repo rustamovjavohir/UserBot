@@ -21,7 +21,8 @@ from api.checking.filters.filters import TimekeepingFilter
 from api.checking.mixins import IsRadiusMixin
 from api.checking.paginations.paginations import TimekeepingPagination
 from api.checking.permissions import RadiusPermission, AdminPermission, SuperAdminPermission
-from api.checking.serializers.serializers import TimekeepingSerializer, TimekeepingDetailSerializer
+from api.checking.serializers.serializers import TimekeepingSerializer, TimekeepingDetailSerializer, \
+    CreateTimekeepingSerializer
 from api.staff.filters.filters import WorkerFilter
 from api.staff.paginations.paginations import WorkerPagination
 from api.utils import get_client_ip, base64_to_image, get_worker_by_name, get_current_date
@@ -227,3 +228,21 @@ class DetailTimekeepingView(RetrieveUpdateAPIView):
             ])
             return JsonResponse(data, status=403)
         return super().handle_exception(exc)
+
+
+class CreateTimekeepingView(GenericAPIView):
+    serializer_class = CreateTimekeepingSerializer
+    authentication_classes = [JWTAuthentication, ]
+    permission_classes = [IsAuthenticated, AdminPermission]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        response = OrderedDict([
+            ('success', True),
+            ("statusCode", 200),
+            ("message", "Create timekeeping success"),
+            ("result", serializer.data),
+        ])
+        return JsonResponse(response, status=200)

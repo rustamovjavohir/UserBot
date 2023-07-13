@@ -77,6 +77,12 @@ class Timekeeping(models.Model):
         self.is_deleted = True
         self.save()
 
+    def work_time(self):
+        if self.check_in and self.check_out:
+            return self.check_out - self.check_in
+        else:
+            return None
+
     class Meta:
         verbose_name = 'Проверка'
         verbose_name_plural = 'Проверки'

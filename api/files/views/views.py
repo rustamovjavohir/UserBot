@@ -10,7 +10,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from api.authorization.serializers.serializers import WorkerSerializers
 from api.checking.permissions import AdminPermission
 from api.checking.serializers.serializers import TimekeepingSerializer
-from api.files.utils import workers_2_xlsx
+from api.files.utils import workers_2_xlsx, WorkdayReportXlsx
 from api.staff.filters.filters import WorkerFilter
 from apps.checking.models import Timekeeping
 from apps.staff.models import Workers
@@ -46,3 +46,20 @@ class ExportWorkersView(GenericAPIView):
     #     end_date = request.query_params.get('end_date', None)
     #     serializer = self.serializer_class(queryset, many=True)
     #     return Response(serializer.data)
+
+
+class ExportWorkDayTableView(GenericAPIView):
+    authentication_classes = [JWTAuthentication, ]
+    # permission_classes = [IsAuthenticated, AdminPermission]
+    queryset = Workers.objects.filter(is_deleted=False).order_by('department__name')
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    serializer_class = WorkerSerializers
+    search_fields = ['worker__full_name', ]
+
+    def get(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
+        workbook = WorkdayReportXlsx(queryset, start_date, end_date)
+        response = workbook.report()
+        return response
