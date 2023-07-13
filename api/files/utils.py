@@ -106,9 +106,10 @@ class WorkdayReportXlsx:
         self.start_date = start_date
         self.end_date = end_date
         self.workbook = openpyxl.load_workbook(filename='media/workday_report.xlsx')
-        self.active_color = "239B56"
-        self.inactive_color = "D35400"
-        self.day_color = "F1C40F"
+        self.active_color = "92D050"
+        self.inactive_color = "FF0000"
+        self.day_color = "FFFF00"
+        self.total_color = "5B9BD5"
         self.tz = pytz.timezone('Asia/Tashkent')
 
     @staticmethod
@@ -199,8 +200,10 @@ class WorkdayReportXlsx:
 
     def set_total_work_time(self, row, column, value):
         cell_title = self.set_total_work_time_value(1, column, "КОЛ-ВО")
+        self.set_color(cell_title, self.day_color)
         cell = self.set_total_work_time_value(row, column, value)
         self.set_total_work_time_style(cell)
+        self.set_color(cell, self.total_color)
 
     def calculate_daily_work_time(self, timekeeping):
         delta = timekeeping.work_time()
@@ -231,6 +234,8 @@ class WorkdayReportXlsx:
                         _d = self.calculate_daily_work_time(timekeeping_data)
                         _daly_work_list.append(_d)
                         self.set_work_time(enum + 1, i + 2, _d)
+                    else:
+                        self.set_work_time(enum + 1, i + 2, None)
             self.set_total_work_time(enum + 1, self.get_delta().days + 3, sum(_daly_work_list))
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
         response['Content-Disposition'] = 'attachment; filename=workers.xlsx'
