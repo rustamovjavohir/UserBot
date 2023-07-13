@@ -185,6 +185,18 @@ class WorkdayReportXlsx:
         cell = self.set_work_time_value(row, column, value)
         self.set_work_time_style(cell, active)
 
+    def set_total_work_time_value(self, row, column, value):
+        return self.get_worksheet.cell(row=row, column=column, value=value)
+
+    def set_total_work_time_style(self, cell):
+        cell.alignment = Alignment(horizontal='center', vertical='center')
+        cell.font = Font(name='Calibri', size=11, bold=True)
+
+    def set_total_work_time(self, row, column, value):
+        cell_title = self.set_total_work_time_value(1, column, "КОЛ-ВО")
+        cell = self.set_total_work_time_value(row, column, value)
+        self.set_total_work_time_style(cell)
+
     def calculate_daily_work_time(self, timekeeping):
         delta = timekeeping.work_time()
         minutes = getattr(delta, "seconds", 0) // 60
@@ -202,6 +214,7 @@ class WorkdayReportXlsx:
         for i in range(1, self.get_delta().days + 2):
             self.set_day(1, i + 1, self.get_delta_day(i - 1).day)
         for enum, data in enumerate(self.query, start=1):
+            _daly_work_list = []
             self.set_workers(enum + 1, 1, data.full_name)
             timekeeping = data.timekeeping_set.all().filter(
                 date__gte=self.get_start_date(),
@@ -210,9 +223,11 @@ class WorkdayReportXlsx:
                 for i in range(1, self.get_delta().days + 2):
                     timekeeping_data = timekeeping.filter(date=self.get_start_date() + timedelta(days=i)).first()
                     if timekeeping_data:
-                        self.set_work_time(enum + 1, i + 2, self.calculate_daily_work_time(timekeeping_data))
-
+                        _d = self.calculate_daily_work_time(timekeeping_data)
+                        _daly_work_list.append(_d)
+                        self.set_work_time(enum + 1, i + 2, _d)
+            self.set_total_work_time(enum + 1, self.get_delta().days + 3, sum(_daly_work_list))
         response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = 'attachment; filename=Workers-timekeeping.xlsx'
+        response['Content-Disposition'] = 'attachment; filename=workers.xlsx'
         self.workbook.save(response)
         return response
