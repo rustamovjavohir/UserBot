@@ -208,14 +208,12 @@ class WorkdayReportXlsx:
     def calculate_daily_work_time(self, timekeeping):
         delta = timekeeping.work_time()
         minutes = getattr(delta, "seconds", 0) // 60
-        if minutes < 450:
-            return 0
-        elif 470 < minutes < 490:
+        if 475 <= minutes <= 510:
             return 1
-        elif 490 < minutes < 510:
-            return 1.2
+        elif 510 < minutes:
+            return (minutes - 480) * 0.125 * 2 / 60 + 1
         else:
-            return 2
+            return 0
 
     def report(self):
         self.set_now_date(1, 1, datetime.now())
@@ -228,7 +226,7 @@ class WorkdayReportXlsx:
                 date__gte=self.get_start_date(),
                 date__lte=self.get_end_date())
             if timekeeping:
-                for i in range(1, self.get_delta().days + 2):
+                for i in range(0, self.get_delta().days + 1):
                     timekeeping_data = timekeeping.filter(date=self.get_start_date() + timedelta(days=i)).first()
                     if timekeeping_data:
                         _d = self.calculate_daily_work_time(timekeeping_data)
