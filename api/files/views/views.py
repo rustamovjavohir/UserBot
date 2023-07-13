@@ -55,6 +55,7 @@ class ExportWorkDayTableView(GenericAPIView):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     serializer_class = WorkerSerializers
     search_fields = ['worker__full_name', ]
+    filterset_class = WorkerFilter
 
     def get(self, request):
         queryset = self.filter_queryset(self.get_queryset())
