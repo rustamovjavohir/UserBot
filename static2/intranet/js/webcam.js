@@ -67,6 +67,14 @@ function take_snapshot() {
             'error'
         )
     else {
+        // let button = document.getElementById('take_snapshot');
+        let button = $('#take_snapshot');
+        button.text('Загрузка, пожалуйста подождите...');
+        button.prop('disabled', true);
+
+        let errorLabel = $('#error_label');
+        errorLabel.text('Проблема с интернетом, обновите страницу');
+
         Webcam.snap(function (data_uri) {
             Webcam.snap((data_uri) => {
                 const canvas = document.getElementById('canvas');
@@ -114,8 +122,11 @@ function take_snapshot() {
                                     width: 400,
                                 })
                             }
-
+                            button.text('Фотографировать');
+                            button.prop('disabled', false);
+                            errorLabel.text('');
                             console.log(data);
+
                         });
                 };
                 image.src = data_uri;

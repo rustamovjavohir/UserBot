@@ -29,18 +29,18 @@
             </select>
             <label for="comment" class="form-label">Комментарий</label>
             <input type="text" id="comment" class="form-control user-select" aria-describedby="comment">
+            <h5 id="error_label"></h5>
         </div>
 
         <div class="image_canvas">
             <canvas id="canvas" width="810" height="520"></canvas>
-            {#            <button type="button" id="open-cam" class="btn btn-primary" onClick="open_webcam()">Open Camera</button>#}
-            <button type="button" class="btn btn-success take-photo-button" onClick=take_snapshot()>Фотографировать
-            </button>
+            <button type="button" class="btn btn-success take-photo-button" onClick=take_snapshot()
+                    id="take_snapshot" >Фотографировать</button>
 
         </div>
     </div>
 
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="{% static 'intranet/js/webcam.js' %}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
