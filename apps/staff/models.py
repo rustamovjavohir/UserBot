@@ -176,6 +176,7 @@ class Workers(models.Model):
     class Meta:
         verbose_name = "Сотрудники"
         verbose_name_plural = "Сотрудники"
+        ordering = ['full_name']
 
 
 class Salarys(models.Model):

@@ -99,7 +99,7 @@ class WorkersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
             user, username, password = obj.create_user()
             text = f"Ваш аккаунт был создан. " \
                    f"\nСайт: https://office.radius.uz " \
-                   f"\nЛогин: {username}, " \
+                   f"\nЛогин: {username} " \
                    f"\nПароль: {password}"
             bot.send_message(chat_id=obj.telegram_id, text=text)
         messages.success(request, 'Пользователи созданы успешно!')
@@ -115,6 +115,7 @@ class SalaryAdmin(ImportExportModelAdmin):
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
+    autocomplete_fields = ['full_name']
     resource_class = SalarysResource
     list_per_page = 70
 
@@ -167,6 +168,7 @@ class BonusAdmin(ImportExportModelAdmin):
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
+    autocomplete_fields = ["full_name"]
     resource_class = PaidResource
     list_per_page = 70
     exclude = ['is_deleted', "bonus_id"]
