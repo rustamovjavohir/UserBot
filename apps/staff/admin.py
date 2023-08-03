@@ -299,7 +299,7 @@ class TotalAdmin(admin.ModelAdmin):
     list_display_links = ["full_name"]
     list_filter = ("full_name__full_name", "full_name__department__name", "year", "month")
     search_fields = ["full_name__full_name", "month"]
-    list_per_page = 50
+    list_per_page = 100
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
