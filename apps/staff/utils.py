@@ -403,3 +403,7 @@ def selectWorker(user_id, update: Update, context: CallbackContext):
     msg = update.message.text
     workers = filterWorkers(msg, user_id)
     context.bot.send_message(chat_id=user_id, text="Ishchini tanlang", reply_markup=workersListButton(workers))
+
+
+def sed_error_to_admin(error):
+    bot.send_message(chat_id=779890968, text=f"Error: {error}")

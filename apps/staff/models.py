@@ -231,12 +231,18 @@ class Bonus(models.Model):
     musk_paid.fget.short_description = "Штраф"
 
     def send_bonus_notification(self):
-        bot.send_message(self.full_name.telegram_id,
-                         f"Вам начислен бонус в размере {self.musk_bonus} сум за {self.month} месяц")
+        try:
+            bot.send_message(self.full_name.telegram_id,
+                             f"Вам начислен бонус в размере {self.musk_bonus} сум за {self.month} месяц")
+        except Exception as ex:
+            bot.send_message(chat_id=779890968, text=ex.__str__())
 
     def send_paid_notification(self):
-        bot.send_message(self.full_name.telegram_id,
-                         f"Вам начислен штраф в размере {self.musk_paid} сум за {self.month} месяц")
+        try:
+            bot.send_message(self.full_name.telegram_id,
+                             f"Вам начислен штраф в размере {self.musk_paid} сум за {self.month} месяц")
+        except Exception as ex:
+            bot.send_message(chat_id=779890968, text=ex.__str__())
 
     class Meta:
         verbose_name = "Бонус и шртаф"
