@@ -342,11 +342,15 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                                          reply_markup=acceptInlineButton(req.id))
                 update.message.reply_text(text=f"✅So`rov {staff.boss.full_name}ga yuborildi, ID:  {req.pk}")
             else:
-                boss = Workers.objects.filter(is_boss=True,
-                                              department=Workers.objects.get(telegram_id=worker_id).department).first()
-                context.bot.send_message(chat_id=boss.telegram_id, text=text, parse_mode="html",
-                                         reply_markup=acceptInlineButton(req.id))
-                update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.id}")
+                try:
+                    boss = Workers.objects.filter(is_boss=True,
+                                                  department=Workers.objects.get(telegram_id=worker_id).department).first()
+                    context.bot.send_message(chat_id=boss.telegram_id, text=text, parse_mode="html",
+                                             reply_markup=acceptInlineButton(req.id))
+                    update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.id}")
+                except Exception as ex:
+                    error = f"{obj}\n{ex.__str__()}"
+                    sed_error_to_admin(error)
         reply_markup = avansButton()
         if isCashier(user_id):
             reply_markup = cashierButton()
