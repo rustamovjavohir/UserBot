@@ -4,18 +4,28 @@ import requests
 from telegram import Update
 
 from config.settings import URL_1C, LOGIN_1C, PASSWORD_1C
-from apps.staff.buttons import foodMenuButton
+from apps.staff.buttons import foodMenuButton, acceptInlineButton
 from apps.staff.models import Request_price, ITRequestPrice, Data
-from apps.staff.utils import getWorker, notificationBot
+from apps.staff.utils import getWorker, notificationBot, getAvansText
 from apps.staff.views import isWorker
 
 
 def inline(update: Update, context):
     user_id = update.callback_query.from_user.id
+    worker = getWorker(user_id)
     step = Data.objects.get(telegram_id=user_id).data
     data = update.callback_query.data.split("_")
     if isWorker(user_id):
-        if len(data) == 2 and data[0] == 'done':
+        if len(data) == 2 and data[0] == 'sendBoss':
+            update.callback_query.message.edit_reply_markup()
+            req = Request_price.objects.get(pk=data[1])
+            total = req.workers.first()
+            staff = total.full_name
+            text = getAvansText(name=staff.full_name, req=req, month=req.month, money=req.price,
+                                balance=total.ostatok_1 + req.price)
+            context.bot.send_message(chat_id=worker.boss.telegram_id, text=text, parse_mode='HTML',
+                                     reply_markup=acceptInlineButton(req.pk))
+        elif len(data) == 2 and data[0] == 'done':
             update.callback_query.message.edit_reply_markup()
             req = Request_price.objects.get(pk=data[1])
             if req.is_deleted:

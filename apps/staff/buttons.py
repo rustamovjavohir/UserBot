@@ -32,6 +32,14 @@ def acceptInlineButton(req_id):
     return InlineKeyboardMarkup(buttons)
 
 
+def acceptInlineButton2(req_id):
+    buttons = [
+        [InlineKeyboardButton("✅Tasdiqlash", callback_data=f"sendBoss_{req_id}")],
+        [InlineKeyboardButton("❌Rad etish", callback_data=f"not_{req_id}")]
+    ]
+    return InlineKeyboardMarkup(buttons)
+
+
 def foodMenuButton():
     button = [
         [
