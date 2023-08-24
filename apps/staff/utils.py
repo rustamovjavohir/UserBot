@@ -124,6 +124,18 @@ def nextMonth(obj):
     return next_month
 
 
+def getAvansText(name, req, month, salary, money, balance):
+    text = f"<strong>ID:</strong> {req.pk}\n"
+    text += f"<strong>Sana:</strong> {datetime.now().strftime('%d.%m.%Y')}\n"
+    text += f"<strong>F.I.O.:</strong> {name}\n"
+    text += f"<strong>Oy: {month}</strong>\n"
+    text += f"<strong>Oylik:</strong> {'{:,}'.format(salary)} So`m\n"
+    text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(money)} So`m\n" \
+            f"<strong>Balans:</strong> {'{:,}'.format(balance)} So`m\n"
+
+    return text
+
+
 def getReportTotalText(total: Total):
     text = f"<strong>F.I.O: </strong>{total.full_name.full_name}\n" \
            f"<strong>Oy: </strong>{total.month}\n" \
@@ -132,17 +144,6 @@ def getReportTotalText(total: Total):
            f"<strong>Jami: </strong>{total.itog}\n" \
            f"<strong>To'landi: </strong>{total.vplacheno}\n" \
            f"<strong>Qoldiq: </strong>{total.ostatok}\n"
-    return text
-
-
-def getAvansText(name, req, month, money, balance):
-    text = f"<strong>ID:</strong> {req.pk}\n"
-    text += f"<strong>Sana:</strong> {datetime.now().strftime('%d.%m.%Y')}\n"
-    text += f"<strong>F.I.O.:</strong> {name}\n"
-    text += f"<strong>Oy: {month}</strong>\n"
-    text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(money)} So`m\n" \
-            f"<strong>Balans:</strong> {'{:,}'.format(balance)} So`m\n"
-
     return text
 
 
@@ -288,7 +289,8 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                 print(ex)
             staff = getWorker(worker_id)
             if staff.boss:
-                text = getAvansText(name=staff.full_name, req=req, month=months[month - 1], money=money,
+                text = getAvansText(name=staff.full_name, req=req, salary=obj.itog_1, month=months[month - 1],
+                                    money=money,
                                     balance=obj.ostatok_1 + money)
                 context.bot.send_message(chat_id=staff.boss.telegram_id, text=text, parse_mode="html",
                                          reply_markup=acceptInlineButton(req.id))
@@ -334,7 +336,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
             step.update({"step": 0})
             Data.objects.filter(telegram_id=user_id).update(data=step)
             staff = getWorker(worker_id)
-            text = getAvansText(name=staff.full_name, req=req, month=months[month - 1], money=money,
+            text = getAvansText(name=staff.full_name, req=req, month=months[month - 1], salary=obj.itog_1, money=money,
                                 balance=obj.ostatok_1 + money)
             if staff.boss:
                 context.bot.send_message(chat_id=staff.boss.telegram_id, text=text, parse_mode="html",
@@ -346,7 +348,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                                                   department=Workers.objects.get(
                                                       telegram_id=worker_id).department).first()
                     accept_button = acceptInlineButton(req.id)
-                    if month == datetime.now().month and money > obj.oklad_1 * 0.7:
+                    if month == datetime.now().month and obj.ostatok_1 <= obj.itog_1 * 0.3:
                         accept_button = acceptInlineButton2(req.id)
                     context.bot.send_message(chat_id=boss.telegram_id, text=text, parse_mode="html",
                                              reply_markup=accept_button)
@@ -414,7 +416,6 @@ def selectWorker(user_id, update: Update, context: CallbackContext):
 
 def sed_error_to_admin(error):
     bot.send_message(chat_id=779890968, text=f"Error: {error}")
-
 
 
 def send_boss(update: Update, context: CallbackContext):

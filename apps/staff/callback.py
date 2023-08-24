@@ -21,7 +21,7 @@ def inline(update: Update, context):
             req = Request_price.objects.get(pk=data[1])
             total = req.workers.first()
             staff = total.full_name
-            text = getAvansText(name=staff.full_name, req=req, month=req.month, money=req.price,
+            text = getAvansText(name=staff.full_name, req=req, month=req.month, salary=total.itog_1, money=req.price,
                                 balance=total.ostatok_1 + req.price)
             context.bot.send_message(chat_id=worker.boss.telegram_id, text=text, parse_mode='HTML',
                                      reply_markup=acceptInlineButton(req.pk))
