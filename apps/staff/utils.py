@@ -350,7 +350,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                                                   department=Workers.objects.get(
                                                       telegram_id=worker_id).department).first()
                     accept_button = acceptInlineButton(req.id)
-                    if month == datetime.now().month and (obj.ostatok_1 <= obj.itog_1 * 0.3
+                    if month >= datetime.now().month and (obj.ostatok_1 <= obj.itog_1 * 0.3
                                                           or money >= obj.itog_1 * 0.7):
                         accept_button = acceptInlineButton2(req.id)
                     context.bot.send_message(chat_id=boss.telegram_id, text=text, parse_mode="html",
