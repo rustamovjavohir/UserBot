@@ -8,7 +8,7 @@ from dateutil.relativedelta import relativedelta
 from telegram import Bot, Update
 
 from apps.staff.models import *
-from apps.staff.tasks import create_auto_delete_req
+# from apps.staff.tasks import create_auto_delete_req
 from config.settings import S_TOKEN, URL_1C, LOGIN_1C, PASSWORD_1C
 from datetime import datetime, date
 
@@ -344,8 +344,8 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
             if staff.boss:
                 message = context.bot.send_message(chat_id=staff.boss.telegram_id, text=text, parse_mode="html",
                                                    reply_markup=acceptInlineButton(req.id))
-                create_auto_delete_req(message_id=message.message_id, chat_id=staff.boss.telegram_id,
-                                       request_id=req.id)  # Auto delete request
+                # create_auto_delete_req(message_id=message.message_id, chat_id=staff.boss.telegram_id,
+                #                        request_id=req.id)  # Auto delete request
                 update.message.reply_text(text=f"✅So`rov {staff.boss.full_name}ga yuborildi, ID:  {req.pk}")
             else:
                 try:
@@ -358,8 +358,8 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                         accept_button = acceptInlineButton2(req.id)
                     message = context.bot.send_message(chat_id=boss.telegram_id, text=text, parse_mode="html",
                                                        reply_markup=accept_button)
-                    create_auto_delete_req(message_id=message.message_id, chat_id=boss.telegram_id,
-                                           request_id=req.id)  # Auto delete request
+                    # create_auto_delete_req(message_id=message.message_id, chat_id=boss.telegram_id,
+                    #                        request_id=req.id)  # Auto delete request
                     update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.id}")
                 except Exception as ex:
                     error = f"{obj}\n{ex.__str__()}"
