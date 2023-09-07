@@ -1,5 +1,6 @@
 import threading
 
+from apps.staff.tasks import create_task
 from apps.staff.utils import *
 from apps.staff.models import *
 

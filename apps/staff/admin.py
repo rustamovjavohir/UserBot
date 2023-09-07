@@ -274,7 +274,7 @@ class LeaveAdmin(admin.ModelAdmin):
 
 @admin.register(Request_price)
 class Request_priceAdmin(admin.ModelAdmin):
-    list_display = ["id", "all_workers", "department", "month", "price", "avans", "answer", "created_at"]
+    list_display = ["id", "all_workers", "department", "month", "price", "avans", "answer", "status", "created_at"]
     list_display_links = ["all_workers", "department"]
     list_per_page = 70
     list_filter = (DepartmentFilter, "month")

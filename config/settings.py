@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'import_export',
     'corsheaders',
+    'django_celery_beat',
+    'django_celery_results'
 ]
 
 MIDDLEWARE = [
@@ -157,6 +159,7 @@ PASSWORD_1C = env.str('PASSWORD_C')
 ALLOWED_IPS = env.list('ALLOWED_IPS')
 SEND_CHECKING_ID = env.str('SEND_CHECKING_ID')
 WORKING_TIME = env.int('WORKING_TIME')
+ADMIN_ID = env.str('ADMIN_ID')
 
 JAZZMIN_SETTINGS = {
     # title of the window (Will default to current_admin_site.site_title if absent or None)
@@ -287,6 +290,20 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainSlidingSerializer",
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
+# -------------------------------------------------CELERY--------------------------------------------------------------
+# CELERY_BROKER_URL = "redis://localhost:6379/1"  # In the old version, the settings were in capital letters
+REDIS_HOST = 'localhost'
+REDIS_PORT = '6379'
+CELERY_BROKER_URL = "redis://" + REDIS_HOST + ":" + REDIS_PORT + "/0"
+CELERY_RESULT_BACKEND = "redis://" + REDIS_HOST + ":" + REDIS_PORT + "/0"
+accept_content = ['application/json']
+task_serializer = 'json'
+result_serializer = 'json'
+broker_connection_retry_on_startup = True
+broker_transport_options = {'visibility_timeout': 60 * 60}
+timezone = 'Asia/Tashkent'
+task_always_eager = True  # delay() buyrugini yozish shart emas
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 try:
     from .local_settings import *

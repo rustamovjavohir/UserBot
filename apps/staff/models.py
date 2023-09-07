@@ -70,6 +70,11 @@ class InfTech(models.Model):
 
 
 class ITRequestPrice(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Ожидание'
+        ACCEPTED = 'accepted', 'Принято'
+        REJECTED = 'rejected', 'Отклонено'
+
     secondId = models.IntegerField(null=True, blank=True, verbose_name="Запрос ИД")
     workers = models.ManyToManyField(InfTech)
     department_id = models.CharField(max_length=70)
@@ -78,7 +83,9 @@ class ITRequestPrice(models.Model):
     avans = models.BooleanField()
     comment = models.CharField(max_length=2560, default="")
     answer = models.BooleanField(default=False)
-    status = models.CharField(max_length=256, default="")
+    status = models.CharField(max_length=256,
+                              choices=Status.choices,
+                              default=Status.PENDING)
 
     @property
     def department(self):
@@ -367,6 +374,11 @@ class Total(models.Model):
 
 
 class Request_price(models.Model):
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Ожидание'
+        ACCEPTED = 'accepted', 'Принято'
+        REJECTED = 'rejected', 'Отклонено'
+
     workers = models.ManyToManyField(Total)
     department_id = models.CharField(max_length=70)
     month = models.CharField(choices=getMonths(), max_length=250, null=True, blank=True, verbose_name="Месяц")
@@ -374,7 +386,10 @@ class Request_price(models.Model):
     avans = models.BooleanField(verbose_name="Аванс")
     comment = models.CharField(max_length=2560, default="", null=True, blank=True)
     answer = models.BooleanField(default=False, verbose_name="Ответил")
-    status = models.CharField(max_length=256, default="", null=True, blank=True)
+    status = models.CharField(max_length=256,
+                              choices=Status.choices,
+                              default=Status.PENDING,
+                              verbose_name="Статус")
     is_deleted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
