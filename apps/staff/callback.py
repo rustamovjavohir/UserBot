@@ -28,6 +28,8 @@ def inline(update: Update, context):
         elif len(data) == 2 and data[0] == 'done':
             update.callback_query.message.edit_reply_markup()
             req = Request_price.objects.get(pk=data[1])
+            req.status=Request_price.Status.ACCEPTED
+            req.save()
             if req.is_deleted:
                 department = "00-000022"
             else:
