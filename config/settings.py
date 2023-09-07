@@ -57,7 +57,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'import_export',
     'corsheaders',
-    # 'django_celery_beat',
+    'django_celery_beat',
     # 'django_celery_results'
 ]
 
