@@ -281,8 +281,8 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
             if money == 0:
                 continue
             req = Request_price.objects.create(price=money, avans=True, month=months[month - 1],
-                                               department_id=Workers.objects.get(
-                                                   telegram_id=worker_id).department.ids)
+                                               status=Request_price.Status.ACCEPTED,
+                                               department_id=Workers.objects.get(telegram_id=worker_id).department.ids)
             try:
                 obj = Total.objects.get(full_name__telegram_id=worker_id,
                                         year__in=[datetime.now().year - 1, datetime.now().year],
