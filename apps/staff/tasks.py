@@ -19,7 +19,7 @@ def send_message(message):
 @shared_task
 def auto_del_request(message_id, chat_id, request_id):
     try:
-        Request_price.objects.filter(id=request_id, status=Request_price.Status.PENDING).delete()
+        Request_price.objects.filter(id=request_id, status=Request_price.Status.PENDING, answer=False).delete()
         bot.delete_message(chat_id=chat_id, message_id=message_id)
     except Exception as ex:
         text = f"Function: auto_del_request\n" \
