@@ -52,6 +52,12 @@ class Department(models.Model):
 
 
 class InfTech(models.Model):
+    class Role(models.TextChoices):
+        SUPER_ADMIN = 'super_admin', 'Супер Администратор'
+        ADMIN = 'admin', 'Администратор отдела'
+        USER = 'user', 'Пользователь'
+        ADMINISTRATOR = 'administrator', 'Администратор'
+
     full_name = models.CharField(max_length=70, verbose_name="Ф.И.О", unique=True)
     # department = models.CharField(default='АЙТи отдел', max_length=250, verbose_name="Подразделение")
     department = models.ForeignKey(to=Department, on_delete=models.DO_NOTHING, verbose_name="Подразделение")
@@ -60,6 +66,7 @@ class InfTech(models.Model):
     phone = models.CharField(max_length=70, verbose_name="Телефон номер")
     active = models.BooleanField(default=True, verbose_name="Статус")
     telegram_id = models.BigIntegerField(null=True, blank=True, verbose_name="Telegram ID")
+    role = models.CharField(max_length=20, choices=Role.choices, default=Role.USER, verbose_name="Роль")
 
     def __str__(self):
         return self.full_name
