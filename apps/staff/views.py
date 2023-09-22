@@ -1,6 +1,5 @@
 import threading
 
-from apps.staff.tasks import create_task
 from apps.staff.utils import *
 from apps.staff.models import *
 
@@ -24,7 +23,7 @@ def start(update: Update, context: CallbackContext):
         elif isCashier(user_id):
             update.message.reply_html(inform(user_id), reply_markup=cashierButton())
         else:
-            update.message.reply_html(inform(user_id), reply_markup=avansButton())
+            update.message.reply_html(inform(user_id), reply_markup=avansButton(hasPermBookRoom(user_id)))
         obj, created = Data.objects.get_or_create(telegram_id=user_id)
         obj.telegram_id = user_id
         obj.data = {"step": 0, "name": worker.full_name}
@@ -66,6 +65,10 @@ def mainZone(update: Update, context: CallbackContext):
         applyAvans(update, context)
     elif step["step"] == 0 and msg == "Hisobot":
         report(update, context)
+    elif step["step"] == 0 and msg == "Xonani band qilish":
+        setEventName(update, context)
+    elif step["step"] == 300 and msg != "🏠Bosh sahifa":
+        bookRooms(update, context)
 
 
 def cashierZone(update: Update, context: CallbackContext):

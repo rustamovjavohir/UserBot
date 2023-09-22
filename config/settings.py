@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "apps.staff",
     "apps.checking",
     "apps.authorization",
+    "apps.rooms",
     "api",
     "jobs",
 
@@ -295,7 +296,8 @@ SIMPLE_JWT = {
 REDIS_HOST = 'localhost'
 REDIS_PORT = '6379'
 CELERY_BROKER_URL = "redis://" + REDIS_HOST + ":" + REDIS_PORT + "/0"
-CELERY_RESULT_BACKEND = "redis://" + REDIS_HOST + ":" + REDIS_PORT + "/0"
+# CELERY_RESULT_BACKEND = "redis://" + REDIS_HOST + ":" + REDIS_PORT + "/0"
+CELERY_RESULT_BACKEND = "django-db"
 accept_content = ['application/json']
 task_serializer = 'json'
 result_serializer = 'json'

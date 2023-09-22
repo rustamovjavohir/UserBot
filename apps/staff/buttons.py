@@ -1,10 +1,14 @@
+from datetime import date
+
 from telegram import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 
 
-def avansButton():
+def avansButton(has_room_booked: bool = False):
     buttons = [
         [KeyboardButton('Avans so`rovi'), KeyboardButton('Hisobot')],
     ]
+    if has_room_booked:
+        buttons.append([KeyboardButton('Xonani band qilish')])
     return ReplyKeyboardMarkup(buttons, resize_keyboard=True, one_time_keyboard=True)
 
 
@@ -114,3 +118,64 @@ def getFreeSeatsInlineButton():
     ]
 
     return InlineKeyboardMarkup(free_seats_button)
+
+
+def roomListInlineButton(rooms):
+    button = []
+    if len(rooms) % 2 == 0:
+        for i in range(0, len(rooms), 2):
+            button.append([
+                InlineKeyboardButton(f"{rooms[i].name}", callback_data=f"room_{rooms[i].id}"),
+                InlineKeyboardButton(f"{rooms[i + 1].name}", callback_data=f"room_{rooms[i + 1].id}")
+            ])
+    else:
+        for i in range(0, len(rooms) - 1, 2):
+            button.append([
+                InlineKeyboardButton(f"{rooms[i].name}", callback_data=f"room_{rooms[i].id}"),
+                InlineKeyboardButton(f"{rooms[i + 1].name}", callback_data=f"room_{rooms[i + 1].id}")
+            ])
+        button.append([InlineKeyboardButton(f"{rooms[-1].name}", callback_data=f"room_{rooms[-1].id}")])
+    return InlineKeyboardMarkup(button)
+
+
+def roomMenuButton(room, date: date = None, prev_date: date = None, next_date: date = None):
+    button = []
+    inner_button = []
+    if prev_date:
+        inner_button.append(
+            InlineKeyboardButton("⬅️", callback_data=f"room_{room.id}_{str(prev_date)}_prev")
+        )
+    inner_button.append(
+        InlineKeyboardButton("📅Bron qilish", callback_data=f"room_{room.id}_{str(date)}_book")
+    )
+    if next_date:
+        inner_button.append(
+            InlineKeyboardButton("➡️", callback_data=f"room_{room.id}_{str(next_date)}_next")
+        )
+    button.append(inner_button)
+    button.append([
+        InlineKeyboardButton("🏠Bosh sahifa", callback_data=f"room_{room.id}_home"),
+    ])
+
+    return InlineKeyboardMarkup(button)
+
+
+def freeRoomHoursInlineButton(room, hours, command: str = "start"):
+    button = []
+    if len(hours) > 0:
+        if len(hours) % 2 == 0:
+            for i in range(0, len(hours), 2):
+                button.append([
+                    InlineKeyboardButton(f"{hours[i]}:00", callback_data=f"room_{room.id}_{hours[i]}_{command}"),
+                    InlineKeyboardButton(f"{hours[i + 1]}:00", callback_data=f"room_{room.id}_{hours[i + 1]}_{command}")
+                ])
+        else:
+            for i in range(0, len(hours) - 1, 2):
+                button.append([
+                    InlineKeyboardButton(f"{hours[i]}:00", callback_data=f"room_{room.id}_{hours[i]}_{command}"),
+                    InlineKeyboardButton(f"{hours[i + 1]}:00", callback_data=f"room_{room.id}_{hours[i + 1]}_{command}")
+                ])
+            button.append(
+                [InlineKeyboardButton(f"{hours[-1]}:00", callback_data=f"room_{room.id}_{hours[-1]}_{command}")])
+    button.append([InlineKeyboardButton("🏠Bosh sahifa", callback_data=f"room_{room.id}_home")])
+    return InlineKeyboardMarkup(button)

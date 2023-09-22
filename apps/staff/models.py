@@ -113,8 +113,9 @@ class ITRequestPrice(models.Model):
 class Workers(models.Model):
     class Role(models.TextChoices):
         SUPER_ADMIN = 'super_admin', 'Супер Администратор'
-        ADMIN = 'admin', 'Администратор'
+        ADMIN = 'admin', 'Администратор отдела'
         USER = 'user', 'Пользователь'
+        ADMINISTRATOR = 'administrator', 'Администратор'
 
     full_name = models.CharField(max_length=70, verbose_name="Ф.И.О", )
     department = models.ForeignKey(Department, on_delete=models.CASCADE, verbose_name="Подразделение")

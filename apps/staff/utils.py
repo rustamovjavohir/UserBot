@@ -3,6 +3,7 @@ from time import sleep
 import requests
 from telegram.ext import CallbackContext
 
+from apps.rooms.models import Rooms, Timetable
 from apps.staff.buttons import *
 from dateutil.relativedelta import relativedelta
 from telegram import Bot, Update
@@ -186,6 +187,12 @@ def isCashier(user_id) -> bool:
     return False
 
 
+def hasPermBookRoom(user_id) -> bool:
+    if isWorker(user_id):
+        return getWorker(user_id).role in [Workers.Role.ADMIN, Workers.Role.SUPER_ADMIN, Workers.Role.ADMINISTRATOR]
+    return False
+
+
 def requestAvans(update: Update, context: CallbackContext, step_count=1, is_self=True):
     step_dict = {"step": step_count}
     if not is_self:
@@ -207,7 +214,7 @@ def setAvans(update: Update, context: CallbackContext, worker_id=None, menu_butt
     step_num = 6
     staff_name = getWorker(step.get("other_staff_id", user_id)).full_name
     if menu_button is None:
-        menu_button = avansButton()
+        menu_button = avansButton(hasPermBookRoom(user_id))
     if worker_id is None:
         staff_name = step['name']
         step_num = 2
@@ -273,7 +280,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
         step.update({"step": 0})
         Data.objects.filter(telegram_id=worker_id).update(data=step)
         update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.secondId}")
-        update.message.reply_text("Bosh sahifa", reply_markup=avansButton())
+        update.message.reply_text("Bosh sahifa", reply_markup=avansButton(hasPermBookRoom(user_id)))
     elif getattr(getWorker(worker_id), 'is_boss'):
         price = int(step['price'])
         money_split = splitMoney(user_id=worker_id, money=price)
@@ -315,7 +322,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                     update.message.reply_html("🚫Xatolik yuz berdi")
         step.update({"step": 0})
         Data.objects.filter(telegram_id=worker_id).update(data=step)
-        reply_markup = avansButton()
+        reply_markup = avansButton(hasPermBookRoom(user_id))
         if isCashier(user_id):
             reply_markup = cashierButton()
         update.message.reply_text("Bosh sahifa", reply_markup=reply_markup)
@@ -364,7 +371,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                 except Exception as ex:
                     error = f"{obj}\n{ex.__str__()}"
                     sed_error_to_admin(error)
-        reply_markup = avansButton()
+        reply_markup = avansButton(hasPermBookRoom(user_id))
         if isCashier(user_id):
             reply_markup = cashierButton()
         update.message.reply_text("Bosh sahifa", reply_markup=reply_markup)
@@ -390,9 +397,9 @@ def report(update: Update, context: CallbackContext):
 
 
 def home(update: Update, context: CallbackContext, menu_button=None):
-    if menu_button is None:
-        menu_button = avansButton()
     user_id = update.message.from_user.id
+    if menu_button is None:
+        menu_button = avansButton(hasPermBookRoom(user_id))
     step = Data.objects.get(telegram_id=user_id).data
     step.update({"step": 0})
     Data.objects.filter(telegram_id=user_id).update(data=step)
@@ -433,3 +440,61 @@ def send_boss(update: Update, context: CallbackContext):
     Data.objects.filter(telegram_id=user_id).update(data=step)
     update.message.reply_html("Boshlig`ingizni tanlang",
                               reply_markup=homeButton())
+
+
+def setEventName(update: Update, context: CallbackContext):
+    update.message.reply_html("Tadbir nomini kiriting", reply_markup=homeButton())
+    user_id = update.message.from_user.id
+    step = Data.objects.get(telegram_id=user_id).data
+    step.update({"step": 300})
+    Data.objects.filter(telegram_id=user_id).update(data=step)
+
+
+def bookRooms(update: Update, context: CallbackContext):
+    event = update.message.text
+    rooms = Rooms.objects.filter(is_active=True)
+    user_id = update.message.from_user.id
+    step = Data.objects.get(telegram_id=user_id).data
+    step.update({"step": 301, "event": event})
+    Data.objects.filter(telegram_id=user_id).update(data=step)
+    update.message.reply_html("Xonani tanlang", reply_markup=roomListInlineButton(rooms))
+
+
+def roomTimeTables(room):
+    return Timetable.objects.filter(room=room, is_active=True, date__gte=date.today()).order_by('date', 'start_time')
+
+
+def roomTableText(room, date: date):
+    text = f"📅{date.strftime('%Y-%m-%d')}\n" \
+           f"Xona: <strong>{room.name}</strong>\n" \
+           f"<strong>Band qilingan vaqtlar:</strong>\n"
+    for item in roomTimeTables(room).filter(date=date):
+        text += f"👤{item.user.full_name}\n" \
+                f"Tadbir: <strong>{item.event}</strong>\n" \
+                f"🕔{item.start_time.strftime('%H:%M')} - {item.end_time.strftime('%H:%M')}\n\n"
+    return text
+
+
+def freeRoomHours(room, date: date):
+    time_table = Timetable.objects.filter(room=room, date=date)
+    time_table_list = [i for i in range(8, 19)]
+    for item in time_table:
+        for i in range(item.start_time.hour, item.end_time.hour):
+            if i in time_table_list:
+                time_table_list.remove(i)
+    return time_table_list
+
+
+def freeRoomEndHours(room, date: date, start_time: int):
+    end_time_list = []
+    time_table = Timetable.objects.filter(room=room, date=date, start_time__hour__gte=start_time).order_by('start_time')
+    stat_hour = time_table.first().start_time.hour if time_table.exists() else 19
+    while start_time < stat_hour:
+        start_time += 1
+        end_time_list.append(start_time)
+    return end_time_list
+
+
+def selectBookTime(user, room, event, date, start_time, end_time):
+    Timetable.objects.create(user=user, room=room, event=event, date=date, start_time=start_time, end_time=end_time)
+    return 1
