@@ -19,7 +19,7 @@ def inline(update: Update, context):
     worker = getWorker(user_id)
     step = Data.objects.get(telegram_id=user_id).data
     data = update.callback_query.data.split("_")
-    print(data)
+    # print(data)
     if isWorker(user_id):
         if len(data) == 2 and data[0] == 'sendBoss':
             update.callback_query.message.edit_reply_markup()
@@ -147,7 +147,7 @@ def inline(update: Update, context):
                 end_time = datetime.strptime(data[2], "%H").time()
                 next_date = date + timedelta(days=1)
                 prev_date = date - timedelta(days=1)
-                step.update({"end_time": data[2]})
+                step.update({"step": 0, "end_time": data[2]})
                 event = step.get('event')
                 Data.objects.filter(telegram_id=user_id).update(data=step)
                 selectBookTime(user=user, room=room, event=event, date=date, start_time=start_time, end_time=end_time)
