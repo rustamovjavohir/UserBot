@@ -67,6 +67,7 @@ class InfTech(models.Model):
     active = models.BooleanField(default=True, verbose_name="Статус")
     telegram_id = models.BigIntegerField(null=True, blank=True, verbose_name="Telegram ID")
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.USER, verbose_name="Роль")
+    in_office = models.BooleanField(default=True, null=True, blank=True, verbose_name="В офисе")
 
     def __str__(self):
         return self.full_name

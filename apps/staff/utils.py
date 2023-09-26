@@ -189,7 +189,8 @@ def isCashier(user_id) -> bool:
 
 def hasPermBookRoom(user_id) -> bool:
     if isWorker(user_id):
-        return getWorker(user_id).role in [Workers.Role.ADMIN, Workers.Role.SUPER_ADMIN, Workers.Role.ADMINISTRATOR]
+        return getWorker(user_id).in_office
+    # getWorker(user_id).role in [Workers.Role.ADMIN, Workers.Role.SUPER_ADMIN, Workers.Role.ADMINISTRATOR])
     return False
 
 
