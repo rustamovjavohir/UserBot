@@ -38,7 +38,7 @@ class WorkersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ["id", "full_name", "department", "job", "phone", "telegram_id", "boss",
                     "is_boss", "user", "is_deleted", "in_office"]
     list_display_links = ["full_name", "department", "job", "phone"]
-    list_filter = ("department",)
+    list_filter = ("department", "is_deleted", "in_office")
     search_fields = ["full_name", "job"]
     list_editable = ["is_boss"]
     readonly_fields = ['created_at']
@@ -46,6 +46,7 @@ class WorkersAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     resource_class = WorkerResource
     exclude = ['is_deleted']
     actions = ["create_user"]
+    ordering = ["department", "is_deleted"]
 
     def get_exclude(self, request, obj=None):
         if request.user.is_superuser:
