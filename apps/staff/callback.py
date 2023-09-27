@@ -9,7 +9,7 @@ from apps.staff.buttons import foodMenuButton, acceptInlineButton, roomMenuButto
     freeRoomHoursInlineButton, avansButton
 from apps.staff.models import Request_price, ITRequestPrice, Data
 from apps.staff.utils import getWorker, notificationBot, getAvansText, roomTableText, selectBookTime, freeRoomHours, \
-    freeRoomEndHours
+    freeRoomEndHours, send_message_to_group
 from apps.staff.views import isWorker
 from datetime import datetime, timedelta
 
@@ -156,6 +156,6 @@ def inline(update: Update, context):
                     button = roomMenuButton(room=room, date=date, prev_date=prev_date, next_date=next_date)
                 else:
                     button = roomMenuButton(room=room, date=date, next_date=next_date)
-                update.callback_query.edit_message_text(text=text, parse_mode='HTML',
-                                                        reply_markup=None)
+                update.callback_query.edit_message_text(text=text, parse_mode='HTML', reply_markup=None)
                 context.bot.send_message(chat_id=user_id, text="Xona bron qilindi", reply_markup=avansButton(True))
+                send_message_to_group(context, text)

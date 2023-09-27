@@ -161,6 +161,7 @@ ALLOWED_IPS = env.list('ALLOWED_IPS')
 SEND_CHECKING_ID = env.str('SEND_CHECKING_ID')
 WORKING_TIME = env.int('WORKING_TIME')
 ADMIN_ID = env.str('ADMIN_ID')
+GROUP_ID = env.str('GROUP_ID')
 
 JAZZMIN_SETTINGS = {
     # title of the window (Will default to current_admin_site.site_title if absent or None)

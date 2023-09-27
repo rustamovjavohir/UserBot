@@ -10,7 +10,7 @@ from telegram import Bot, Update
 
 from apps.staff.models import *
 from apps.staff.tasks import create_auto_delete_req
-from config.settings import S_TOKEN, URL_1C, LOGIN_1C, PASSWORD_1C
+from config.settings import S_TOKEN, URL_1C, LOGIN_1C, PASSWORD_1C, GROUP_ID
 from datetime import datetime, date
 
 bot = Bot(token=S_TOKEN)
@@ -499,3 +499,7 @@ def freeRoomEndHours(room, date: date, start_time: int):
 def selectBookTime(user, room, event, date, start_time, end_time):
     Timetable.objects.create(user=user, room=room, event=event, date=date, start_time=start_time, end_time=end_time)
     return 1
+
+
+def send_message_to_group(context: CallbackContext, text):
+    context.bot.send_message(chat_id=GROUP_ID, text=text, parse_mode="HTML")
