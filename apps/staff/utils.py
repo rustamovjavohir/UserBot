@@ -318,6 +318,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                 }
                 res = requests.post(url=url, auth=auth, json=js)
                 if 'success' in list(res.json().keys()):
+                    print(res.json())
                     update.message.reply_html(f"✅So`rov tasdiqlandi, kassaga chiqishingiz mumkin ID: {req.pk}")
                 else:
                     update.message.reply_html("🚫Xatolik yuz berdi")
