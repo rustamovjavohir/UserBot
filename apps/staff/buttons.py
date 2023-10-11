@@ -63,9 +63,10 @@ def cashierButton():
     button = [
         [
             KeyboardButton("Avans yozish"),
+            KeyboardButton('Avans so`rovi')
         ],
         [
-            KeyboardButton('Avans so`rovi'),
+            KeyboardButton('Xonani band qilish'),
             KeyboardButton('Hisobot')
         ],
     ]

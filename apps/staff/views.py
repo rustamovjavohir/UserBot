@@ -84,6 +84,8 @@ def cashierZone(update: Update, context: CallbackContext):
             report(update, context)
         elif msg == "Avans yozish":
             createAvans(update, context)
+        elif msg == "Xonani band qilish":
+            setEventName(update, context)
     elif step["step"] == 1 and msg != '🏠Bosh sahifa':
         setAvans(update, context)
     elif step["step"] == 2 and msg == "✅So`rovni tasdiqlayman":
@@ -96,6 +98,8 @@ def cashierZone(update: Update, context: CallbackContext):
         setAvans(update, context, worker_id=step["other_staff_id"])
     elif step["step"] == 6 and msg == "✅So`rovni tasdiqlayman":
         applyAvans(update, context, worker_id=step["other_staff_id"])
+    elif step["step"] == 300 and msg != "🏠Bosh sahifa":
+        bookRooms(update, context)
 
 
 def kitchenZone(update: Update, context: CallbackContext):

@@ -6,10 +6,10 @@ from telegram import Update
 from apps.rooms.models import Rooms
 from config.settings import URL_1C, LOGIN_1C, PASSWORD_1C
 from apps.staff.buttons import foodMenuButton, acceptInlineButton, roomMenuButton, roomListInlineButton, \
-    freeRoomHoursInlineButton, avansButton
+    freeRoomHoursInlineButton, avansButton, cashierButton
 from apps.staff.models import Request_price, ITRequestPrice, Data
 from apps.staff.utils import getWorker, notificationBot, getAvansText, roomTableText, selectBookTime, freeRoomHours, \
-    freeRoomEndHours, send_message_to_group
+    freeRoomEndHours, send_message_to_group, isCashier
 from apps.staff.views import isWorker
 from datetime import datetime, timedelta
 
@@ -157,5 +157,6 @@ def inline(update: Update, context):
                 else:
                     button = roomMenuButton(room=room, date=date, next_date=next_date)
                 update.callback_query.edit_message_text(text=text, parse_mode='HTML', reply_markup=None)
-                context.bot.send_message(chat_id=user_id, text="Xona bron qilindi", reply_markup=avansButton(True))
+                menu_button = cashierButton() if isCashier(user_id) else avansButton(True)
+                context.bot.send_message(chat_id=user_id, text="Xona bron qilindi", reply_markup=menu_button)
                 send_message_to_group(context, text)

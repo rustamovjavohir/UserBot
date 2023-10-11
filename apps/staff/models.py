@@ -57,6 +57,7 @@ class InfTech(models.Model):
         ADMIN = 'admin', 'Администратор отдела'
         USER = 'user', 'Пользователь'
         ADMINISTRATOR = 'administrator', 'Администратор'
+        CASHIER = 'cashier', 'Кассир'
 
     full_name = models.CharField(max_length=70, verbose_name="Ф.И.О", unique=True)
     # department = models.CharField(default='АЙТи отдел', max_length=250, verbose_name="Подразделение")
@@ -124,6 +125,7 @@ class Workers(models.Model):
         ADMIN = 'admin', 'Администратор отдела'
         USER = 'user', 'Пользователь'
         ADMINISTRATOR = 'administrator', 'Администратор'
+        CASHIER = 'cashier', 'Кассир'
 
     full_name = models.CharField(max_length=70, verbose_name="Ф.И.О", )
     department = models.ForeignKey(Department, on_delete=models.CASCADE, verbose_name="Подразделение")
