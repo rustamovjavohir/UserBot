@@ -241,10 +241,10 @@ def setAvans(update: Update, context: CallbackContext, worker_id=None, menu_butt
                            f"oyliginiyam olib bo'ldiz🤌.\n" \
                            f"Izoh: Eng ko'pi bilan 2 oy uchun avans olsa bo'ladi"
                 else:
-                    text = f"Ishtaha karnakku, {months[next_month.month - 1]} nikiniyam qo'shsa ham yetmayapdi🙅🏻‍♂.\n" \
+                    text = f"Ishtaha karnayku, {months[next_month.month - 1]} nikiniyam qo'shsa ham yetmayapdi🙅🏻‍♂.\n" \
                            f"<strong>Izoh</strong>: Yozilgan summa 2 oylik avans pulidan ko'p"
             else:
-                text = f"Boshliq oylik yozmabdilaku🤲. \n" \
+                text = f"Boshliq oylik yozmabdilarku🤲. \n" \
                        f"Izoh:<strong> {months[next_month.month - 1]}</strong> uchun oylik kiritilmagan"
             update.message.reply_html(text, reply_markup=menu_button)
     else:

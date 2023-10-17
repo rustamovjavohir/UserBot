@@ -7,7 +7,7 @@ def startUpdater():
     sss = BackgroundScheduler({'apscheduler.timezone': 'Asia/Tashkent'})
     sss.add_job(updateTotal, "interval", seconds=300)
     sss.add_job(updateTotal, "cron", hour=23, minute=00)
-    sss.add_job(addSalary, "cron", day=25, hour=1, minute=30)
+    # sss.add_job(addSalary, "cron", day=25, hour=1, minute=30)
     sss.add_job(sendNotificationSetCheckout, "cron", hour=18, minute=20)
     sss.add_job(setCheckOut, "cron", hour=23, minute=55)
     # sss.add_job(ttime, "cron", hour=23, minute=50)
