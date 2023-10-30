@@ -138,7 +138,7 @@ def getAvansText(name, req, month, salary, money, balance):
     text += f"<strong>Avans miqdori:</strong> {'{:,}'.format(money)} So`m\n" \
             f"<strong>Balans:</strong> {'{:,}'.format(balance)} So`m\n"
 
-    if balance <= salary * 0.3 or money >= salary * 0.7:
+    if balance + money <= salary * 0.3 or balance <= salary * 0.3 or money >= salary * 0.7:
         text += f"\n<strong>⚠️Diqqat!</strong> Oylikning 70% dan ortiq miqdorda avans berilmoqda!\n"
     return text
 
