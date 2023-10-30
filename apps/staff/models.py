@@ -228,6 +228,7 @@ class Bonus(models.Model):
     year = models.CharField(default=datetime.datetime.now().year, verbose_name="Год", max_length=10)
     bonus = models.IntegerField(default=0, verbose_name="Бонус")
     paid = models.IntegerField(default=0, verbose_name="Штраф")
+    cause = models.CharField(max_length=250, null=True, blank=False, verbose_name="Причина")
     is_deleted = models.BooleanField(default=False)
 
     @property
@@ -251,14 +252,14 @@ class Bonus(models.Model):
     def send_bonus_notification(self):
         try:
             bot.send_message(self.full_name.telegram_id,
-                             f"Вам начислен бонус в размере {self.musk_bonus} сум за {self.month} месяц")
+                             f"Вам начислен бонус в размере {self.musk_bonus} сум за {self.month} месяц \nПричина: {self.cause}")
         except Exception as ex:
             bot.send_message(chat_id=779890968, text=ex.__str__())
 
     def send_paid_notification(self):
         try:
             bot.send_message(self.full_name.telegram_id,
-                             f"Вам начислен штраф в размере {self.musk_paid} сум за {self.month} месяц")
+                             f"Вам начислен штраф в размере {self.musk_paid} сум за {self.month} месяц \nПричина: {self.cause}")
         except Exception as ex:
             bot.send_message(chat_id=779890968, text=ex.__str__())
 

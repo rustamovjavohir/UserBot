@@ -21,6 +21,9 @@ def sortedByMonthIndex(iterable, reverse=True):
 
 
 def checkReceivedSalary(user_id, month=""):
+    """
+    Oylik chiqqan holda avans so'ramaslik uchun
+    """
     if not month:
         months = getMonthList()
         month = months[(date.today() + relativedelta(months=-2)).month % 12]
