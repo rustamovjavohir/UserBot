@@ -12,11 +12,13 @@
                     <a href="#" class="btn btn-success create_button fa fa-eye-slash" id="hide" style="font-size:20px;
                     margin-right: 5px; margin-left: 5px"></a>
                 </li>
-                <li>
-                    <a href="/media/Salarys-2023-11-03.xlsx" download
-                       class="btn btn-success create_button fa fa-file-excel-o"
-                       style="font-size:20px; margin-right: 5px; margin-left: 5px"></a>
-                </li>
+                {% if template_type == 'bonus' %}
+                    <li>
+                        <a href="{{ import_template_path }}" download
+                           class="btn btn-success create_button fa fa-file-excel-o"
+                           style="font-size:20px; margin-right: 5px; margin-left: 5px"></a>
+                    </li>
+                {% endif %}
             {% endif %}
             {% if has_add_permission %}
                 {{ block.super }}

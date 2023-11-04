@@ -140,7 +140,9 @@ class SalaryAdmin(ImportExportModelAdmin):
             salary = sum([data.salary for data in qs])
 
             my_context = {
-                'salary': "{:,}".format(salary)
+                'salary': "{:,}".format(salary),
+                'template_type': 'bonus',
+                'import_template_path': '/media/Salarys-2023-11-03.xlsx',
             }
             return super(SalaryAdmin, self).changelist_view(request,
                                                             extra_context=my_context)
