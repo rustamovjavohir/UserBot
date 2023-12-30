@@ -12,6 +12,13 @@
                     <a href="#" class="btn btn-success create_button fa fa-eye-slash" id="hide" style="font-size:20px;
                     margin-right: 5px; margin-left: 5px"></a>
                 </li>
+                {% if template_type == 'bonus' %}
+                    <li>
+                        <a href="{{ import_template_path }}" download
+                           class="btn btn-success create_button fa fa-file-excel-o"
+                           style="font-size:20px; margin-right: 5px; margin-left: 5px"></a>
+                    </li>
+                {% endif %}
             {% endif %}
             {% if has_add_permission %}
                 {{ block.super }}
@@ -87,7 +94,7 @@
 
     <style>
         .field-oklad, .field-bonuss, .field-paid, .field-itog, .field-vplacheno, .field-waiting, .field-ostatok,
-        .field-musk_salary, .field-musk_fine, .field-musk_bonus, .field-musk_paid{
+        .field-musk_salary, .field-musk_fine, .field-musk_bonus, .field-musk_paid {
             opacity: 0;
         }
 
