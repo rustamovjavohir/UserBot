@@ -375,7 +375,7 @@ class DepartmentAdmin(ImportExportModelAdmin):
 
         months = getMonthList()
 
-        month = months[int(date.today().month) - 1] # TODO change month to 2
+        month = months[int(date.today().month) - 2] # TODO change month to 2
         if int(date.today().month) == 1:
             year = int(date.today().year) - 1
         else:
@@ -430,7 +430,7 @@ class DepartmentAdmin(ImportExportModelAdmin):
 
     months = getMonthList()
 
-    month = months[int(date.today().month) - 1]  # TODO change month to 2
+    month = months[int(date.today().month) - 2]  # TODO change month to 2
     make_published.short_description = f'Отправить запрос зарплаты для сотрудников за {month} месяц'
 
 
