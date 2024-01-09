@@ -23,7 +23,7 @@ def auto_del_request(message_id, chat_id, request_id):
         bot.delete_message(chat_id=chat_id, message_id=message_id)
     except Exception as ex:
         text = f"Function: auto_del_request\n" \
-               f"order: {request_id}" \
+               f"order: {request_id}\n" \
                f"Xatolik yuz berdi: {ex.__str__()}"
         bot.send_message(chat_id=settings.ADMIN_ID, text=text)
 

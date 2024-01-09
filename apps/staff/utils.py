@@ -296,7 +296,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                                                department_id=Workers.objects.get(telegram_id=worker_id).department.ids)
             try:
                 obj = Total.objects.get(full_name__telegram_id=worker_id,
-                                        year__in=[datetime.now().year], # change to next year
+                                        year__in=[datetime.now().year],  # change to next year
                                         month=months[month - 1])
                 req.workers.add(obj)
             except Exception as ex:
@@ -342,7 +342,8 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
                                                    telegram_id=worker_id).department.ids)
             try:
                 obj = Total.objects.filter(full_name__telegram_id=worker_id,
-                                           year__in=[datetime.now().year], # change to next year
+                                           year__in=[datetime.now().year - 1, datetime.now().year],
+                                           # change to next year
                                            month=months[month - 1]).first()
                 req.workers.add(obj)
             except Exception as ex:
