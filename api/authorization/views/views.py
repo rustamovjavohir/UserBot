@@ -16,7 +16,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from api.authorization.serializers.serializers import (CustomObtainPairSerializer, CustomTokenRefreshSerializer,
                                                        LogoutSerializer, UserProfilesSerializer, VerifyTokenSerializer,
                                                        ChangeUserPasswordSerializer)
-from api.checking.permissions import AllowIPPermission
+from api.checking.permissions import AllowIPPermission, RadiusPermission
 
 
 def LoginPage(request):
@@ -38,7 +38,7 @@ def LoginPage(request):
 
 class LoginView(TokenObtainPairView):
     serializer_class = CustomObtainPairSerializer
-    permission_classes = [AllowIPPermission]
+    permission_classes = [AllowIPPermission | RadiusPermission]
 
     def handle_exception(self, exc):
         response = super().handle_exception(exc)
@@ -87,8 +87,7 @@ class LogoutView(GenericAPIView):
 
 class CustomUserProfile(GenericAPIView):
     serializer_class = UserProfilesSerializer
-    permission_classes = [IsAuthenticated, AllowIPPermission]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, AllowIPPermission | RadiusPermission]
     authentication_classes = [JWTAuthentication, ]
 
     def get(self, request, *args, **kwargs):
