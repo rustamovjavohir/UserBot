@@ -1,5 +1,6 @@
 from rest_framework.permissions import BasePermission
 
+from api.utils import get_client_ip
 from apps.staff.models import Workers
 from config.settings import ALLOWED_IPS
 
@@ -29,9 +30,7 @@ class SuperAdminPermission(BasePermission):
 
 class AllowIPPermission(BasePermission):
     def has_permission(self, request, view):
-        ip = request.META.get('REMOTE_ADDR')
-        print(ip)
-        print("allow: ", ALLOWED_IPS)
+        ip = get_client_ip(request)
         if ip in ALLOWED_IPS:
             return True
-        return True
+        return False
