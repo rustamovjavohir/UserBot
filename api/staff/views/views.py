@@ -18,7 +18,7 @@ from api.staff.filters.filters import WorkerFilter
 from api.staff.paginations.paginations import WorkerPagination
 from api.utils import get_client_ip
 from apps.staff.models import *
-from config.settings import S_TOKEN, ALLOWED_IPS
+from config.settings import S_TOKEN, ALLOWED_IP
 from api.staff.serializers.serializers import BonusSerializer, WorkerSerializer
 import datetime
 
@@ -89,7 +89,7 @@ class BonusView(APIView):
     queryset = Bonus.objects.filter(is_deleted=False)
     months = getMonthList()
     permission_classes = [IsAuthenticated]
-    ip_address = ALLOWED_IPS
+    ip_address = ALLOWED_IP
     serializer_class = BonusSerializer
 
     def get_serializer(self, *args, **kwargs):

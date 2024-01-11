@@ -36,8 +36,7 @@ def start(update: Update, context: CallbackContext):
 def help_handler(update: Update, context: CallbackContext):
     text = "Bot bo'yicha:\n" \
            "1) Botdan foydalanish uchun /start ni bosing.\n" \
-           "2) Botdan foydalanish uchun Radius mobile ishchi bo'lishingiz kerak.\n" \
-           "3) Xatolik bo'lsa @RustamovJX ga murojaat qiling."
+           "2) Botdan foydalanish uchun Radius mobile ishchi bo'lishingiz kerak.\n"
     update.message.reply_text(text)
 
 

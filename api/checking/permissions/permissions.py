@@ -1,6 +1,7 @@
 from rest_framework.permissions import BasePermission
 
 from apps.staff.models import Workers
+from config.settings import ALLOWED_IPS
 
 
 class RadiusPermission(BasePermission):
@@ -23,4 +24,12 @@ class SuperAdminPermission(BasePermission):
         worker = request.user.workers_set.first()
         if worker:
             return True if worker.role == Workers.Role.SUPER_ADMIN else False
+        return False
+
+
+class AllowIPPermission(BasePermission):
+    def has_permission(self, request, view):
+        ip = request.META.get('REMOTE_ADDR')
+        if ip in ALLOWED_IPS:
+            return True
         return False
