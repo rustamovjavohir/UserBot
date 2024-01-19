@@ -313,7 +313,7 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 
 # -------------------------------------------------STAFF_TASKS----------------------------------------------------------
-ACCEPT_USERS_ID = [44, 78]
+ACCEPT_USERS_ID = [44, 78, 32]
 
 try:
     from .local_settings import *
