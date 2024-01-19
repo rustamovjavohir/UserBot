@@ -311,6 +311,10 @@ task_always_eager = True  # delay() buyrugini yozish shart emas
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 # CELERY_IMPORTS = ['apps.tasks.celery_tasks', 'apps.staff.tasks']
 
+
+# -------------------------------------------------STAFF_TASKS----------------------------------------------------------
+ACCEPT_USERS_ID = [44, ]
+
 try:
     from .local_settings import *
 except ImportError:

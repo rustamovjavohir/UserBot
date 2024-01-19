@@ -11,7 +11,7 @@ from telegram import Bot, Update
 from apps.staff.models import *
 from apps.staff.tasks import create_auto_delete_req
 from apps.tasks.models import Tasks
-from config.settings import S_TOKEN, URL_1C, LOGIN_1C, PASSWORD_1C, GROUP_ID
+from config.settings import S_TOKEN, URL_1C, LOGIN_1C, PASSWORD_1C, GROUP_ID, ACCEPT_USERS_ID
 from datetime import datetime, date, timedelta
 
 bot = Bot(token=S_TOKEN)
@@ -200,7 +200,7 @@ def hasPermBookRoom(user_id) -> bool:
 
 def hasPermCreateTask(user_id) -> bool:
     if isWorker(user_id):
-        return getWorker(user_id).id in [2, 44]
+        return getWorker(user_id).id in ACCEPT_USERS_ID
     return False
 
 
