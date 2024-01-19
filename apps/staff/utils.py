@@ -200,7 +200,7 @@ def hasPermBookRoom(user_id) -> bool:
 
 def hasPermCreateTask(user_id) -> bool:
     if isWorker(user_id):
-        return getWorker(user_id).id in [2, ]
+        return getWorker(user_id).id in [2, 44]
     return False
 
 
