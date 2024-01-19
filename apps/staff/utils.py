@@ -186,7 +186,8 @@ def isKitchen(user_id) -> bool:
 
 def isCashier(user_id) -> bool:
     if isWorker(user_id):
-        return getWorker(user_id).role in [Workers.Role.CASHIER, Workers.Role.SUPER_ADMIN]
+        # return getWorker(user_id).role in [Workers.Role.CASHIER, Workers.Role.SUPER_ADMIN]
+        return getWorker(user_id).role in [Workers.Role.CASHIER, ]
         # return getWorker(user_id).department.ids.__eq__("00-000041")
     return False
 
