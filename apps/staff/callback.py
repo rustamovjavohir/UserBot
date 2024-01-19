@@ -4,14 +4,20 @@ import requests
 from telegram import Update
 
 from apps.rooms.models import Rooms
+from apps.staff import constants
+from apps.staff.tasks import remain_task_notification
+from apps.tasks import choices
+from apps.tasks.models import Tasks
 from config.settings import URL_1C, LOGIN_1C, PASSWORD_1C
 from apps.staff.buttons import foodMenuButton, acceptInlineButton, roomMenuButton, roomListInlineButton, \
-    freeRoomHoursInlineButton, avansButton, cashierButton
+    freeRoomHoursInlineButton, avansButton, cashierButton, dayInlineButton, hourInlineButton, homeButton, \
+    completeTaskButton, cancelTaskButton, confirmCancelTaskButton
 from apps.staff.models import Request_price, ITRequestPrice, Data
 from apps.staff.utils import getWorker, notificationBot, getAvansText, roomTableText, selectBookTime, freeRoomHours, \
-    freeRoomEndHours, send_message_to_group, isCashier
+    freeRoomEndHours, send_message_to_group, isCashier, home, filterWorkerByName, taskInform, sendTaskToStaff, \
+    updateTaskData, unPingTask, removeTaskStaff
 from apps.staff.views import isWorker
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 
 def inline(update: Update, context):
@@ -19,7 +25,7 @@ def inline(update: Update, context):
     worker = getWorker(user_id)
     step = Data.objects.get(telegram_id=user_id).data
     data = update.callback_query.data.split("_")
-    # print(data)
+    print(data)
     if isWorker(user_id):
         if len(data) == 2 and data[0] == 'sendBoss':
             update.callback_query.message.edit_reply_markup()
@@ -160,3 +166,83 @@ def inline(update: Update, context):
                 menu_button = cashierButton() if isCashier(user_id) else avansButton(True)
                 context.bot.send_message(chat_id=user_id, text="Xona bron qilindi", reply_markup=menu_button)
                 send_message_to_group(context, text)
+        elif data[0] == 'task':
+            if "next" in data:
+                today = datetime.strptime(data[2], "%Y-%m-%d").date()
+                next_date = today + timedelta(days=1)
+                prev_date = today - timedelta(days=1)
+                update.callback_query.edit_message_text(text=constants.ENTER_TASK_DEADLINE, parse_mode='HTML',
+                                                        reply_markup=dayInlineButton(today=today,
+                                                                                     prev_date=prev_date,
+                                                                                     next_date=next_date))
+            elif "prev" in data:
+                today = datetime.strptime(data[2], "%Y-%m-%d").date()
+                prev_date = today - timedelta(days=1)
+                next_date = today + timedelta(days=1)
+                if today == datetime.now().date():
+                    prev_date = None
+                update.callback_query.edit_message_text(text=constants.ENTER_TASK_DEADLINE, parse_mode='HTML',
+                                                        reply_markup=dayInlineButton(today=today,
+                                                                                     prev_date=prev_date,
+                                                                                     next_date=next_date))
+            elif "select" in data:
+                today = datetime.strptime(data[2], "%Y-%m-%d").date()
+                hour = 8
+                if today == datetime.now().date() and datetime.now().hour >= 8:
+                    hour = datetime.now().hour
+                step.update({"step": 3, "task_date": data[2]})
+                Data.objects.filter(telegram_id=user_id).update(data=step)
+                update.callback_query.edit_message_text(text=constants.ENTER_TASK_NAME, parse_mode='HTML',
+                                                        reply_markup=hourInlineButton(hour=hour))
+            elif "close" in data:
+                update.callback_query.edit_message_reply_markup(reply_markup=None)
+                context.bot.send_message(chat_id=user_id, text='.', reply_markup=homeButton())
+            elif "hour" in data:
+                task_hour = data[2]
+                worker = filterWorkerByName(step.get('task_worker'))
+                creator = getWorker(user_id)
+                date_string = step.get('task_date') + " " + task_hour
+                deadline = datetime.strptime(date_string, "%Y-%m-%d %H").astimezone(
+                    timezone(timedelta(hours=5)))
+                step.update({"step": 4, "task_hour": task_hour})
+                Data.objects.filter(telegram_id=user_id).update(data=step)
+                task = Tasks.objects.create(name=step.get('task_name'), user=worker, deadline=deadline,
+                                            created_by=creator)
+                sendTaskToStaff(task, context)
+                remain_task_notification(task)
+                update.callback_query.edit_message_text(text=taskInform(task), parse_mode='HTML',
+                                                        reply_markup=cancelTaskButton(task))
+                updateTaskData(task, {"sender_message_id": update.callback_query.message.message_id})
+                context.bot.send_message(chat_id=user_id, text='.', reply_markup=homeButton())
+            elif "accept" in data:
+                task = Tasks.objects.get(pk=data[1])
+                task.status = choices.TaskStatusChoices.IN_PROGRESS
+                task.accepting_date = datetime.now().astimezone(timezone(timedelta(hours=5)))
+                task.save()
+                task.refresh_from_db()
+                update.callback_query.edit_message_text(text=taskInform(task), parse_mode='HTML',
+                                                        reply_markup=completeTaskButton(task))
+            elif "complete" in data:
+                task = Tasks.objects.get(pk=data[1])
+                task.status = choices.TaskStatusChoices.DONE
+                task.completion_date = datetime.now().astimezone(timezone(timedelta(hours=5)))
+                task.save()
+                task.refresh_from_db()
+                update.callback_query.edit_message_text(text=taskInform(task), parse_mode='HTML',
+                                                        reply_markup=None)
+                unPingTask(task, context)
+            elif "cancel" in data:
+                if "yes" in data:
+                    task = Tasks.objects.get(pk=data[1])
+                    task.status = choices.TaskStatusChoices.CANCELED
+                    task.save()
+                    task.refresh_from_db()
+                    removeTaskStaff(task, context)
+                elif "no" in data:
+                    task = Tasks.objects.get(pk=data[1])
+                    update.callback_query.edit_message_text(text=taskInform(task), parse_mode='HTML',
+                                                            reply_markup=cancelTaskButton(task))
+                else:
+                    task = Tasks.objects.get(pk=data[1])
+                    update.callback_query.edit_message_text(text=taskInform(task), parse_mode='HTML',
+                                                            reply_markup=confirmCancelTaskButton(task))

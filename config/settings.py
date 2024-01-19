@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "apps.checking",
     "apps.authorization",
     "apps.rooms",
+    'apps.tasks',
     "api",
     "jobs",
 
@@ -308,6 +309,7 @@ broker_transport_options = {'visibility_timeout': 60 * 60}
 timezone = 'Asia/Tashkent'
 task_always_eager = True  # delay() buyrugini yozish shart emas
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+# CELERY_IMPORTS = ['apps.tasks.celery_tasks', 'apps.staff.tasks']
 
 try:
     from .local_settings import *

@@ -1,28 +1,38 @@
-from datetime import date
+from datetime import date, datetime
 
 from telegram import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 
+from apps.staff import constants
+from apps.tasks.models import Tasks
 
-def avansButton(has_room_booked: bool = False):
+
+def baseMenuButton():
     buttons = [
-        [KeyboardButton('Avans so`rovi'), KeyboardButton('Hisobot')],
+        [KeyboardButton(constants.REQUEST_AVANS), KeyboardButton(constants.REPORT)],
     ]
+    return buttons
+
+
+def avansButton(has_room_booked: bool = False, has_create_task: bool = False):
+    buttons = baseMenuButton()
     if has_room_booked:
-        buttons.append([KeyboardButton('Xonani band qilish')])
+        buttons.append([KeyboardButton(constants.BOOK_ROOM)])
+    if has_create_task:
+        buttons.append([KeyboardButton(constants.CREATE_TASKS)])
     return ReplyKeyboardMarkup(buttons, resize_keyboard=True, one_time_keyboard=True)
 
 
 def homeButton():
     buttons = [
-        [KeyboardButton('🏠Bosh sahifa')],
+        [KeyboardButton(constants.HOME)]
     ]
     return ReplyKeyboardMarkup(buttons, resize_keyboard=True, one_time_keyboard=True)
 
 
 def acceptButton():
     buttons = [
-        [KeyboardButton('✅So`rovni tasdiqlayman')],
-        [KeyboardButton('🏠Bosh sahifa')]
+        [KeyboardButton(constants.ACCEPT_REQUEST)],
+        [KeyboardButton(constants.HOME)]
     ]
 
     return ReplyKeyboardMarkup(buttons, resize_keyboard=True, one_time_keyboard=True)
@@ -30,46 +40,36 @@ def acceptButton():
 
 def acceptInlineButton(req_id):
     buttons = [
-        [InlineKeyboardButton("✅Tasdiqlash", callback_data=f"done_{req_id}")],
-        [InlineKeyboardButton("❌Rad etish", callback_data=f"not_{req_id}")]
+        [InlineKeyboardButton(constants.ACCEPT, callback_data=f"done_{req_id}")],
+        [InlineKeyboardButton(constants.REJECT, callback_data=f"not_{req_id}")]
     ]
     return InlineKeyboardMarkup(buttons)
 
 
 def acceptInlineButton2(req_id):
     buttons = [
-        [InlineKeyboardButton("✅Tasdiqlash", callback_data=f"sendBoss_{req_id}")],
-        [InlineKeyboardButton("❌Rad etish", callback_data=f"not_{req_id}")]
+        [InlineKeyboardButton(constants.ACCEPT, callback_data=f"sendBoss_{req_id}")],
+        [InlineKeyboardButton(constants.REJECT, callback_data=f"not_{req_id}")]
     ]
     return InlineKeyboardMarkup(buttons)
 
 
 def foodMenuButton():
-    button = [
-        [
-            KeyboardButton("Taomnoma"),
-            KeyboardButton("Obetga 🗣")
-        ],
-        [
-            KeyboardButton('Avans so`rovi'),
-            KeyboardButton('Hisobot')
-        ],
-    ]
+    button = baseMenuButton()
+    button.append([
+        KeyboardButton(constants.FOOD_MENU),
+        KeyboardButton(constants.GO_KITCHEN),
+    ])
 
     return ReplyKeyboardMarkup(button, resize_keyboard=True, one_time_keyboard=True)
 
 
 def cashierButton():
-    button = [
-        [
-            KeyboardButton("Avans yozish"),
-            KeyboardButton('Avans so`rovi')
-        ],
-        [
-            KeyboardButton('Xonani band qilish'),
-            KeyboardButton('Hisobot')
-        ],
-    ]
+    button = baseMenuButton()
+    button.append([
+        KeyboardButton(constants.WRITE_AVANS),
+        KeyboardButton(constants.BOOK_ROOM),
+    ])
 
     return ReplyKeyboardMarkup(button, resize_keyboard=True, one_time_keyboard=True)
 
@@ -78,7 +78,7 @@ def workersListButton(workers):
     button = []
     for worker in workers:
         button.append([KeyboardButton(f"{worker.full_name}")])
-
+    button.append([KeyboardButton(constants.HOME)])
     return ReplyKeyboardMarkup(button, resize_keyboard=True, one_time_keyboard=True)
 
 
@@ -155,7 +155,7 @@ def roomMenuButton(room, date: date = None, prev_date: date = None, next_date: d
         )
     button.append(inner_button)
     button.append([
-        InlineKeyboardButton("🏠Bosh sahifa", callback_data=f"room_{room.id}_home"),
+        InlineKeyboardButton(constants.HOME, callback_data=f"room_{room.id}_home"),
     ])
 
     return InlineKeyboardMarkup(button)
@@ -178,5 +178,81 @@ def freeRoomHoursInlineButton(room, hours, command: str = "start"):
                 ])
             button.append(
                 [InlineKeyboardButton(f"{hours[-1]}:00", callback_data=f"room_{room.id}_{hours[-1]}_{command}")])
-    button.append([InlineKeyboardButton("🏠Bosh sahifa", callback_data=f"room_{room.id}_home")])
+    button.append([InlineKeyboardButton(constants.HOME, callback_data=f"room_{room.id}_home")])
     return InlineKeyboardMarkup(button)
+
+
+def dayInlineButton(today: date = datetime.now().date(), prev_date: date = None, next_date: date = None):
+    button = []
+    inner_button = []
+    prefix = 'task'
+    if prev_date:
+        inner_button.append(
+            InlineKeyboardButton("⬅️", callback_data=f"{prefix}_day_{str(prev_date)}_prev")
+        )
+    inner_button.append(
+        InlineKeyboardButton(f"{today}", callback_data=f"{prefix}_day_{today}_select")
+    )
+    if next_date:
+        inner_button.append(
+            InlineKeyboardButton("➡️", callback_data=f"{prefix}_day_{str(next_date)}_next")
+        )
+    button.append(inner_button)
+    button.append([InlineKeyboardButton(constants.HOME, callback_data=f"{prefix}_day_close")])
+
+    return InlineKeyboardMarkup(button)
+
+
+def hourInlineButton(hour: int = 8):
+    prefix = 'task'
+    button = []
+    delta = 24 - hour
+    start_hour = 24 - delta + 1
+    if delta % 2 == 0:
+        for i in range(start_hour, 24, 2):
+            button.append([
+                InlineKeyboardButton(f"{i}:00", callback_data=f"{prefix}_hour_{i}"),
+                InlineKeyboardButton(f"{i + 1}:00", callback_data=f"{prefix}_hour_{i + 1}")
+            ])
+    else:
+        for i in range(start_hour, 23, 2):
+            button.append([
+                InlineKeyboardButton(f"{i}:00", callback_data=f"{prefix}_hour_{i}"),
+                InlineKeyboardButton(f"{i + 1}:00", callback_data=f"{prefix}_hour_{i + 1}")
+            ])
+        button.append([InlineKeyboardButton(f"{24}:00", callback_data=f"{prefix}_hour_{24}")])
+    button.append([InlineKeyboardButton(constants.HOME, callback_data=f"{prefix}_time_close")])
+    return InlineKeyboardMarkup(button)
+
+
+def taskButton(task: Tasks):
+    button = [
+        InlineKeyboardButton(f"{constants.ACCEPT_TASK}", callback_data=f"task_{task.id}_accept"),
+    ]
+
+    return InlineKeyboardMarkup([button])
+
+
+def completeTaskButton(task: Tasks):
+    button = [
+        InlineKeyboardButton(f"{constants.COMPLETE_TASK}", callback_data=f"task_{task.id}_complete"),
+    ]
+
+    return InlineKeyboardMarkup([button])
+
+
+def cancelTaskButton(task: Tasks):
+    button = [
+        InlineKeyboardButton(f"{constants.CANCEL_TASK}", callback_data=f"task_{task.id}_cancel"),
+    ]
+
+    return InlineKeyboardMarkup([button])
+
+
+def confirmCancelTaskButton(task: Tasks):
+    button = [
+        InlineKeyboardButton(f"{constants.ACCEPT}", callback_data=f"task_{task.id}_yes_cancel"),
+        InlineKeyboardButton(f"{constants.REJECT}", callback_data=f"task_{task.id}_no_cancel"),
+    ]
+
+    return InlineKeyboardMarkup([button])

@@ -10,8 +10,9 @@ from telegram import Bot, Update
 
 from apps.staff.models import *
 from apps.staff.tasks import create_auto_delete_req
+from apps.tasks.models import Tasks
 from config.settings import S_TOKEN, URL_1C, LOGIN_1C, PASSWORD_1C, GROUP_ID
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 bot = Bot(token=S_TOKEN)
 
@@ -197,6 +198,12 @@ def hasPermBookRoom(user_id) -> bool:
     return False
 
 
+def hasPermCreateTask(user_id) -> bool:
+    if isWorker(user_id):
+        return getWorker(user_id).id in [2, ]
+    return False
+
+
 def requestAvans(update: Update, context: CallbackContext, step_count=1, is_self=True):
     step_dict = {"step": step_count}
     if not is_self:
@@ -209,6 +216,10 @@ def requestAvans(update: Update, context: CallbackContext, step_count=1, is_self
     Data.objects.filter(telegram_id=user_id).update(data=step)
     update.message.reply_text('Avans miqdorini yozing',
                               reply_markup=homeButton())
+
+
+def filterWorkerByName(worker):
+    return Workers.objects.filter(full_name=worker, active=True).first()
 
 
 def setAvans(update: Update, context: CallbackContext, worker_id=None, menu_button=None):
@@ -284,7 +295,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
         step.update({"step": 0})
         Data.objects.filter(telegram_id=worker_id).update(data=step)
         update.message.reply_text(f"✅So`rov bo`lim boshlig`iga yuborildi, ID: {req.secondId}")
-        update.message.reply_text("Bosh sahifa", reply_markup=avansButton(hasPermBookRoom(user_id)))
+        update.message.reply_text(constants.HOME_PAGE, reply_markup=avansButton(hasPermBookRoom(user_id)))
     elif getattr(getWorker(worker_id), 'is_boss'):
         price = int(step['price'])
         money_split = splitMoney(user_id=worker_id, money=price)
@@ -332,7 +343,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
         reply_markup = avansButton(hasPermBookRoom(user_id))
         if isCashier(user_id):
             reply_markup = cashierButton()
-        update.message.reply_text("Bosh sahifa", reply_markup=reply_markup)
+        update.message.reply_text(constants.HOME_PAGE, reply_markup=reply_markup)
 
     else:  # oddiy ishchilar
         price = int(step['price'])
@@ -385,7 +396,7 @@ def applyAvans(update: Update, context: CallbackContext, worker_id=None):
         reply_markup = avansButton(hasPermBookRoom(user_id))
         if isCashier(user_id):
             reply_markup = cashierButton()
-        update.message.reply_text("Bosh sahifa", reply_markup=reply_markup)
+        update.message.reply_text(constants.HOME_PAGE, reply_markup=reply_markup)
 
 
 def report(update: Update, context: CallbackContext):
@@ -410,12 +421,11 @@ def report(update: Update, context: CallbackContext):
 def home(update: Update, context: CallbackContext, menu_button=None):
     user_id = update.message.from_user.id
     if menu_button is None:
-        menu_button = avansButton(hasPermBookRoom(user_id))
+        menu_button = avansButton(has_room_booked=hasPermBookRoom(user_id), has_create_task=hasPermCreateTask(user_id))
     step = Data.objects.get(telegram_id=user_id).data
     step.update({"step": 0})
     Data.objects.filter(telegram_id=user_id).update(data=step)
-    update.message.reply_html("Bosh sahifa",
-                              reply_markup=menu_button)
+    update.message.reply_html(constants.HOME_PAGE, reply_markup=menu_button)
 
 
 def createAvans(update: Update, context: CallbackContext):
@@ -423,8 +433,7 @@ def createAvans(update: Update, context: CallbackContext):
     step = Data.objects.get(telegram_id=user_id).data
     step.update({"step": 3})
     Data.objects.filter(telegram_id=user_id).update(data=step)
-    update.message.reply_html("Hodimning ismini kiriting (фақат кирил ҳарфларида)",
-                              reply_markup=homeButton())
+    update.message.reply_html(constants.ENTER_STAFF_NAME, reply_markup=homeButton())
 
 
 def filterWorkers(message, user_id):
@@ -471,6 +480,48 @@ def bookRooms(update: Update, context: CallbackContext):
     update.message.reply_html("Xonani tanlang", reply_markup=roomListInlineButton(rooms))
 
 
+def createTask(update: Update, context: CallbackContext):
+    update.message.reply_text(constants.ENTER_TASK_NAME, reply_markup=homeButton())
+    user_id = update.message.from_user.id
+    step = Data.objects.get(telegram_id=user_id).data
+    step.update({"step": 400})
+    Data.objects.filter(telegram_id=user_id).update(data=step)
+
+
+def setTaskName(update: Update, context: CallbackContext):
+    task = update.message.text
+    user_id = update.message.from_user.id
+    step = Data.objects.get(telegram_id=user_id).data
+    step.update({"step": 401, "task_name": task})
+    Data.objects.filter(telegram_id=user_id).update(data=step)
+    update.message.reply_text(constants.ENTER_STAFF_NAME, reply_markup=homeButton())
+
+
+def selectTaskWorker(update: Update, context: CallbackContext):
+    user_id = update.message.from_user.id
+    msg = update.message.text
+    workers = filterWorkers(msg, user_id)
+    update.message.reply_text(constants.SELECT_STAFF, reply_markup=workersListButton(workers))
+    step = Data.objects.get(telegram_id=user_id).data
+    step.update({"step": 402})
+    Data.objects.filter(telegram_id=user_id).update(data=step)
+
+
+def setTaskWorker(update: Update, context: CallbackContext):
+    user_id = update.message.from_user.id
+    worker = update.message.text
+    if filterWorkerByName(worker):
+        step = Data.objects.get(telegram_id=user_id).data
+        step.update({"step": 403, "task_worker": worker})
+        Data.objects.filter(telegram_id=user_id).update(data=step)
+        today = datetime.now().date()
+        next_date = today + timedelta(days=1)
+        update.message.reply_text(constants.ENTER_TASK_DEADLINE,
+                                  reply_markup=dayInlineButton(today=today, next_date=next_date))
+    else:
+        return home(update, context)
+
+
 def roomTimeTables(room):
     return Timetable.objects.filter(room=room, is_active=True, date__gte=date.today()).order_by('date', 'start_time')
 
@@ -513,3 +564,64 @@ def selectBookTime(user, room, event, date, start_time, end_time):
 
 def send_message_to_group(context: CallbackContext, text):
     context.bot.send_message(chat_id=GROUP_ID, text=text, parse_mode="HTML")
+
+
+def updateTaskData(task: Tasks, data: dict):
+    _data = task.data
+    _data.update(data)
+    task.data = _data
+    task.save()
+    task.refresh_from_db()
+    return task
+
+
+def taskInform(task: Tasks):
+    deadline = task.deadline.astimezone(datetime.now().astimezone().tzinfo)
+    text = f"Vazifa raqami: <strong>№{task.pk}</strong>\n" \
+           f"Nomi: <strong>{task.name}</strong>\n" \
+           f"Deadline: <strong>{deadline.strftime('%d.%m.%Y %H:%M')}</strong>\n" \
+           f"Ma'sul shaxs: <strong>{task.user.full_name}</strong>\n" \
+           f"Yaratuvchi: <strong>{task.created_by.full_name}</strong>\n" \
+           f"Status: <strong>{task.get_status_display()}</strong>\n"
+    if task.accepting_date:
+        accept_date = task.accepting_date.astimezone(datetime.now().astimezone().tzinfo)
+        text += f"Qabul qilgan sana: <strong>{accept_date.strftime('%d.%m.%Y %H:%M')}</strong>\n"
+    if task.completion_date:
+        completion_date = task.completion_date.astimezone(datetime.now().astimezone().tzinfo)
+        text += f"Yakunlangan sana: <strong>{completion_date.strftime('%d.%m.%Y %H:%M')}</strong>\n"
+    return text
+
+
+def sendTaskToStaff(task: Tasks, context: CallbackContext):
+    text = taskInform(task)
+    msg = context.bot.send_message(chat_id=task.user.telegram_id, text=text, parse_mode="HTML",
+                                   reply_markup=taskButton(task))
+    context.bot.pin_chat_message(chat_id=task.user.telegram_id, message_id=msg.message_id, disable_notification=False)
+    updateTaskData(task, {"receiver_message_id": msg.message_id})
+
+
+def removeTaskStaff(task: Tasks, context: CallbackContext):
+    try:
+        if task.data.get("receiver_message_id", None):
+            context.bot.delete_message(chat_id=task.user.telegram_id,
+                                       message_id=task.data.get("receiver_message_id"))
+    except Exception as ex:
+        print(ex)
+
+
+def unPingTask(task: Tasks, context: CallbackContext):
+    try:
+        if task.data.get("receiver_message_id", None):
+            context.bot.unpin_chat_message(chat_id=task.user.telegram_id,
+                                           message_id=task.data.get("receiver_message_id"))
+    except Exception as ex:
+        print(ex)
+
+
+def send_status_notification(task: Tasks):
+    sender_id = task.created_by.telegram_id
+    sender_message_id = task.data.get('sender_message_id', None)
+    if sender_message_id:
+        text = taskInform(task)
+        bot.edit_message_text(chat_id=sender_id, message_id=sender_message_id, text=text, parse_mode="HTML",
+                              reply_markup=None)
