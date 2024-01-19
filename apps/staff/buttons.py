@@ -70,6 +70,7 @@ def cashierButton():
         KeyboardButton(constants.WRITE_AVANS),
         KeyboardButton(constants.BOOK_ROOM),
     ])
+    button.append([KeyboardButton(constants.CREATE_TASKS)])
 
     return ReplyKeyboardMarkup(button, resize_keyboard=True, one_time_keyboard=True)
 
