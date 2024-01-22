@@ -75,7 +75,7 @@ def remain_task_notification(task: Tasks):
         clocked=inter_schedule,
         name=f'Send message {task.id}',
         task='apps.staff.tasks.send_task_notification',
-        args=(task.id,),
+        args=json.dumps([task.id, ]),
         one_off=True,
     )
     return periodic_task

@@ -196,7 +196,7 @@ def inline(update: Update, context):
                                                         reply_markup=hourInlineButton(hour=hour))
             elif "close" in data:
                 update.callback_query.edit_message_reply_markup(reply_markup=None)
-                context.bot.send_message(chat_id=user_id, text='.', reply_markup=homeButton())
+                context.bot.send_message(chat_id=user_id, text=constants.SUCCESS, reply_markup=homeButton())
             elif "hour" in data:
                 task_hour = data[2]
                 worker = filterWorkerByName(step.get('task_worker'))
@@ -213,7 +213,7 @@ def inline(update: Update, context):
                 update.callback_query.edit_message_text(text=taskInform(task), parse_mode='HTML',
                                                         reply_markup=cancelTaskButton(task))
                 updateTaskData(task, {"sender_message_id": update.callback_query.message.message_id})
-                context.bot.send_message(chat_id=user_id, text='.', reply_markup=homeButton())
+                context.bot.send_message(chat_id=user_id, text=constants.SUCCESS, reply_markup=homeButton())
             elif "accept" in data:
                 task = Tasks.objects.get(pk=data[1])
                 task.status = choices.TaskStatusChoices.IN_PROGRESS

@@ -21,3 +21,4 @@ ENTER_STAFF_NAME = "Xodimning ismini kiriting (фақат кирил ҳарфл�
 SELECT_STAFF = "Xodimni tanlang"
 ENTER_TASK_DEADLINE = "Vazifa muddatini kiriting"
 TASK_CREATED = "Vazifa muvaffaqiyatli yaratildi"
+SUCCESS = "success✅"
