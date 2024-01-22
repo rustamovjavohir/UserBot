@@ -15,10 +15,13 @@ def baseMenuButton():
 
 def avansButton(has_room_booked: bool = False, has_create_task: bool = False):
     buttons = baseMenuButton()
+    if has_create_task:
+        buttons.append([
+            KeyboardButton(constants.CREATE_TASKS),
+            KeyboardButton(constants.SHOW_TASKS),
+        ])
     if has_room_booked:
         buttons.append([KeyboardButton(constants.BOOK_ROOM)])
-    if has_create_task:
-        buttons.append([KeyboardButton(constants.CREATE_TASKS)])
     return ReplyKeyboardMarkup(buttons, resize_keyboard=True, one_time_keyboard=True)
 
 

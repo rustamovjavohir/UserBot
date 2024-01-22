@@ -1,6 +1,7 @@
 from time import sleep
 
 import requests
+from django.db.models import Q
 from telegram.ext import CallbackContext
 
 from apps.rooms.models import Rooms, Timetable
@@ -10,6 +11,7 @@ from telegram import Bot, Update
 
 from apps.staff.models import *
 from apps.staff.tasks import create_auto_delete_req
+from apps.tasks.choices import TaskStatusChoices
 from apps.tasks.models import Tasks
 from config.settings import S_TOKEN, URL_1C, LOGIN_1C, PASSWORD_1C, GROUP_ID, ACCEPT_USERS_ID
 from datetime import datetime, date, timedelta
@@ -489,6 +491,20 @@ def createTask(update: Update, context: CallbackContext):
     Data.objects.filter(telegram_id=user_id).update(data=step)
 
 
+def show_tasks(update: Update, context: CallbackContext):
+    user_id = update.message.from_user.id
+    tasks = Tasks.objects.filter(Q(user__telegram_id=user_id) | Q(created_by__telegram_id=user_id),
+                                 status__in=[TaskStatusChoices.NEW, TaskStatusChoices.IN_PROGRESS],
+                                 is_active=True)
+    if tasks.exists():
+        tasks_text = ""
+        for task in tasks:
+            tasks_text += task_links(task)
+        update.message.reply_html(tasks_text)
+    else:
+        update.message.reply_text("Sizda vazifa yo`q", reply_markup=homeButton())
+
+
 def setTaskName(update: Update, context: CallbackContext):
     task = update.message.text
     user_id = update.message.from_user.id
@@ -590,6 +606,17 @@ def taskInform(task: Tasks):
     if task.completion_date:
         completion_date = task.completion_date.astimezone(datetime.now().astimezone().tzinfo)
         text += f"Yakunlangan sana: <strong>{completion_date.strftime('%d.%m.%Y %H:%M')}</strong>\n"
+    return text
+
+
+def task_links(task: Tasks):
+    # f"https://t.me/{bot.username}/{task.created_by.telegram_id}?messageID={task.data.get('sender_message_id')}\n\n"
+    deadline = task.deadline.astimezone(datetime.now().astimezone().tzinfo)
+    text = f"Vazifa raqami: <strong>№{task.pk}</strong>\n" \
+           f"Nomi: <strong>{task.name}</strong>\n" \
+           f"Ma'sul shaxs: <strong>{task.user.full_name}</strong>\n" \
+           f"Deadline: <strong>{deadline.strftime('%d.%m.%Y %H:%M')}</strong>\n" \
+           f"Status: <strong>{task.get_status_display()}</strong>\n\n"
     return text
 
 

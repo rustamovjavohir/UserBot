@@ -74,6 +74,8 @@ def mainZone(update: Update, context: CallbackContext):
         setEventName(update, context)
     elif step["step"] == 0 and msg == constants.CREATE_TASKS:
         createTask(update, context)
+    elif step["step"] == 0 and msg == constants.SHOW_TASKS:
+        show_tasks(update, context)
     elif step["step"] == 300:
         bookRooms(update, context)
     elif step["step"] == 400:

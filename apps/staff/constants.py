@@ -1,5 +1,6 @@
 # buttons
 CREATE_TASKS = 'Vazifa berish'
+SHOW_TASKS = 'Vazifalarni ko`rish'
 REQUEST_AVANS = 'Avans so`rovi'
 WRITE_AVANS = 'Avans yozish'
 REPORT = 'Hisobot'
