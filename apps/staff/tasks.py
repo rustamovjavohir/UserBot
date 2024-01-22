@@ -63,6 +63,7 @@ def create_auto_delete_req(message_id, chat_id, request_id):
 def send_task_notification(temp, task_id: int, *args, **kwargs):
     task = Tasks.objects.get(id=task_id)
     if task.status in [TaskStatusChoices.NEW, TaskStatusChoices.IN_PROGRESS]:
+        bot.send_message(chat_id=task.created_by.telegram_id, text=remain_task_text(task), parse_mode='HTML')
         bot.send_message(chat_id=task.user.telegram_id, text=remain_task_text(task), parse_mode='HTML')
 
 
