@@ -25,7 +25,7 @@ def inline(update: Update, context):
     worker = getWorker(user_id)
     step = Data.objects.get(telegram_id=user_id).data
     data = update.callback_query.data.split("_")
-    print(data)
+    # print(data)
     if isWorker(user_id):
         if len(data) == 2 and data[0] == 'sendBoss':
             update.callback_query.message.edit_reply_markup()

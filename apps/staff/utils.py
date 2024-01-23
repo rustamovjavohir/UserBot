@@ -502,7 +502,7 @@ def show_tasks(update: Update, context: CallbackContext):
             tasks_text += task_links(task)
         update.message.reply_html(tasks_text)
     else:
-        update.message.reply_text("Sizda vazifa yo`q", reply_markup=homeButton())
+        update.message.reply_text(constants.YOU_HAVE_NO_TASKS, reply_markup=homeButton())
 
 
 def setTaskName(update: Update, context: CallbackContext):
@@ -653,3 +653,11 @@ def send_status_notification(task: Tasks):
         text = taskInform(task)
         bot.edit_message_text(chat_id=sender_id, message_id=sender_message_id, text=text, parse_mode="HTML",
                               reply_markup=None)
+
+
+def task_completed_notification(task: Tasks):
+    sender_id = task.created_by.telegram_id
+    sender_message_id = task.data.get('sender_message_id', None)
+    if sender_message_id:
+        bot.send_message(reply_to_message_id=sender_message_id, chat_id=sender_id,
+                         text=f"{constants.TASK_SUCCESSFULLY_COMPLETED}\n\n{task_links(task)}", parse_mode="HTML")
