@@ -281,6 +281,7 @@ class Request_priceAdmin(admin.ModelAdmin):
     list_display_links = ["all_workers", "department"]
     list_per_page = 70
     list_filter = (DepartmentFilter, "month")
+    actions = ["resent_request"]
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -292,6 +293,37 @@ class Request_priceAdmin(admin.ModelAdmin):
             if not staff.is_access:
                 return qs.filter(workers__full_name__department=staff.department)
         return qs
+
+    def resent_request(self, request, queryset):
+        success_list = []
+        error_list = []
+        for obj in queryset:
+            url = f"{URL_1C}hs/radius_bot/create_applications"
+            auth = (LOGIN_1C, PASSWORD_1C)
+            js = {
+                "id": str(obj.pk),
+                "department": obj.department_id,
+                "price": obj.price,
+                "avans": obj.avans,
+                "comment": obj.month
+            }
+            res = requests.post(url=url, auth=auth, json=js)
+            if 'success' in list(res.json().keys()):
+                success_list.append(obj.id)
+            else:
+                error_list.append(obj.id)
+        if len(success_list) > 0:
+            success = ", ".join([str(i) for i in success_list])
+            self.message_user(request,
+                              message=f"Заявки на зарплату {success}успешно отправлены.",
+                              level=messages.SUCCESS)
+        if len(error_list) > 0:
+            error = ", ".join([str(i) for i in error_list])
+            self.message_user(request,
+                              message=f"Заявки на зарплату {error}были отправлены безуспешно.",
+                              level=messages.ERROR)
+
+    resent_request.short_description = "Отправить повторно"
 
 
 @admin.register(Total)
@@ -375,7 +407,7 @@ class DepartmentAdmin(ImportExportModelAdmin):
 
         months = getMonthList()
 
-        month = months[int(date.today().month) - 2] # TODO change month to 2
+        month = months[int(date.today().month) - 2]  # TODO change month to 2
         if int(date.today().month) == 1:
             year = int(date.today().year) - 1
         else:
