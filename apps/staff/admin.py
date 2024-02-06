@@ -280,7 +280,7 @@ class Request_priceAdmin(admin.ModelAdmin):
     list_display = ["id", "all_workers", "department", "month", "price", "avans", "answer", "status", "created_at"]
     list_display_links = ["all_workers", "department"]
     list_per_page = 70
-    list_editable = ['answer']
+    # list_editable = ['answer']
     list_filter = (DepartmentFilter, "month")
     actions = ["resent_request"]
 
