@@ -11,6 +11,7 @@ from api.utils import get_current_date
 from apps.staff.models import Workers, Department
 from datetime import datetime
 
+
 class CustomObtainPairSerializer(TokenObtainPairSerializer):
 
     @classmethod

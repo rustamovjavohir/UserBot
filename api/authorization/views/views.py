@@ -9,7 +9,8 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken, AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
@@ -42,17 +43,29 @@ class LoginView(TokenObtainPairView):
 
     def handle_exception(self, exc):
         response = super().handle_exception(exc)
+        response.data["status_code"] = response.status_code
         if isinstance(exc, InvalidToken):
             response.data['success'] = False
             response.data['message'] = response.data['detail']
             response.data['result'] = None
             response.data.pop('detail')
             return response
-
+        elif isinstance(exc, AuthenticationFailed):
+            response.data['success'] = False
+            response.data['message'] = "Неправильное имя пользователя или пароль"
+            response.data['result'] = None
+            response.data.pop('detail')
+            return response
+        elif isinstance(exc, PermissionDenied):
+            response.data['success'] = False
+            response.data['message'] = ("У вас недостаточно прав для выполнения данного действия. "
+                                        "Или IP-адрес неправильный")
+            response.data['result'] = None
+            response.data.pop('detail')
+            return response
         response.data['success'] = False
         response.data['message'] = str(exc)
         response.data['result'] = None
-        response.data["status_code"] = response.status_code
         response.data.pop('detail')
         return response
 
